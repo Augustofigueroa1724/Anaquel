@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Anaquel</string>
+    <string name="title_activity_main">Anaquel</string>
+    <string name="package_name">app.anaquel.catalogo</string>
+    <string name="custom_url_scheme">app.anaquel.catalogo</string>
+</resources>

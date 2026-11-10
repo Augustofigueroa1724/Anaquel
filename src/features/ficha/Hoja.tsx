@@ -31,13 +31,14 @@ function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
   const cerrar = useBiblioteca((s) => s.cerrar);
   const anadir = useBiblioteca((s) => s.anadirCandidato);
   const descartar = useBiblioteca((s) => s.descartarCandidato);
+  const repetido = useBiblioteca((s) => s.libros.some((l) => l.isbn === libro.isbn));
 
   return (
     <>
       <p className="eti">{ETIQUETA[libro.estado]}</p>
       <h2>{libro.titulo}</h2>
       <p className="autor">{libro.autor}</p>
-      <div className="fila"><span>Año</span><span>{libro.anio}</span></div>
+      <div className="fila"><span>Año</span><span>{libro.anio || '—'}</span></div>
       <div className="fila"><span>ISBN</span><span className="mono">{libro.isbn}</span></div>
       {enEstante && (
         <div className="estados" role="group" aria-label="Estado de lectura">
@@ -62,7 +63,9 @@ function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
         ) : (
           <>
             <button className="btn sec" onClick={descartar}>Cancelar</button>
-            <button className="btn" onClick={anadir}>Añadir al anaquel</button>
+            {repetido
+              ? <p className="nota">Este libro ya está en tu anaquel.</p>
+              : <button className="btn" onClick={anadir}>Añadir al anaquel</button>}
           </>
         )}
       </div>

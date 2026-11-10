@@ -89,3 +89,8 @@ export function repartePorBaldas(libros: readonly Libro[], util: number, separac
   if (actual.length > 0) baldas.push(actual);
   return baldas;
 }
+
+/** Candidato a partir de un ISBN leído, sin datos todavía (la búsqueda por ISBN llega después). */
+export function candidatoDesdeIsbn(isbn: string): Omit<Libro, 'id' | 'color' | 'edicion'> {
+  return { titulo: 'Libro sin identificar', autor: 'Datos pendientes', anio: 0, isbn, estado: 'pendiente' };
+}

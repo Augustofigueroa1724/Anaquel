@@ -17,7 +17,8 @@ npm run build
 ## Estado
 - Estantería HTML con filtros, libro 3D que sale del estante, ficha con cambio de estado, escáner simulado y persistencia en localStorage.
 - «Prestar» aún no tiene flujo.
-- Pendiente: escáner nativo, búsqueda real por ISBN, Capacitor, CI y backend.
+- Escáner nativo con ML Kit (EAN-13) listo en código; pendiente de prueba en dispositivo.
+- Pendiente: búsqueda real por ISBN, CI de iOS y Android, y backend.
 
 ## Decisiones
 | Fecha | Decisión | Motivo |
@@ -26,5 +27,6 @@ npm run build
 | Nov 2026 | Estantería en HTML como vista principal; 3D opcional | Debe verse bien aunque three.js no cargue |
 | Nov 2026 | React + Vite + TypeScript, Zustand | Mismo stack que los otros proyectos |
 | Nov 2026 | localStorage primero, detrás de un repositorio | Empezar rápido; migrar a SQLite antes de la tienda |
-| Nov 2026 | Escaneo con cámara del móvil (EAN-13) | Lectura directa del ISBN |
+| Nov 2026 | Escaneo con cámara del móvil (EAN-13) con @capacitor-mlkit/barcode-scanning 6.2 | Lectura directa del ISBN; mismo Capacitor 6 que el resto de apps |
+| Nov 2026 | Un ISBN leído sin datos entra como «Libro sin identificar» | La búsqueda por ISBN va en el siguiente paso |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |

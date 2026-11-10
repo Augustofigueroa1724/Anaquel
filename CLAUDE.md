@@ -4,7 +4,8 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 
 ## Estado
 - Fase: primera implementación (andamiaje, estantería, ficha, libro 3D animado, escáner simulado, datos en localStorage).
-- Pendiente: escáner nativo, búsqueda real por ISBN, arrastre del libro validado en móvil real, Capacitor (iOS y Android), CI, backend (al final).
+- Escáner nativo implementado (ML Kit vía Capacitor, EAN-13). Sin probar en dispositivo: no hay Mac ni SDK de Android aquí; se prueba en CI y en el Redmi.
+- Pendiente: búsqueda real por ISBN (hoy el libro leído queda como «Libro sin identificar»), arrastre del libro en móvil real, workflows de iOS y Android, backend (al final).
 
 ## Stack (aprobado)
 - React 18 + Vite 5 + TypeScript 5. Estado con Zustand.
@@ -20,7 +21,9 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - `src/features/estanteria/`: mueble, baldas, lomos, filtros.
 - `src/features/ficha/`: hoja de ficha y cambio de estado.
 - `src/features/libro3d/`: libro que sale del estante (WAAPI + CSS 3D, geometría en `vuelo.ts`).
-- `src/features/escaner/`: visor (simulado por ahora).
+- `src/features/escaner/`: visor. Nativo: «Escanear»; web: «Simular lectura» (solo desarrollo).
+- `src/platform/`: funciones que tocan plugins nativos. Fuera de la app devuelven `no-disponible` sin fallar.
+- `android/`, `ios/`: proyectos Capacitor 6 generados con `npx cap add`. Los cambios nativos van en `AndroidManifest.xml` (CAMERA y metadatos de ML Kit) e `Info.plist` (NSCameraUsageDescription).
 - `src/styles/anaquel.css`: CSS del prototipo, sin cambios salvo nota. Contiene los tokens (`:root`).
 - `docs/handoff/`: paquete de diseño (fuente de verdad visual).
 
@@ -43,6 +46,7 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 
 ## Comandos
 - `npm run dev`: desarrollo.
+- `npx cap sync android|ios`: copia la web a los proyectos nativos (tras `npm run build`).
 - `npm run build`: comprobación de tipos y build.
 - `npm test`: pruebas unitarias.
 
