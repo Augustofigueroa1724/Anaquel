@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  ESTADOS, ETIQUETA, hoyIso, validaDatos, validaPrestamo, type DatosLibro, type Estado, type Libro,
+  ESTADOS, ETIQUETA, formateaFecha, hoyIso, validaDatos, validaPrestamo, type DatosLibro, type Estado, type Libro,
 } from '../../domain/libro';
 
 type Modo = 'ver' | 'editar' | 'borrar' | 'prestar';
@@ -65,7 +65,10 @@ function Vista({
       <div className="fila"><span>Año</span><span>{libro.anio || '—'}</span></div>
       <div className="fila"><span>ISBN</span><span className="mono">{libro.isbn}</span></div>
       {enEstante && libro.prestamo && modo !== 'prestar' && (
-        <div className="fila"><span>Prestado a</span><span>{libro.prestamo.a}</span></div>
+        <>
+          <div className="fila"><span>Prestado a</span><span>{libro.prestamo.a}</span></div>
+          <div className="fila"><span>Desde</span><span>{formateaFecha(libro.prestamo.desde)}</span></div>
+        </>
       )}
       {enEstante && (
         <div className="estados" role="group" aria-label="Estado de lectura">

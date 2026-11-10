@@ -125,3 +125,10 @@ export function hoyIso(fecha: Date = new Date()): string {
   const d = String(fecha.getDate()).padStart(2, '0');
   return `${fecha.getFullYear()}-${m}-${d}`;
 }
+
+/** AAAA-MM-DD → «9 nov 2026» (texto en español). */
+export function formateaFecha(iso: string): string {
+  const [a, m, d] = iso.split('-').map(Number);
+  if (!a || !m || !d) return iso;
+  return new Date(a, m - 1, d).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}

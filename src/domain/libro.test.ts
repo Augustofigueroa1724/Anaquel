@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso,
+  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -90,5 +90,11 @@ describe('préstamos', () => {
   });
   it('fecha local en formato AAAA-MM-DD', () => {
     expect(hoyIso(new Date(2026, 10, 9))).toBe('2026-11-09');
+  });
+});
+
+describe('formateaFecha', () => {
+  it('muestra la fecha en español', () => {
+    expect(formateaFecha('2026-11-09')).toBe('9 nov 2026');
   });
 });
