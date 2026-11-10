@@ -1,0 +1,68 @@
+import { COLORES_TELA, edicionDe, type Estado, type Libro } from '../domain/libro';
+
+/** Datos de ejemplo del prototipo. No son la colección de nadie; los ISBN son falsos. */
+const EJEMPLOS: [titulo: string, autor: string, anio: number, estado: Estado][] = [
+  ['Cien años de soledad', 'Gabriel García Márquez', 1967, 'leido'],
+  ['El nombre de la rosa', 'Umberto Eco', 1980, 'leido'],
+  ['1984', 'George Orwell', 1949, 'leyendo'],
+  ['Rayuela', 'Julio Cortázar', 1963, 'pendiente'],
+  ['Pedro Páramo', 'Juan Rulfo', 1955, 'leido'],
+  ['La sombra del viento', 'Carlos Ruiz Zafón', 2001, 'leido'],
+  ['Dune', 'Frank Herbert', 1965, 'leyendo'],
+  ['Fundación', 'Isaac Asimov', 1951, 'pendiente'],
+  ['El hobbit', 'J. R. R. Tolkien', 1937, 'leido'],
+  ['Frankenstein', 'Mary Shelley', 1818, 'pendiente'],
+  ['Matar a un ruiseñor', 'Harper Lee', 1960, 'leido'],
+  ['Orgullo y prejuicio', 'Jane Austen', 1813, 'leido'],
+  ['Ficciones', 'Jorge Luis Borges', 1944, 'leido'],
+  ['Sapiens', 'Yuval Noah Harari', 2011, 'pendiente'],
+  ['Persépolis', 'Marjane Satrapi', 2000, 'leido'],
+  ['Crónica de una muerte anunciada', 'Gabriel García Márquez', 1981, 'leido'],
+  ['Un mundo feliz', 'Aldous Huxley', 1932, 'pendiente'],
+  ['Stoner', 'John Williams', 1965, 'leido'],
+  ['El Principito', 'Antoine de Saint-Exupéry', 1943, 'leido'],
+  ['Ensayo sobre la ceguera', 'José Saramago', 1995, 'leyendo'],
+  ['La metamorfosis', 'Franz Kafka', 1915, 'leido'],
+  ['Hombres buenos', 'Arturo Pérez-Reverte', 2015, 'pendiente'],
+  ['Los miserables', 'Victor Hugo', 1862, 'pendiente'],
+  ['Drácula', 'Bram Stoker', 1897, 'leido'],
+  ['La carretera', 'Cormac McCarthy', 2006, 'leido'],
+  ['El señor de las moscas', 'William Golding', 1954, 'leido'],
+  ['Moby Dick', 'Herman Melville', 1851, 'pendiente'],
+  ['Crimen y castigo', 'Fiódor Dostoyevski', 1866, 'leyendo'],
+  ['Mujercitas', 'Louisa May Alcott', 1868, 'leido'],
+  ['La insoportable levedad del ser', 'Milan Kundera', 1984, 'leido'],
+  ['Demian', 'Hermann Hesse', 1919, 'pendiente'],
+  ['Neuromante', 'William Gibson', 1984, 'leido'],
+  ['Kafka en la orilla', 'Haruki Murakami', 2002, 'pendiente'],
+  ['Tokio blues', 'Haruki Murakami', 1987, 'leido'],
+  ['El perfume', 'Patrick Süskind', 1985, 'leido'],
+  ['Sin noticias de Gurb', 'Eduardo Mendoza', 1991, 'leido'],
+  ['Los renglones torcidos de Dios', 'Torcuato Luca de Tena', 1979, 'pendiente'],
+  ['Caballo de Troya', 'J. J. Benítez', 1984, 'leido'],
+  ['Shogun', 'James Clavell', 1975, 'leyendo'],
+  ['Bajo la misma estrella', 'John Green', 2012, 'leido'],
+  ['El gran Gatsby', 'F. Scott Fitzgerald', 1925, 'leido'],
+  ['Cumbres borrascosas', 'Emily Brontë', 1847, 'pendiente'],
+  ['Rebelión en la granja', 'George Orwell', 1945, 'leido'],
+];
+
+export const LIBROS_EJEMPLO: Libro[] = EJEMPLOS.map(([titulo, autor, anio, estado], i) => ({
+  id: i,
+  titulo,
+  autor,
+  anio,
+  estado,
+  isbn: `978-0-00-${String(100000 + i * 7919).slice(0, 6)}-${i % 10}`,
+  color: COLORES_TELA[i % COLORES_TELA.length],
+  edicion: edicionDe(i),
+}));
+
+/** Libro que devuelve «Simular lectura» en el escáner (no está en el anaquel). */
+export const CANDIDATO_SIMULADO: Omit<Libro, 'id' | 'color' | 'edicion'> = {
+  titulo: 'La mano izquierda de la oscuridad',
+  autor: 'Ursula K. Le Guin',
+  anio: 1969,
+  estado: 'pendiente',
+  isbn: '978-0-00-000000-0',
+};
