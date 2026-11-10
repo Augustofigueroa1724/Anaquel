@@ -18,8 +18,8 @@ export function Hoja() {
 
   return (
     <>
-      <div className={`velo ${abiertaHoja ? 'abierto' : ''}`} onClick={cerrar} />
-      <div className={`hoja ${abiertaHoja ? 'abierta' : ''}`} role="dialog" aria-modal="true" aria-label="Ficha del libro">
+      <div id="velo" className={`velo ${abiertaHoja ? "abierto" : ""}`} onClick={cerrar} />
+      <div id="hoja" className={`hoja ${abiertaHoja ? "abierta" : ""}`} role="dialog" aria-modal="true" aria-label="Ficha del libro">
         {mostrado && <Ficha libro={mostrado.libro} enEstante={mostrado.enEstante} />}
       </div>
     </>

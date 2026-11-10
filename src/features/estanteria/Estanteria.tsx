@@ -78,7 +78,7 @@ export function Estanteria() {
   const baldas = useMemo(() => repartePorBaldas(lista, Math.max(120, ancho - 106)), [lista, ancho]);
 
   return (
-    <div className="plano" ref={ref}>
+    <div id="plano" className="plano" ref={ref}>
       {lista.length === 0 ? (
         <p className="vacio">Ningún libro en este filtro.</p>
       ) : (

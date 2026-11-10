@@ -17,10 +17,12 @@ export function poseLomo(r: DOMRect): Pose {
 /** Hueco libre sobre la hoja de ficha, donde se muestra el libro de frente. */
 export function poseDestino(): { x: number; y: number; s: number } {
   const hoja = document.getElementById('hoja');
-  const alto = Math.min(hoja?.scrollHeight ?? 0, window.innerHeight * 0.56);
+  // offsetHeight es la altura real de la hoja aunque esté aún fuera de la pantalla.
+  const alto = hoja?.offsetHeight ?? 0;
   const arriba = 12;
-  const libre = window.innerHeight - alto - arriba;
-  const s = Math.max(0.5, Math.min(1.12, (libre - 40) / H));
+  const libre = Math.max(0, window.innerHeight - alto - arriba);
+  // El libro cabe entero en el hueco libre, con margen de 12 px arriba y abajo.
+  const s = Math.max(0.5, Math.min(1.12, (libre - 24) / H));
   return { x: window.innerWidth / 2 - W / 2, y: arriba + libre / 2 - H / 2 + 6, s };
 }
 
