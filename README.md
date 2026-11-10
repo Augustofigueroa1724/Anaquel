@@ -15,9 +15,9 @@ npm run build
 ```
 
 ## Estado
-- Estantería HTML con filtros, ficha con cambio de estado, escáner simulado y persistencia en localStorage.
+- Estantería HTML con filtros, libro 3D que sale del estante, ficha con cambio de estado, escáner simulado y persistencia en localStorage.
 - «Prestar» aún no tiene flujo.
-- Pendiente: animación 3D del libro, escáner nativo, búsqueda real por ISBN, Capacitor, CI y backend.
+- Pendiente: escáner nativo, búsqueda real por ISBN, Capacitor, CI y backend.
 
 ## Decisiones
 | Fecha | Decisión | Motivo |
@@ -27,3 +27,4 @@ npm run build
 | Nov 2026 | React + Vite + TypeScript, Zustand | Mismo stack que los otros proyectos |
 | Nov 2026 | localStorage primero, detrás de un repositorio | Empezar rápido; migrar a SQLite antes de la tienda |
 | Nov 2026 | Escaneo con cámara del móvil (EAN-13) | Lectura directa del ISBN |
+| Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |

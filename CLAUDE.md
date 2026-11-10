@@ -3,8 +3,8 @@
 App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario escanea el ISBN con la cámara y el libro entra en su anaquel. Interfaz en español; los textos se traducirán después.
 
 ## Estado
-- Fase: primera implementación (andamiaje, estantería, ficha, escáner simulado, datos en localStorage).
-- Pendiente: animación del libro 3D, escáner nativo, búsqueda real por ISBN, Capacitor (iOS y Android), CI, backend (al final).
+- Fase: primera implementación (andamiaje, estantería, ficha, libro 3D animado, escáner simulado, datos en localStorage).
+- Pendiente: escáner nativo, búsqueda real por ISBN, arrastre del libro validado en móvil real, Capacitor (iOS y Android), CI, backend (al final).
 
 ## Stack (aprobado)
 - React 18 + Vite 5 + TypeScript 5. Estado con Zustand.
@@ -19,6 +19,7 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - `src/app/`: `App.tsx` (cáscara, pestañas), `biblioteca.ts` (store).
 - `src/features/estanteria/`: mueble, baldas, lomos, filtros.
 - `src/features/ficha/`: hoja de ficha y cambio de estado.
+- `src/features/libro3d/`: libro que sale del estante (WAAPI + CSS 3D, geometría en `vuelo.ts`).
 - `src/features/escaner/`: visor (simulado por ahora).
 - `src/styles/anaquel.css`: CSS del prototipo, sin cambios salvo nota. Contiene los tokens (`:root`).
 - `docs/handoff/`: paquete de diseño (fuente de verdad visual).
@@ -32,7 +33,8 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - No usar: verde como acento, crema o marfil cálidos, Fraunces, Newsreader, Tiempos, acentos terracota.
 - El latón (`--accent`) solo para señales; los botones principales van en tinta (`--fg`).
 - Ningún campo por debajo de 16 px; ningún scroll horizontal; respetar `safe-area`.
-- El 3D (three.js) es opcional: la estantería HTML es la vista principal.
+- La animación del libro es CSS 3D con Web Animations (no three.js). La estantería HTML es la vista principal y no depende de ella.
+- Respetar `prefers-reduced-motion`: duración 0.
 - Mantener los ids del prototipo mientras se porta (`#estanteria`, `#escanear`, `#plano`, `#filtros`, `#hoja`, `#velo`, `#tab-estanteria`, `#tab-escanear`, `#simular`, `#cuenta`, `#pista`).
 
 ## Datos

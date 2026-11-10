@@ -3,6 +3,7 @@ import { Escanear } from '../features/escaner/Escanear';
 import { Estanteria } from '../features/estanteria/Estanteria';
 import { Filtros } from '../features/estanteria/Filtros';
 import { Hoja } from '../features/ficha/Hoja';
+import { LibroVuelo } from '../features/libro3d/LibroVuelo';
 import { filtrar } from '../domain/libro';
 import { useBiblioteca } from './biblioteca';
 
@@ -67,6 +68,7 @@ export default function App() {
         </nav>
       </div>
 
+      <LibroVuelo />
       <Hoja />
     </>
   );

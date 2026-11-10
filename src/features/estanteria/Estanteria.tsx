@@ -5,7 +5,7 @@ import {
 } from '../../domain/libro';
 
 /** Interior del lomo según la edición (clásico, moderno o condensado). */
-function Interior({ libro }: { libro: Libro }) {
+export function Interior({ libro }: { libro: Libro }) {
   const titulo = (
     <span className="zona"><span className="tit"><span>{libro.titulo}</span></span></span>
   );
