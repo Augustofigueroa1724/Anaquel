@@ -62,8 +62,10 @@ function Vista({
       <p className="eti">{ETIQUETA[libro.estado]}</p>
       <h2>{libro.titulo}</h2>
       <p className="autor">{libro.autor}</p>
-      <div className="fila"><span>Año</span><span>{libro.anio || '—'}</span></div>
-      <div className="fila"><span>ISBN</span><span className="mono">{libro.isbn}</span></div>
+      <div className="fila par">
+        <div><span>Año</span><span>{libro.anio || '—'}</span></div>
+        <div><span>ISBN</span><span className="mono">{libro.isbn || '—'}</span></div>
+      </div>
       {enEstante && libro.prestamo && modo !== 'prestar' && (
         <>
           <div className="fila"><span>Prestado a</span><span>{libro.prestamo.a}</span></div>

@@ -7,3 +7,17 @@
 .confirmar p{margin:0 0 4px}
 .quitar{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);font:500 13px var(--sans);padding:10px;min-height:44px;cursor:pointer;text-decoration:underline}
 .acciones-libro{display:flex;justify-content:center;gap:24px;margin-top:6px}
+
+/* Ficha más compacta (sobre el CSS del prototipo): año e ISBN en una sola fila,
+   márgenes más cortos. Los botones siguen por encima de 44 px de alto. */
+.hoja::before{margin-bottom:10px}
+.hoja h2{font-size:26px;margin-bottom:2px}
+.hoja .autor{margin-bottom:8px}
+.hoja .fila{padding:7px 0}
+.fila.par{display:grid;grid-template-columns:auto 1fr;gap:20px}
+.fila.par > div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fila.par > div:last-child{text-align:right}
+.hoja .estados{margin:8px 0 10px}
+.hoja .btn{min-height:46px}
+.acciones-libro{margin-top:0}
+.acciones-libro .quitar{margin-top:2px}
