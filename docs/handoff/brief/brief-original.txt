@@ -1,0 +1,400 @@
+Quiero rediseñar la UI/UX de "Anaquel", una app móvil para catalogar libros. El usuario escanea el código de barras (ISBN) con la cámara del móvil y el libro se añade a su estantería. La app va a la App Store (iPhone) y también a Android, con Capacitor.
+
+QUÉ ES
+- Anaquel es para lectores que quieren tener su biblioteca ordenada y poder compartirla con amigos.
+- La pantalla principal es un anaquel visual: baldas de madera con los libros como lomos de colores. Hay una versión 3D (arrastrar para recorrer el anaquel) y una versión plana en HTML que es la que siempre se ve.
+- Pestañas abajo: "Anaquel" y "Escanear".
+- Filtros arriba: Todos, Leyendo, Pendientes, Leídos.
+- Al tocar un libro se abre una hoja inferior (ficha) con título, autor, año, ISBN, estado de lectura (Leído, Leyendo, Pendiente) y botones Prestar y Listo.
+- La pestaña Escanear tiene un visor de cámara con una línea de barrido y el botón "Simular lectura", que muestra el resultado y "Añadir al anaquel".
+
+PROBLEMA ACTUAL
+- La paleta es demasiado verde: el verde pino (#2f5d50) está en todo (acento, pestaña activa, botones, filtros activos). Hay que reducirlo mucho y dejar un acento distinto o neutro. Lo que quiero es una identidad más editorial, cálida o neutra, de librería, no de app de salud ni de bosque.
+- El estante de madera y los lomos tienen que seguir siendo protagonistas: son la gracia de la app.
+- Quiero que se note que es una app de libros, no una app genérica.
+
+LO QUE NO PUEDES CAMBIAR
+- Idioma: toda la interfaz en español. Los textos van en español y se traducirán después.
+- Móvil primero (390 px de ancho), con margen lateral de 16 px y sin scroll horizontal. Respetar las zonas seguras (safe-area) del iPhone.
+- Mantén los ids y clases que usa el script (#estanteria, #escanear, #plano, #escena, #filtros, .chip con data-f, .lomo, #hoja, #velo, #tab-estanteria, #tab-escanear, #simular, #cuenta, #pista). Si cambias la estructura, dímelo.
+- El 3D es opcional: si la librería no carga, la estantería en HTML tiene que verse igual de bien.
+- Modo claro y oscuro, con los colores definidos como tokens en :root (como ahora).
+- Sin texto de relleno: los libros son ejemplos, pero los títulos y autores son reales.
+
+LO QUE QUIERO DE VUELTA
+1. Una propuesta visual nueva: paleta, tipografía y tratamiento de la estantería, con una dirección clara.
+2. El HTML completo, con el mismo comportamiento que el actual.
+3. Captura en móvil (390 px) de: estantería, ficha abierta y pestaña Escanear.
+4. Una breve explicación de las decisiones de color, en 3 o 4 líneas.
+
+=====================================================
+HTML ACTUAL (archivo único, pégalo tal cual)
+=====================================================
+
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Anaquel · pantallas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap">
+<style>
+/* Anaquel: mock de diseño. Paleta: verde pino sobre papel frío; madera oscura en el estante. */
+:root{
+  --bg:#eef0ec; --fg:#1b1f1d; --muted:#67706b; --card:#ffffff; --line:#d5dad3;
+  --accent:#2f5d50; --accent-fg:#ffffff; --wood:#7b5d44; --wood-dark:#4d3a2b;
+  --serif:"Newsreader", Georgia, serif; --sans:"Inter", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --fg:#e8ece9; --muted:#8e978f; --card:#1c211f; --line:#2b322f;
+    --accent:#7fb8a3; --accent-fg:#0f1412; --wood:#5e4a38; --wood-dark:#33271d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --fg:#e8ece9; --muted:#8e978f; --card:#1c211f; --line:#2b322f;
+  --accent:#7fb8a3; --accent-fg:#0f1412; --wood:#5e4a38; --wood-dark:#33271d;
+  color-scheme: dark;
+}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.app{height:100%;display:flex;flex-direction:column;min-width:0}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.marca{font:600 22px/1 var(--serif);letter-spacing:.2px}
+.cuenta{color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px}
+.filtros{display:flex;gap:8px;overflow-x:auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:7px 13px;font:500 13px var(--sans);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+main{flex:1;position:relative;min-height:0;min-width:0}
+section{position:absolute;inset:0}
+section[hidden]{display:none!important}
+#escena{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#escena[hidden]{display:none!important}
+.pista{position:absolute;left:0;right:0;bottom:12px;text-align:center;color:var(--muted);font-size:12px;pointer-events:none}
+/* Estantería en HTML (siempre visible; el 3D la sustituye si carga) */
+.plano{overflow-y:auto;padding:18px 0 40px;-webkit-overflow-scrolling:touch}
+.balda{display:flex;align-items:flex-end;justify-content:center;gap:3px;min-height:170px;margin:0 max(12px,env(safe-area-inset-right,0px)) 26px max(12px,env(safe-area-inset-left,0px));padding:14px 10px 0;background:var(--wood-dark);border-radius:4px 4px 0 0;border-bottom:12px solid var(--wood);box-shadow:0 14px 18px -12px rgba(0,0,0,.45)}
+.lomo{flex:none;width:30px;height:150px;border:0;border-radius:2px 2px 0 0;color:#f4f1ea;font:600 11px/1 var(--sans);writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:8px 4px;text-align:left;cursor:pointer;display:flex;align-items:center}
+.lomo:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.vacio{text-align:center;color:var(--muted);padding:40px 16px}
+/* Escáner */
+.visor{position:absolute;inset:0;background:#0c0f0e;overflow:hidden}
+.visor .fondo{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 40%,#2a332f 0%,#0c0f0e 70%)}
+.marco{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(78vw,340px);aspect-ratio:2/1;border-radius:14px;border:2px solid rgba(255,255,255,.85);box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+.marco::after{content:"";position:absolute;left:8px;right:8px;height:2px;background:#ff6b5a;top:50%;animation:barrido 2.2s ease-in-out infinite;box-shadow:0 0 12px #ff6b5a}
+@keyframes barrido{0%,100%{transform:translateY(-70px)}50%{transform:translateY(70px)}}
+@media (prefers-reduced-motion:reduce){.marco::after{animation:none}}
+.visor p{position:absolute;left:16px;right:16px;bottom:118px;margin:0;text-align:center;color:#eef0ec;font-size:15px}
+.visor small{display:block;color:#aab3ad;font-size:12px;margin-top:4px}
+.acciones{position:absolute;left:0;right:0;bottom:24px;display:flex;justify-content:center;gap:10px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.btn{border:0;border-radius:12px;padding:13px 18px;font:600 15px var(--sans);cursor:pointer;background:var(--accent);color:var(--accent-fg);min-height:44px}
+.btn.sec{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+/* Barra inferior */
+nav{display:flex;border-top:1px solid var(--line);background:var(--bg);padding:6px max(12px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+nav button{flex:1;border:0;background:none;color:var(--muted);font:600 13px var(--sans);padding:10px 0;cursor:pointer;min-height:44px}
+nav button[aria-current="page"]{color:var(--accent)}
+/* Hoja */
+.velo{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s}
+.velo.abierto{opacity:1;pointer-events:auto}
+.hoja{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:18px 18px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:82%;overflow-y:auto;box-shadow:0 -10px 30px rgba(0,0,0,.2)}
+.hoja.abierta{transform:none}
+.hoja h2{font:600 26px/1.15 var(--serif);margin:0 0 4px;text-wrap:balance}
+.hoja .autor{color:var(--muted);margin:0 0 14px}
+.fila{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:10px 0;font-variant-numeric:tabular-nums}
+.fila span:first-child{color:var(--muted)}
+.estados{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
+.hoja .botones{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.hoja .botones .btn{flex:1}
+.nota{font-size:12px;color:var(--muted);margin-top:12px}
+</style>
+
+<div class="app">
+  <header>
+    <span class="marca">Anaquel</span>
+    <span class="cuenta" id="cuenta">…</span>
+  </header>
+  <div class="filtros" id="filtros">
+    <button class="chip" data-f="todos" aria-pressed="true">Todos</button>
+    <button class="chip" data-f="leyendo" aria-pressed="false">Leyendo</button>
+    <button class="chip" data-f="pendiente" aria-pressed="false">Pendientes</button>
+    <button class="chip" data-f="leido" aria-pressed="false">Leídos</button>
+  </div>
+
+  <main>
+    <section id="estanteria">
+      <div class="plano" id="plano"></div>
+      <canvas id="escena" hidden aria-label="Estantería 3D. Arrastra para moverte, toca un libro para ver su ficha."></canvas>
+      <div class="pista" id="pista">Toca un libro para ver su ficha</div>
+    </section>
+
+    <section id="escanear" hidden>
+      <div class="visor" aria-label="Vista de la cámara">
+        <div class="fondo"></div>
+        <div class="marco"></div>
+        <p>Apunta al código de barras del libro<small>Suele estar en la contraportada</small></p>
+        <div class="acciones">
+          <button class="btn" id="simular">Simular lectura</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav>
+    <button id="tab-estanteria" aria-current="page">Anaquel</button>
+    <button id="tab-escanear">Escanear</button>
+  </nav>
+</div>
+
+<div class="velo" id="velo"></div>
+<div class="hoja" id="hoja" role="dialog" aria-modal="true"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
+<script>
+/* Datos de ejemplo: no son la colección de nadie. */
+const COLORES = ['#2f5d50','#7b3f3f','#2d3f5c','#8a6a2f','#4a3b5e','#5b6b3a','#9a4e2e','#33555e','#6e2f4a','#3b3b3b'];
+const LIBROS = [
+  ['Cien años de soledad','Gabriel García Márquez',1967,'leido'],
+  ['El nombre de la rosa','Umberto Eco',1980,'leido'],
+  ['1984','George Orwell',1949,'leyendo'],
+  ['Rayuela','Julio Cortázar',1963,'pendiente'],
+  ['Pedro Páramo','Juan Rulfo',1955,'leido'],
+  ['La sombra del viento','Carlos Ruiz Zafón',2001,'leido'],
+  ['Dune','Frank Herbert',1965,'leyendo'],
+  ['Fundación','Isaac Asimov',1951,'pendiente'],
+  ['El hobbit','J. R. R. Tolkien',1937,'leido'],
+  ['Frankenstein','Mary Shelley',1818,'pendiente'],
+  ['Matar a un ruiseñor','Harper Lee',1960,'leido'],
+  ['Orgullo y prejuicio','Jane Austen',1813,'leido'],
+  ['Ficciones','Jorge Luis Borges',1944,'leido'],
+  ['Sapiens','Yuval Noah Harari',2011,'pendiente'],
+  ['Persépolis','Marjane Satrapi',2000,'leido'],
+  ['Crónica de una muerte anunciada','Gabriel García Márquez',1981,'leido'],
+  ['Un mundo feliz','Aldous Huxley',1932,'pendiente'],
+  ['Stoner','John Williams',1965,'leido'],
+  ['El Principito','Antoine de Saint-Exupéry',1943,'leido'],
+  ['Ensayo sobre la ceguera','José Saramago',1995,'leyendo'],
+  ['La metamorfosis','Franz Kafka',1915,'leido'],
+  ['Hombres buenos','Arturo Pérez-Reverte',2019,'pendiente'],
+  ['Los miserables','Victor Hugo',1862,'pendiente'],
+  ['Drácula','Bram Stoker',1897,'leido'],
+  ['La carretera','Cormac McCarthy',2006,'leido'],
+  ['El señor de las moscas','William Golding',1954,'leido'],
+  ['Moby Dick','Herman Melville',1851,'pendiente'],
+  ['Crimen y castigo','Fiódor Dostoyevski',1866,'leyendo'],
+  ['Mujercitas','Louisa May Alcott',1868,'leido'],
+  ['La insoportable levedad del ser','Milan Kundera',1984,'leido'],
+  ['Demian','Hermann Hesse',1919,'pendiente'],
+  ['Neuromante','William Gibson',1984,'leido'],
+  ['Kafka en la orilla','Haruki Murakami',2002,'pendiente'],
+  ['Tokio blues','Haruki Murakami',1987,'leido'],
+  ['El perfume','Patrick Süskind',1985,'leido'],
+  ['Sin noticias de Gurb','Eduardo Mendoza',1991,'leido'],
+  ['Los renglones torcidos de Dios','Torcuato Luca de Tena',1979,'pendiente'],
+  ['Caballo de Troya','J. J. Benítez',1984,'leido'],
+  ['Shogun','James Clavell',1975,'leyendo'],
+  ['Estrella que cae','John Green',2012,'leido'],
+  ['El gran Gatsby','F. Scott Fitzgerald',1925,'leido'],
+  ['Cumbres borrascosas','Emily Brontë',1847,'pendiente'],
+  ['Rebelión en la granja','George Orwell',1945,'leido']
+].map((l,i)=>({ id:i, t:l[0], a:l[1], y:l[2], st:l[3], c:COLORES[i%COLORES.length],
+  isbn:'978-0-00-'+String(100000+i*7919).slice(0,6)+'-'+(i%10) }));
+
+const ETQ={leido:'Leído',leyendo:'Leyendo',pendiente:'Pendiente'};
+let filtro='todos';
+const $=s=>document.querySelector(s);
+const visibles=()=>LIBROS.filter(b=>filtro==='todos'||b.st===filtro);
+
+/* ---------- Ficha (compartida por el plano y el 3D) ---------- */
+function abreFicha(b){
+  const h=$('#hoja');
+  h.innerHTML=`
+    <h2>${b.t}</h2>
+    <p class="autor">${b.a}</p>
+    <div class="fila"><span>Año</span><span>${b.y}</span></div>
+    <div class="fila"><span>ISBN</span><span>${b.isbn}</span></div>
+    <div class="fila"><span>Estado</span><span>${ETQ[b.st]}</span></div>
+    <div class="estados" role="group" aria-label="Estado de lectura">
+      ${Object.keys(ETQ).map(k=>`<button class="chip" data-e="${k}" aria-pressed="${k===b.st}">${ETQ[k]}</button>`).join('')}
+    </div>
+    <div class="botones">
+      <button class="btn sec" id="prestar">Prestar</button>
+      <button class="btn" id="cerrar">Listo</button>
+    </div>
+    <p class="nota">Ejemplo de ficha. Los datos se rellenarán desde la base de datos de libros.</p>`;
+  h.querySelectorAll('[data-e]').forEach(c=>c.onclick=()=>{ b.st=c.dataset.e; refresca(); abreFicha(b); });
+  $('#cerrar').onclick=cierra;
+  $('#prestar').onclick=()=>{ $('#prestar').textContent='Prestado (ejemplo)'; };
+  abre();
+}
+function abre(){ $('#velo').classList.add('abierto'); $('#hoja').classList.add('abierta'); }
+function cierra(){ $('#hoja').classList.remove('abierta'); $('#velo').classList.remove('abierto'); }
+$('#velo').onclick=cierra;
+
+/* ---------- Plano en HTML: siempre funciona ---------- */
+function pintaPlano(){
+  const lista=visibles(), plano=$('#plano');
+  plano.innerHTML='';
+  if(!lista.length){ plano.innerHTML='<p class="vacio">Ningún libro en este filtro.</p>'; return; }
+  const baldas=3, por=Math.ceil(lista.length/baldas);
+  for(let r=0;r<baldas;r++){
+    const lote=lista.slice(r*por,(r+1)*por);
+    if(!lote.length) continue;
+    const bal=document.createElement('div'); bal.className='balda';
+    lote.forEach(b=>{
+      const btn=document.createElement('button');
+      btn.className='lomo'; btn.style.background=b.c; btn.textContent=b.t;
+      btn.style.height=(120+(b.id%5)*12)+'px';
+      btn.setAttribute('aria-label',b.t+', '+b.a);
+      btn.onclick=()=>abreFicha(b);
+      bal.appendChild(btn);
+    });
+    plano.appendChild(bal);
+  }
+}
+function refresca(){
+  $('#cuenta').textContent=visibles().length+(visibles().length===1?' libro':' libros');
+  pintaPlano();
+  if(typeof construye3D==='function') construye3D();
+}
+
+/* ---------- 3D opcional: solo si la librería y WebGL están disponibles ---------- */
+let construye3D=null, ajusta3D=null;
+try{
+  if(typeof THREE==='undefined') throw new Error('sin three.js');
+  const canvas=$('#escena'), main=canvas.parentElement;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const escena=new THREE.Scene();
+  const camara=new THREE.PerspectiveCamera(40,1,.1,200);
+  const grupo=new THREE.Group(); escena.add(grupo);
+  escena.add(new THREE.HemisphereLight(0xffffff,0x665544,1.1));
+  const sol=new THREE.DirectionalLight(0xffffff,1.6); sol.position.set(4,8,10); escena.add(sol);
+  const colorDeVariable=n=>new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue(n).trim());
+  escena.background=colorDeVariable('--bg');
+  const LIBROS_3D=[];
+
+  function texturaLomo(b){
+    const c=document.createElement('canvas'); c.width=96; c.height=512;
+    const g=c.getContext('2d');
+    g.fillStyle=b.c; g.fillRect(0,0,96,512);
+    g.fillStyle='rgba(255,255,255,.12)'; g.fillRect(0,0,96,22); g.fillRect(0,490,96,22);
+    g.save(); g.translate(48,256); g.rotate(-Math.PI/2);
+    g.fillStyle='#f4f1ea'; g.font='600 30px Inter, sans-serif'; g.textAlign='center'; g.textBaseline='middle';
+    g.fillText(b.t.length>24?b.t.slice(0,23)+'…':b.t,0,0); g.restore();
+    const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
+  }
+
+  construye3D=function(){
+    while(grupo.children.length) grupo.remove(grupo.children[0]);
+    LIBROS_3D.length=0;
+    const lista=visibles();
+    const baldas=3, ancho=12.4, altoBalda=3.1;
+    for(let r=0;r<baldas;r++){
+      const y=r*altoBalda;
+      const fondo=new THREE.Mesh(new THREE.BoxGeometry(ancho,altoBalda-.1,.3),new THREE.MeshStandardMaterial({color:colorDeVariable('--wood-dark')}));
+      fondo.position.set(0,y+altoBalda/2-.05,-.9); grupo.add(fondo);
+      const tabla=new THREE.Mesh(new THREE.BoxGeometry(ancho+.4,.14,1.6),new THREE.MeshStandardMaterial({color:colorDeVariable('--wood')}));
+      tabla.position.set(0,y,0); grupo.add(tabla);
+    }
+    let semilla=7; const rnd=()=>(semilla=(semilla*9301+49297)%233280)/233280;
+    const porBalda=Math.ceil(lista.length/baldas), avail=ancho-.6, gap=.03;
+    let idx=0;
+    for(let r=0;r<baldas;r++){
+      const lote=lista.slice(idx,idx+porBalda); idx+=lote.length;
+      const bruto=lote.map(()=>.32+rnd()*.14);
+      const tot=bruto.reduce((a,b)=>a+b,0)+gap*(lote.length-1);
+      const s=Math.min(avail/tot,1.5);
+      let x=-(tot*s)/2;
+      lote.forEach((b,j)=>{
+        const w=bruto[j]*s, h=2.1+rnd()*.7, d=1.1;
+        const mats=[
+          new THREE.MeshStandardMaterial({color:b.c}),
+          new THREE.MeshStandardMaterial({color:b.c}),
+          new THREE.MeshStandardMaterial({color:'#f4f1ea'}),
+          new THREE.MeshStandardMaterial({color:'#f4f1ea'}),
+          new THREE.MeshStandardMaterial({map:texturaLomo(b)}),
+          new THREE.MeshStandardMaterial({color:b.c})
+        ];
+        const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mats);
+        m.position.set(x+w/2, r*altoBalda+.07+h/2, -.1);
+        m.userData.libro=b; grupo.add(m); LIBROS_3D.push(m);
+        x+=w+gap;
+      });
+    }
+  };
+
+  let panX=0, panObjetivo=0, arrastre=null;
+  ajusta3D=function(){
+    const r=main.getBoundingClientRect();
+    if(r.width<2||r.height<2) return;
+    renderer.setSize(r.width,r.height,false);
+    camara.aspect=r.width/r.height;
+    camara.position.set(0,3.1,Math.max(12,4.6/(Math.tan(THREE.MathUtils.degToRad(20))*camara.aspect)));
+    camara.lookAt(0,3.1,0);
+    camara.updateProjectionMatrix();
+  };
+  const limite=()=>Math.max(0,(12.4-(camara.position.z*Math.tan(THREE.MathUtils.degToRad(20))*camara.aspect*2))/2+1);
+  canvas.addEventListener('pointerdown',e=>{arrastre={x:e.clientX,y:e.clientY,p:panObjetivo,m:0}; canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',e=>{
+    if(!arrastre) return;
+    const dx=e.clientX-arrastre.x; arrastre.m=Math.max(arrastre.m,Math.abs(dx),Math.abs(e.clientY-arrastre.y));
+    const L=limite();
+    panObjetivo=Math.max(-L,Math.min(L,arrastre.p-dx*(camara.position.z*.0016)));
+  });
+  canvas.addEventListener('pointerup',e=>{
+    if(arrastre && arrastre.m<6){
+      const rect=canvas.getBoundingClientRect();
+      const ray=new THREE.Raycaster();
+      ray.setFromCamera(new THREE.Vector2(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1),camara);
+      const hit=ray.intersectObjects(LIBROS_3D,false)[0];
+      if(hit) abreFicha(hit.object.userData.libro);
+    }
+    arrastre=null;
+  });
+  function frame(){
+    panX+=(panObjetivo-panX)*.15;
+    camara.position.x=panX;
+    camara.lookAt(panX,3.1,0);
+    renderer.render(escena,camara);
+    requestAnimationFrame(frame);
+  }
+  // Solo se activa si el contexto WebGL se crea bien
+  canvas.hidden=false; $('#plano').hidden=true; $('#pista').textContent='Arrastra para recorrer el anaquel · toca un libro';
+  window.addEventListener('resize',ajusta3D);
+  ajusta3D(); frame();
+}catch(e){
+  // Sin 3D: la estantería en HTML ya está pintada. Nada más que hacer.
+  construye3D=null;
+}
+
+/* ---------- Pestañas, filtros y simulación del escáner ---------- */
+function muestra(id){
+  $('#estanteria').hidden=id!=='estanteria'; $('#escanear').hidden=id!=='escanear';
+  $('#tab-estanteria').setAttribute('aria-current',id==='estanteria'?'page':'false');
+  $('#tab-escanear').setAttribute('aria-current',id==='escanear'?'page':'false');
+  $('#filtros').hidden=id!=='estanteria';
+  if(id==='estanteria' && ajusta3D) ajusta3D();
+}
+$('#tab-estanteria').onclick=()=>muestra('estanteria');
+$('#tab-escanear').onclick=()=>muestra('escanear');
+$('#simular').onclick=()=>{
+  const h=$('#hoja');
+  h.innerHTML=`
+    <h2>Dune</h2>
+    <p class="autor">Frank Herbert · 1965</p>
+    <div class="fila"><span>ISBN leído</span><span>978-0-00-000000-0</span></div>
+    <div class="fila"><span>Fuente</span><span>Ejemplo</span></div>
+    <div class="botones">
+      <button class="btn sec" id="otra">Cancelar</button>
+      <button class="btn" id="anadir">Añadir al anaquel</button>
+    </div>
+    <p class="nota">Si no hay resultado: buscar por título y autor, o fotografiar la portada.</p>`;
+  abre();
+  $('#otra').onclick=cierra; $('#anadir').onclick=()=>{ cierra(); muestra('estanteria'); };
+};
+document.querySelectorAll('#filtros .chip').forEach(c=>c.onclick=()=>{
+  filtro=c.dataset.f;
+  document.querySelectorAll('#filtros .chip').forEach(x=>x.setAttribute('aria-pressed',String(x===c)));
+  refresca();
+});
+refresca();
+</script>

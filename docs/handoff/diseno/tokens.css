@@ -1,0 +1,34 @@
+/* Tokens de Anaquel, extraídos del prototipo. Claro por defecto; oscuro por sistema o data-theme="dark". */
+:root{
+  --bg:#dde2de; --fg:#131313; --muted:#4f5752; --card:#f7f8f6; --line:#c5ccc7;
+  --glass:rgba(247,248,246,.66); --glass-line:rgba(0,0,0,.07);
+  --papel:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='66' viewBox='0 0 44 66'%3E%3Cg fill='none' stroke='rgba%2852%2C72%2C60%2C.20%29' stroke-width='1'%3E%3Cpath d='M0 0C0 16 22 17 22 33S44 50 44 66'/%3E%3Cpath d='M44 0C44 16 22 17 22 33S0 50 0 66'/%3E%3C/g%3E%3Cg fill='rgba%2852%2C72%2C60%2C.16%29'%3E%3Cpath d='M22 4c2 3 2 6 0 9c-2-3-2-6 0-9zM22 62c2-3 2-6 0-9c-2 3-2 6 0 9zM0 29c3 2 3 6 0 8zM44 29c-3 2-3 6 0 8z'/%3E%3Cpath d='M18 33c-3-2-3-5 0-7c1 2 3 4 4 7c-1 3-3 5-4 7c-3-2-3-5 0-7z' opacity='.0'/%3E%3C/g%3E%3Cg fill='rgba%28176%2C138%2C70%2C.55%29'%3E%3Ccircle cx='22' cy='33' r='1.4'/%3E%3Ccircle cx='0' cy='0' r='1.4'/%3E%3Ccircle cx='44' cy='0' r='1.4'/%3E%3Ccircle cx='0' cy='66' r='1.4'/%3E%3Ccircle cx='44' cy='66' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+  --accent:#b08a46; --accent-fg:#131313;
+  --wood:#6b3d22; --wood-dark:#24140c; --wood-light:#9c6440; --wood-side:#3d2213; --wood-floor:#7d4a2b;
+  --lampara:rgba(255,236,200,.0);
+  --display:"Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --sans:"Manrope", system-ui, -apple-system, sans-serif;
+  --cond:"Oswald", "Arial Narrow", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e0e0f; --fg:#f2f0ec; --muted:#9b978f; --card:#19191b; --line:#2a2a2e;
+    --glass:rgba(32,32,35,.62); --glass-line:rgba(255,255,255,.07);
+    --accent:#d4ad66; --accent-fg:#131313;
+    --wood:#5c3b24; --wood-dark:#1a110b; --wood-light:#7d5435; --wood-side:#33200f; --wood-floor:#6b4529;
+    --lampara:rgba(255,214,150,.10);
+    --papel:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='66' viewBox='0 0 44 66'%3E%3Cg fill='none' stroke='rgba%28255%2C255%2C255%2C.045%29' stroke-width='1'%3E%3Cpath d='M0 0C0 16 22 17 22 33S44 50 44 66'/%3E%3Cpath d='M44 0C44 16 22 17 22 33S0 50 0 66'/%3E%3C/g%3E%3Cg fill='rgba%28255%2C255%2C255%2C.04%29'%3E%3Cpath d='M22 4c2 3 2 6 0 9c-2-3-2-6 0-9zM22 62c2-3 2-6 0-9c-2 3-2 6 0 9zM0 29c3 2 3 6 0 8zM44 29c-3 2-3 6 0 8z'/%3E%3Cpath d='M18 33c-3-2-3-5 0-7c1 2 3 4 4 7c-1 3-3 5-4 7c-3-2-3-5 0-7z' opacity='.0'/%3E%3C/g%3E%3Cg fill='rgba%28212%2C173%2C102%2C.22%29'%3E%3Ccircle cx='22' cy='33' r='1.4'/%3E%3Ccircle cx='0' cy='0' r='1.4'/%3E%3Ccircle cx='44' cy='0' r='1.4'/%3E%3Ccircle cx='0' cy='66' r='1.4'/%3E%3Ccircle cx='44' cy='66' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e0e0f; --fg:#f2f0ec; --muted:#9b978f; --card:#19191b; --line:#2a2a2e;
+  --glass:rgba(32,32,35,.62); --glass-line:rgba(255,255,255,.07);
+  --accent:#d4ad66; --accent-fg:#131313;
+  --wood:#5c3b24; --wood-dark:#1a110b; --wood-light:#7d5435; --wood-side:#33200f; --wood-floor:#6b4529;
+  --lampara:rgba(255,214,150,.10);
+    --papel:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='66' viewBox='0 0 44 66'%3E%3Cg fill='none' stroke='rgba%28255%2C255%2C255%2C.045%29' stroke-width='1'%3E%3Cpath d='M0 0C0 16 22 17 22 33S44 50 44 66'/%3E%3Cpath d='M44 0C44 16 22 17 22 33S0 50 0 66'/%3E%3C/g%3E%3Cg fill='rgba%28255%2C255%2C255%2C.04%29'%3E%3Cpath d='M22 4c2 3 2 6 0 9c-2-3-2-6 0-9zM22 62c2-3 2-6 0-9c-2 3-2 6 0 9zM0 29c3 2 3 6 0 8zM44 29c-3 2-3 6 0 8z'/%3E%3Cpath d='M18 33c-3-2-3-5 0-7c1 2 3 4 4 7c-1 3-3 5-4 7c-3-2-3-5 0-7z' opacity='.0'/%3E%3C/g%3E%3Cg fill='rgba%28212%2C173%2C102%2C.22%29'%3E%3Ccircle cx='22' cy='33' r='1.4'/%3E%3Ccircle cx='0' cy='0' r='1.4'/%3E%3Ccircle cx='44' cy='0' r='1.4'/%3E%3Ccircle cx='0' cy='66' r='1.4'/%3E%3Ccircle cx='44' cy='66' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+  color-scheme: dark;
+}
