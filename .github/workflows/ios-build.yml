@@ -1,0 +1,40 @@
+# Compila la app de iOS de Anaquel (Capacitor 6, CocoaPods por el plugin de ML Kit)
+# en un runner macOS. No hay Mac: esta es la única comprobación nativa de iOS.
+# Se lanza a mano (workflow_dispatch) porque cada minuto de macOS cuesta diez veces más.
+#   · Compila para el simulador sin firma: prueba de que el proyecto está sano.
+#   · La firma y la subida a TestFlight (fastlane match, como Fifth Square) quedan
+#     pendientes: necesitan la app creada en App Store Connect y sus secrets.
+name: iOS build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode 26 (App Store Connect exige el SDK de iOS 26)
+        run: |
+          XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          test -n "$XC" || { echo "No hay Xcode 26 en este runner:"; ls /Applications | grep -i xcode; exit 1; }
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Bundle web y pods
+        run: |
+          npm ci
+          npm run build
+          npx cap sync ios
+          cd ios/App && pod install
+      - name: Compilar para el simulador (sin firma)
+        run: |
+          set -o pipefail
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App \
+            -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40

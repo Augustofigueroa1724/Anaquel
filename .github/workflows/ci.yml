@@ -1,0 +1,30 @@
+# CI de Anaquel: en cada push a main y en cada pull request.
+#   · Pruebas unitarias (Vitest).
+#   · Build web con comprobación de tipos.
+#   · Prueba de humo en Chromium: recorre la app compilada y falla con errores de
+#     script, desbordamiento horizontal o un flujo roto.
+# Ubuntu: cuesta diez veces menos que macOS, así que todo lo barato va aquí.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verifica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Navegador para la prueba de humo
+        run: npx playwright install --with-deps chromium
+      - run: npm run humo

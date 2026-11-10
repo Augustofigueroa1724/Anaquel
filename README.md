@@ -19,7 +19,8 @@ npm run build
 - «Prestar» aún no tiene flujo.
 - Escáner nativo con ML Kit (EAN-13) listo en código; pendiente de prueba en dispositivo.
 - Búsqueda por ISBN con Google Books y Open Library.
-- Pendiente: CI de iOS y Android, y backend.
+- CI en GitHub Actions: pruebas, build y humo en cada push; APK de Android y compilación de iOS a mano.
+- Pendiente: firma y TestFlight de iOS, Play Store, y backend.
 
 ## Decisiones
 | Fecha | Decisión | Motivo |
@@ -29,5 +30,6 @@ npm run build
 | Nov 2026 | React + Vite + TypeScript, Zustand | Mismo stack que los otros proyectos |
 | Nov 2026 | localStorage primero, detrás de un repositorio | Empezar rápido; migrar a SQLite antes de la tienda |
 | Nov 2026 | Escaneo con cámara del móvil (EAN-13) con @capacitor-mlkit/barcode-scanning 6.2 | Lectura directa del ISBN; mismo Capacitor 6 que el resto de apps |
+| Nov 2026 | CI: Ubuntu para todo lo barato; macOS solo a mano | Cada minuto de macOS cuesta diez veces más |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |

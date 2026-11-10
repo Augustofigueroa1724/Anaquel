@@ -1,0 +1,74 @@
+# Compila la app de Android de Anaquel (Capacitor 6) en Ubuntu. Se lanza a mano.
+#   · Siempre: APK de depuración como artefacto del run (instalable con
+#     «orígenes desconocidos»; para el Redmi con `adb install` o abriéndolo desde Descargas).
+#   · Con `release=true` y los secrets del almacén: .aab y .apk firmados.
+#     Secrets: ANDROID_KEYSTORE_B64 (el .jks en base64), ANDROID_KEYSTORE_PASSWORD,
+#     ANDROID_KEY_ALIAS y ANDROID_KEY_PASSWORD.
+# Versión: la de package.json. versionCode: número del run.
+name: Android build
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Firmar la release (.aab y .apk) con el almacén de los secrets"
+        type: boolean
+        default: false
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - name: Versión y bundle web sincronizado
+        run: |
+          V=$(node -p "require('./package.json').version")
+          echo "APP_VERSION=$V" >> "$GITHUB_ENV"
+          echo "versión $V, versionCode $BUILD_NUMBER"
+          npm run build
+          npx cap sync android
+      - name: APK de depuración
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug -PversionName="$APP_VERSION" -PversionCode="$BUILD_NUMBER"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anaquel-${{ env.APP_VERSION }}-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Almacén de claves (solo release)
+        if: ${{ inputs.release }}
+        run: |
+          test -n "${{ secrets.ANDROID_KEYSTORE_B64 }}" || { echo "Falta el secret ANDROID_KEYSTORE_B64"; exit 1; }
+          echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > android/app/anaquel.jks
+      - name: Release firmada (.aab y .apk)
+        if: ${{ inputs.release }}
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon bundleRelease assembleRelease -PversionName="$APP_VERSION" -PversionCode="$BUILD_NUMBER"
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.release }}
+        with:
+          name: anaquel-${{ env.APP_VERSION }}-release
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+      - name: Borra el almacén de claves
+        if: ${{ always() && inputs.release }}
+        run: rm -f android/app/anaquel.jks

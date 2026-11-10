@@ -6,7 +6,8 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - Fase: primera implementación (andamiaje, estantería, ficha, libro 3D animado, escáner simulado, datos en localStorage).
 - Escáner nativo implementado (ML Kit vía Capacitor, EAN-13). Sin probar en dispositivo: no hay Mac ni SDK de Android aquí; se prueba en CI y en el Redmi.
 - Búsqueda por ISBN: Google Books y, si falla, Open Library (`src/data/buscar-isbn.ts`), con tope de 8 s por petición.
-- Pendiente: arrastre del libro en móvil real, probar la búsqueda en dispositivo, workflows de iOS y Android, backend (al final).
+- CI: `.github/workflows/ci.yml` (en cada push a main y PR: pruebas, build y humo). `android-build.yml` (a mano: APK de depuración y release firmada opcional). `ios-build.yml` (a mano: compila para el simulador sin firma).
+- Pendiente: firma y TestFlight de iOS (fastlane match, app en App Store Connect), Play Store, arrastre del libro en móvil real, backend (al final).
 
 ## Stack (aprobado)
 - React 18 + Vite 5 + TypeScript 5. Estado con Zustand.
@@ -51,6 +52,7 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - `npx cap sync android|ios`: copia la web a los proyectos nativos (tras `npm run build`).
 - `npm run build`: comprobación de tipos y build.
 - `npm test`: pruebas unitarias.
+- `npm run humo`: prueba de humo en Chromium contra la build (con `PLAYWRIGHT_CHROMIUM` si el navegador no está en la ruta por defecto).
 
 ## Trabajo
 - Rama `main`, con merge automático salvo que se indique lo contrario.
