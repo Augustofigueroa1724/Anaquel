@@ -6,3 +6,4 @@
 .confirmar{margin-top:12px}
 .confirmar p{margin:0 0 4px}
 .quitar{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);font:500 13px var(--sans);padding:10px;min-height:44px;cursor:pointer;text-decoration:underline}
+.acciones-libro{display:flex;justify-content:center;gap:24px;margin-top:6px}

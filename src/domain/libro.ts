@@ -11,6 +11,8 @@ export interface Libro {
   estado: Estado;
   color: string;
   edicion: Edicion;
+  /** Préstamo activo: a quién y desde qué día (AAAA-MM-DD). Ausente si el libro está en casa. */
+  prestamo?: { a: string; desde: string };
 }
 
 export const ESTADOS: readonly Estado[] = ['leido', 'leyendo', 'pendiente'];
@@ -110,4 +112,16 @@ export function validaDatos(d: DatosLibro): string | null {
     return 'El año no es válido.';
   }
   return null;
+}
+
+/** Nombre de la persona a quien se presta. Devuelve el mensaje de error o null. */
+export function validaPrestamo(nombre: string): string | null {
+  return nombre.trim() ? null : 'Escribe a quién prestas el libro.';
+}
+
+/** Fecha de hoy en formato AAAA-MM-DD (hora local). */
+export function hoyIso(fecha: Date = new Date()): string {
+  const m = String(fecha.getMonth() + 1).padStart(2, '0');
+  const d = String(fecha.getDate()).padStart(2, '0');
+  return `${fecha.getFullYear()}-${m}-${d}`;
 }

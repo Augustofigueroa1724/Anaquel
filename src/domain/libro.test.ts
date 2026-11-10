@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro, validaDatos,
+  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -80,5 +80,15 @@ describe('validaDatos', () => {
   it('rechaza años absurdos', () => {
     expect(validaDatos({ ...base, anio: -5 })).toMatch(/año/);
     expect(validaDatos({ ...base, anio: 3000 })).toMatch(/año/);
+  });
+});
+
+describe('préstamos', () => {
+  it('exige el nombre de quien recibe el libro', () => {
+    expect(validaPrestamo('  ')).toMatch(/quién/);
+    expect(validaPrestamo('Ana')).toBeNull();
+  });
+  it('fecha local en formato AAAA-MM-DD', () => {
+    expect(hoyIso(new Date(2026, 10, 9))).toBe('2026-11-09');
   });
 });

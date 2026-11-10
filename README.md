@@ -16,7 +16,7 @@ npm run build
 
 ## Estado
 - Estantería HTML con filtros, libro 3D que sale del estante, ficha con cambio de estado, escáner simulado y persistencia en localStorage.
-- «Prestar» aún no tiene flujo.
+- Préstamos: se anota a quién se presta y se marca devuelto. Sin lista de contactos ni recordatorios.
 - Editar (título, autor, año, ISBN, estado) y quitar del anaquel, con confirmación.
 - Escáner nativo con ML Kit (EAN-13) listo en código; pendiente de prueba en dispositivo.
 - Búsqueda por ISBN con Google Books y Open Library.
@@ -32,6 +32,7 @@ npm run build
 | Nov 2026 | localStorage primero, detrás de un repositorio | Empezar rápido; migrar a SQLite antes de la tienda |
 | Nov 2026 | Escaneo con cámara del móvil (EAN-13) con @capacitor-mlkit/barcode-scanning 6.2 | Lectura directa del ISBN; mismo Capacitor 6 que el resto de apps |
 | Nov 2026 | CI: Ubuntu para todo lo barato; macOS solo a mano | Cada minuto de macOS cuesta diez veces más |
+| Nov 2026 | Préstamo = nombre libre y fecha, en el propio libro | Sin contactos ni servidor todavía; basta para saber dónde está el libro |
 | Nov 2026 | Quitar libro con confirmación en la propia hoja, sin diálogos del sistema | Los diálogos nativos no encajan con la app y pueden no mostrarse en la web |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |

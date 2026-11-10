@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  ESTADOS, ETIQUETA, validaDatos, type DatosLibro, type Estado, type Libro,
+  ESTADOS, ETIQUETA, hoyIso, validaDatos, validaPrestamo, type DatosLibro, type Estado, type Libro,
 } from '../../domain/libro';
+
+type Modo = 'ver' | 'editar' | 'borrar' | 'prestar';
 
 /** Ficha del libro (hoja inferior). Muestra el último libro abierto mientras se cierra. */
 export function Hoja() {
@@ -31,7 +33,7 @@ export function Hoja() {
 }
 
 function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
-  const [modo, setModo] = useState<'ver' | 'editar' | 'borrar'>('ver');
+  const [modo, setModo] = useState<Modo>('ver');
   if (modo === 'editar' && enEstante) {
     return <Formulario libro={libro} onListo={() => setModo('ver')} />;
   }
@@ -43,14 +45,15 @@ function Vista({
 }: {
   libro: Libro;
   enEstante: boolean;
-  modo: 'ver' | 'editar' | 'borrar';
-  setModo: (m: 'ver' | 'editar' | 'borrar') => void;
+  modo: Modo;
+  setModo: (m: Modo) => void;
 }) {
   const cambiaEstado = useBiblioteca((s) => s.cambiaEstado);
   const cerrar = useBiblioteca((s) => s.cerrar);
   const anadir = useBiblioteca((s) => s.anadirCandidato);
   const descartar = useBiblioteca((s) => s.descartarCandidato);
   const borrar = useBiblioteca((s) => s.borrarLibro);
+  const devolver = useBiblioteca((s) => s.devolver);
   const repetido = useBiblioteca((s) => s.libros.some((l) => l.isbn === libro.isbn));
   const busqueda = useBiblioteca((s) => s.busqueda);
 
@@ -61,6 +64,9 @@ function Vista({
       <p className="autor">{libro.autor}</p>
       <div className="fila"><span>Año</span><span>{libro.anio || '—'}</span></div>
       <div className="fila"><span>ISBN</span><span className="mono">{libro.isbn}</span></div>
+      {enEstante && libro.prestamo && modo !== 'prestar' && (
+        <div className="fila"><span>Prestado a</span><span>{libro.prestamo.a}</span></div>
+      )}
       {enEstante && (
         <div className="estados" role="group" aria-label="Estado de lectura">
           {ESTADOS.map((e: Estado) => (
@@ -71,7 +77,7 @@ function Vista({
         </div>
       )}
 
-      {enEstante && modo === 'borrar' ? (
+      {enEstante && modo === 'borrar' && (
         <div className="confirmar">
           <p>¿Quitar «{libro.titulo}» de tu anaquel? No se puede deshacer.</p>
           <div className="botones">
@@ -79,12 +85,20 @@ function Vista({
             <button className="btn" onClick={() => borrar(libro.id)}>Sí, quitar</button>
           </div>
         </div>
-      ) : (
+      )}
+
+      {enEstante && modo === 'prestar' && (
+        <FormularioPrestamo libro={libro} onListo={() => setModo('ver')} />
+      )}
+
+      {!(enEstante && (modo === 'borrar' || modo === 'prestar')) && (
         <>
           <div className="botones">
             {enEstante ? (
               <>
-                <button className="btn sec" onClick={() => setModo('editar')}>Editar</button>
+                {libro.prestamo
+                  ? <button className="btn sec" onClick={() => devolver(libro.id)}>Marcar devuelto</button>
+                  : <button className="btn sec" onClick={() => setModo('prestar')}>Prestar</button>}
                 <button className="btn" onClick={cerrar}>Listo</button>
               </>
             ) : (
@@ -97,7 +111,10 @@ function Vista({
             )}
           </div>
           {enEstante && (
-            <button className="quitar" onClick={() => setModo('borrar')}>Quitar del anaquel</button>
+            <div className="acciones-libro">
+              <button className="quitar" onClick={() => setModo('editar')}>Editar</button>
+              <button className="quitar" onClick={() => setModo('borrar')}>Quitar del anaquel</button>
+            </div>
           )}
           {!enEstante && busqueda === 'buscando' && <p className="nota">Buscando datos del libro…</p>}
           {!enEstante && busqueda === 'no-encontrado' && <p className="nota">No encontramos este ISBN. Puedes añadirlo igualmente.</p>}
@@ -105,6 +122,35 @@ function Vista({
         </>
       )}
     </>
+  );
+}
+
+function FormularioPrestamo({ libro, onListo }: { libro: Libro; onListo: () => void }) {
+  const prestar = useBiblioteca((s) => s.prestar);
+  const [a, setA] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  function guardar(e: React.FormEvent) {
+    e.preventDefault();
+    const fallo = validaPrestamo(a);
+    if (fallo) { setError(fallo); return; }
+    prestar(libro.id, a, hoyIso());
+    onListo();
+  }
+
+  return (
+    <form onSubmit={guardar} noValidate>
+      <p className="eti">Prestar «{libro.titulo}»</p>
+      <label className="campo">
+        <span>¿A quién?</span>
+        <input value={a} onChange={(e) => setA(e.target.value)} autoComplete="off" autoFocus />
+      </label>
+      {error && <p className="nota" role="alert">{error}</p>}
+      <div className="botones">
+        <button type="button" className="btn sec" onClick={onListo}>Cancelar</button>
+        <button type="submit" className="btn">Guardar</button>
+      </div>
+    </form>
   );
 }
 

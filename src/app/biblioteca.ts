@@ -22,6 +22,8 @@ interface Biblioteca {
   descartarCandidato(): void;
   editarLibro(id: number, cambios: Partial<Omit<Libro, 'id' | 'color' | 'edicion'>>): void;
   borrarLibro(id: number): void;
+  prestar(id: number, a: string, desde: string): void;
+  devolver(id: number): void;
 }
 
 const guardados = repositorioLocal.cargar();
@@ -73,6 +75,22 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
 
   editarLibro: (id, cambios) => {
     const libros = get().libros.map((l) => (l.id === id ? { ...l, ...cambios } : l));
+    repositorioLocal.guardar(libros);
+    set({ libros });
+  },
+
+  prestar: (id, a, desde) => {
+    const libros = get().libros.map((l) => (l.id === id ? { ...l, prestamo: { a: a.trim(), desde } } : l));
+    repositorioLocal.guardar(libros);
+    set({ libros });
+  },
+
+  devolver: (id) => {
+    const libros = get().libros.map((l) => {
+      if (l.id !== id) return l;
+      const { prestamo: _quitado, ...resto } = l;
+      return resto;
+    });
     repositorioLocal.guardar(libros);
     set({ libros });
   },
