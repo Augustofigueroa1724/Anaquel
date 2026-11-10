@@ -1,0 +1,8 @@
+/* Formularios de la ficha. Los campos van a 16 px: por debajo, Safari amplía la página al enfocar. */
+.campo{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.campo span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.campo input{font:500 16px var(--sans);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:44px;width:100%;box-sizing:border-box}
+.campo input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.confirmar{margin-top:12px}
+.confirmar p{margin:0 0 4px}
+.quitar{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);font:500 13px var(--sans);padding:10px;min-height:44px;cursor:pointer;text-decoration:underline}

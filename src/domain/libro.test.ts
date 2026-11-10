@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro,
+  tintaPara, type Libro, validaDatos,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -65,5 +65,20 @@ describe('repartePorBaldas', () => {
   });
   it('lista vacía no produce baldas', () => {
     expect(repartePorBaldas([], 300)).toEqual([]);
+  });
+});
+
+describe('validaDatos', () => {
+  const base = { titulo: 'Dune', autor: 'Frank Herbert', anio: 1965, isbn: '', estado: 'leido' as const };
+  it('acepta datos correctos y sin año (0)', () => {
+    expect(validaDatos(base)).toBeNull();
+    expect(validaDatos({ ...base, anio: 0 })).toBeNull();
+  });
+  it('exige título', () => {
+    expect(validaDatos({ ...base, titulo: '   ' })).toMatch(/título/);
+  });
+  it('rechaza años absurdos', () => {
+    expect(validaDatos({ ...base, anio: -5 })).toMatch(/año/);
+    expect(validaDatos({ ...base, anio: 3000 })).toMatch(/año/);
   });
 });

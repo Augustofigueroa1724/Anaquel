@@ -94,3 +94,20 @@ export function repartePorBaldas(libros: readonly Libro[], util: number, separac
 export function candidatoDesdeIsbn(isbn: string): Omit<Libro, 'id' | 'color' | 'edicion'> {
   return { titulo: 'Libro sin identificar', autor: 'Datos pendientes', anio: 0, isbn, estado: 'pendiente' };
 }
+
+export interface DatosLibro {
+  titulo: string;
+  autor: string;
+  anio: number;
+  isbn: string;
+  estado: Estado;
+}
+
+/** Valida lo que escribe el usuario. Devuelve el mensaje de error o null si está bien. */
+export function validaDatos(d: DatosLibro): string | null {
+  if (!d.titulo.trim()) return 'Escribe el título del libro.';
+  if (!Number.isInteger(d.anio) || d.anio < 0 || d.anio > new Date().getFullYear() + 1) {
+    return 'El año no es válido.';
+  }
+  return null;
+}

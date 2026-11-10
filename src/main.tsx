@@ -5,6 +5,7 @@ import '@fontsource/manrope/index.css';
 import '@fontsource/oswald/index.css';
 import '@fontsource/ibm-plex-mono/index.css';
 import './styles/anaquel.css';
+import './styles/formulario.css';
 import App from './app/App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

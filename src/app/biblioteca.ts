@@ -20,6 +20,8 @@ interface Biblioteca {
   leerIsbn(isbn: string): void;
   anadirCandidato(): void;
   descartarCandidato(): void;
+  editarLibro(id: number, cambios: Partial<Omit<Libro, 'id' | 'color' | 'edicion'>>): void;
+  borrarLibro(id: number): void;
 }
 
 const guardados = repositorioLocal.cargar();
@@ -67,6 +69,18 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
     const siguiente = [...libros, nuevo];
     repositorioLocal.guardar(siguiente);
     set({ libros: siguiente, candidato: null, busqueda: null, filtro: 'todos' });
+  },
+
+  editarLibro: (id, cambios) => {
+    const libros = get().libros.map((l) => (l.id === id ? { ...l, ...cambios } : l));
+    repositorioLocal.guardar(libros);
+    set({ libros });
+  },
+
+  borrarLibro: (id) => {
+    const libros = get().libros.filter((l) => l.id !== id);
+    repositorioLocal.guardar(libros);
+    set({ libros, abierto: null });
   },
 
   descartarCandidato: () => set({ candidato: null, busqueda: null }),
