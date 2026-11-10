@@ -5,7 +5,8 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 ## Estado
 - Fase: primera implementación (andamiaje, estantería, ficha, libro 3D animado, escáner simulado, datos en localStorage).
 - Escáner nativo implementado (ML Kit vía Capacitor, EAN-13). Sin probar en dispositivo: no hay Mac ni SDK de Android aquí; se prueba en CI y en el Redmi.
-- Pendiente: búsqueda real por ISBN (hoy el libro leído queda como «Libro sin identificar»), arrastre del libro en móvil real, workflows de iOS y Android, backend (al final).
+- Búsqueda por ISBN: Google Books y, si falla, Open Library (`src/data/buscar-isbn.ts`), con tope de 8 s por petición.
+- Pendiente: arrastre del libro en móvil real, probar la búsqueda en dispositivo, workflows de iOS y Android, backend (al final).
 
 ## Stack (aprobado)
 - React 18 + Vite 5 + TypeScript 5. Estado con Zustand.
@@ -43,6 +44,7 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 ## Datos
 - Modelo: `Libro { id, titulo, autor, anio, isbn, estado: 'leido'|'leyendo'|'pendiente', color, edicion: 'clasico'|'moderno'|'condensado' }`.
 - Los datos de ejemplo son ficticios; los ISBN son falsos.
+- Un ISBN leído se busca por Google Books (con CORS) y después Open Library. No se guarda nada del usuario en esas consultas, solo el ISBN.
 
 ## Comandos
 - `npm run dev`: desarrollo.

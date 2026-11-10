@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { CANDIDATO_SIMULADO, LIBROS_EJEMPLO } from '../data/ejemplos';
+import { buscarPorIsbn, type Busqueda } from '../data/buscar-isbn';
 import { repositorioLocal } from '../data/repositorio-local';
 import {
   candidatoDesdeIsbn, COLORES_TELA, edicionDe, type Estado, type Filtro, type Libro,
@@ -10,6 +11,7 @@ interface Biblioteca {
   filtro: Filtro;
   abierto: number | null;
   candidato: Libro | null;
+  busqueda: Busqueda | null;
   setFiltro(f: Filtro): void;
   abrir(id: number): void;
   cerrar(): void;
@@ -28,10 +30,11 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
   filtro: 'todos',
   abierto: null,
   candidato: null,
+  busqueda: null,
 
   setFiltro: (filtro) => set({ filtro }),
   abrir: (id) => set({ abierto: id, candidato: null }),
-  cerrar: () => set({ abierto: null, candidato: null }),
+  cerrar: () => set({ abierto: null, candidato: null, busqueda: null }),
 
   cambiaEstado: (id, estado) => {
     const libros = get().libros.map((l) => (l.id === id ? { ...l, estado } : l));
@@ -39,8 +42,21 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
     set({ libros });
   },
 
-  simularLectura: () => set({ candidato: { ...CANDIDATO_SIMULADO, id: -1, color: COLORES_TELA[0], edicion: 'clasico' } }),
-  leerIsbn: (isbn) => set({ candidato: { ...candidatoDesdeIsbn(isbn), id: -1, color: COLORES_TELA[0], edicion: 'clasico' } }),
+  simularLectura: () => set({ busqueda: null, candidato: { ...CANDIDATO_SIMULADO, id: -1, color: COLORES_TELA[0], edicion: 'clasico' } }),
+  leerIsbn: (isbn) => {
+    set({
+      candidato: { ...candidatoDesdeIsbn(isbn), id: -1, color: COLORES_TELA[0], edicion: 'clasico' },
+      busqueda: 'buscando',
+    });
+    void buscarPorIsbn(isbn).then(({ estado, meta }) => {
+      const actual = get().candidato;
+      if (!actual || actual.isbn !== isbn) return; // el usuario ya cerró o leyó otro
+      set({
+        candidato: meta ? { ...actual, ...meta } : actual,
+        busqueda: estado,
+      });
+    });
+  },
 
   anadirCandidato: () => {
     const { libros, candidato } = get();
@@ -50,8 +66,8 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
     const nuevo: Libro = { ...candidato, id, color: COLORES_TELA[id % COLORES_TELA.length], edicion: edicionDe(id) };
     const siguiente = [...libros, nuevo];
     repositorioLocal.guardar(siguiente);
-    set({ libros: siguiente, candidato: null, filtro: 'todos' });
+    set({ libros: siguiente, candidato: null, busqueda: null, filtro: 'todos' });
   },
 
-  descartarCandidato: () => set({ candidato: null }),
+  descartarCandidato: () => set({ candidato: null, busqueda: null }),
 }));

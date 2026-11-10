@@ -32,6 +32,7 @@ function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
   const anadir = useBiblioteca((s) => s.anadirCandidato);
   const descartar = useBiblioteca((s) => s.descartarCandidato);
   const repetido = useBiblioteca((s) => s.libros.some((l) => l.isbn === libro.isbn));
+  const busqueda = useBiblioteca((s) => s.busqueda);
 
   return (
     <>
@@ -63,6 +64,9 @@ function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
         ) : (
           <>
             <button className="btn sec" onClick={descartar}>Cancelar</button>
+            {!repetido && busqueda === 'buscando' && <p className="nota">Buscando datos del libro…</p>}
+            {!repetido && busqueda === 'no-encontrado' && <p className="nota">No encontramos este ISBN. Puedes añadirlo igualmente.</p>}
+            {!repetido && busqueda === 'sin-red' && <p className="nota">Sin conexión: el libro se añade sin datos.</p>}
             {repetido
               ? <p className="nota">Este libro ya está en tu anaquel.</p>
               : <button className="btn" onClick={anadir}>Añadir al anaquel</button>}
