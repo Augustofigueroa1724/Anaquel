@@ -32,6 +32,15 @@ platform :ios do
       UI.user_error!("Falta crear la app en App Store Connect (Apps → + → Nueva app) con el bundle ID #{APP_ID}. La API de Apple no permite crearla.")
     end
     UI.success("La app existe en App Store Connect")
+
+    # Los certificados de distribución tienen tope por cuenta. Fifth Square y Crate
+    # Mates guardan los suyos con match; si alguno ya no existe, su próxima build
+    # necesita «perfil_nuevo». Solo se muestran los IDs, que no son secretos.
+    ids = Spaceship::ConnectAPI::Certificate.all.select { |c| c.certificate_type.to_s.include?("DISTRIBUTION") }.map(&:id)
+    UI.message("Certificados de distribución en la cuenta: #{ids.join(', ')}")
+    { "78G9JJ88JS" => "Fifth Square", "4Z5BYZ528H" => "Crate Mates" }.each do |id, app|
+      ids.include?(id) ? UI.success("#{app}: su certificado #{id} sigue activo") : UI.important("#{app}: su certificado #{id} ya no existe")
+    end
   end
 
   desc "Archiva firmado y sube a TestFlight"
