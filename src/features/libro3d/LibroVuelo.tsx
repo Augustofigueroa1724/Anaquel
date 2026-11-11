@@ -129,6 +129,7 @@ export function LibroVuelo() {
         { transform: fin, opacity: 1 },
       ];
     }
+    node.style.visibility = 'visible';
     anims.current = [node.animate(frames, { duration: reducido() ? 0 : 1000, easing: EASE_SACA, fill: 'forwards' })];
     node.style.pointerEvents = 'auto';
   }
@@ -162,7 +163,12 @@ export function LibroVuelo() {
     );
     anims.current = [a];
     a.onfinish = () => {
+      // El libro 3D va en una capa fija: si se queda visible sobre el lomo, al hacer
+      // scroll en la estantería parece que sigue volando. Se oculta y vuelve el lomo.
       node.style.pointerEvents = 'none';
+      node.style.visibility = 'hidden';
+      a.cancel();
+      anims.current = [];
       if (lomoOculto.current) { lomoOculto.current.style.visibility = ''; lomoOculto.current = null; }
     };
   }
