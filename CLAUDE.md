@@ -6,8 +6,9 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - Fase: primera implementación (andamiaje, estantería, ficha, libro 3D animado, escáner simulado, datos en localStorage).
 - Escáner nativo implementado (ML Kit vía Capacitor, EAN-13). Sin probar en dispositivo: no hay Mac ni SDK de Android aquí; se prueba en CI y en el Redmi.
 - Búsqueda por ISBN: Google Books y, si falla, Open Library (`src/data/buscar-isbn.ts`), con tope de 8 s por petición.
-- CI: `.github/workflows/ci.yml` (en cada push a main y PR: pruebas, build y humo). `android-build.yml` (a mano: APK de depuración y release firmada opcional). `ios-build.yml` (a mano: compila para el simulador sin firma).
-- Pendiente: firma y TestFlight de iOS (fastlane match, app en App Store Connect), Play Store, arrastre del libro en móvil real, backend (al final).
+- CI: `.github/workflows/ci.yml` (en cada push a main y PR: pruebas, build y humo). `android-build.yml` (a mano: APK de depuración y release firmada opcional). `ios-build.yml` (a mano: compila para el simulador sin firma; con `testflight=true`, registra el App ID en Ubuntu y después firma con fastlane match y sube a TestFlight; `fastlane/Fastfile`, bundle `app.anaquel.catalogo`).
+- TestFlight necesita en este repo los secrets ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, APPLE_TEAM_ID y MATCH_PASSWORD, y la app creada a mano en App Store Connect (la API de Apple no la crea).
+- Pendiente: Play Store, arrastre del libro en móvil real, backend (al final).
 
 ## Stack (aprobado)
 - React 18 + Vite 5 + TypeScript 5. Estado con Zustand.

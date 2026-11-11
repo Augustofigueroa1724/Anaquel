@@ -1,0 +1,81 @@
+# Anaquel · firma y subida a TestFlight desde GitHub Actions (no hay Mac).
+# Copiado del Fastfile de Fifth Square, que ya llega a TestFlight. Diferencia:
+# Anaquel va con Capacitor 6 y CocoaPods (lo exige el plugin de ML Kit), así que
+# se compila el .xcworkspace, no el .xcodeproj.
+#
+# `match` crea UNA vez el certificado de distribución y el perfil App Store con la
+# clave de la API de App Store Connect, los cifra con MATCH_PASSWORD y los guarda
+# en la rama `certs` de este repo; cada run los descifra en un llavero temporal.
+default_platform(:ios)
+
+APP_ID = "app.anaquel.catalogo"
+
+def token_asc
+  Spaceship::ConnectAPI::Token.create(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    filepath: ENV.fetch("AUTH_KEY")
+  )
+end
+
+platform :ios do
+  desc "Registra el App ID si no existe y comprueba que la app está creada en App Store Connect"
+  lane :registra do
+    Spaceship::ConnectAPI.token = token_asc
+    if Spaceship::ConnectAPI::BundleId.find(APP_ID).nil?
+      Spaceship::ConnectAPI::BundleId.create(name: "Anaquel", platform: "IOS", identifier: APP_ID)
+      UI.success("App ID #{APP_ID} registrado")
+    else
+      UI.message("El App ID #{APP_ID} ya existía")
+    end
+    if Spaceship::ConnectAPI::App.find(APP_ID).nil?
+      UI.user_error!("Falta crear la app en App Store Connect (Apps → + → Nueva app) con el bundle ID #{APP_ID}. La API de Apple no permite crearla.")
+    end
+    UI.success("La app existe en App Store Connect")
+  end
+
+  desc "Archiva firmado y sube a TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("AUTH_KEY"),
+      in_house: false
+    )
+    setup_ci
+    match(
+      force: ENV["MATCH_FORCE"] == "true",
+      type: "appstore",
+      app_identifier: APP_ID,
+      team_id: ENV.fetch("APPLE_TEAM_ID"),
+      api_key: api_key,
+      readonly: false,
+      storage_mode: "git",
+      git_url: ENV.fetch("MATCH_GIT_URL"),
+      git_branch: "certs",
+      git_basic_authorization: ENV.fetch("MATCH_GIT_BASIC_AUTHORIZATION")
+    )
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "ios/App/App.xcodeproj",
+      targets: ["App"],
+      team_id: ENV.fetch("APPLE_TEAM_ID"),
+      bundle_identifier: APP_ID,
+      code_sign_identity: "Apple Distribution",
+      profile_name: ENV.fetch("sigh_#{APP_ID}_appstore_profile-name")
+    )
+    build_app(
+      workspace: "ios/App/App.xcworkspace",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      xcargs: "MARKETING_VERSION=#{ENV.fetch('APP_VERSION')} CURRENT_PROJECT_VERSION=#{ENV.fetch('BUILD_NUMBER')}",
+      output_directory: ENV.fetch("RUNNER_TEMP"),
+      output_name: "anaquel.ipa"
+    )
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

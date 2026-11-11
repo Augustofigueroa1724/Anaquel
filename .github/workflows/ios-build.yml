@@ -1,15 +1,55 @@
 # Compila la app de iOS de Anaquel (Capacitor 6, CocoaPods por el plugin de ML Kit)
 # en un runner macOS. No hay Mac: esta es la única comprobación nativa de iOS.
-# Se lanza a mano (workflow_dispatch) porque cada minuto de macOS cuesta diez veces más.
-#   · Compila para el simulador sin firma: prueba de que el proyecto está sano.
-#   · La firma y la subida a TestFlight (fastlane match, como Fifth Square) quedan
-#     pendientes: necesitan la app creada en App Store Connect y sus secrets.
+# Se lanza a mano: cada minuto de macOS cuesta diez veces más que uno de Ubuntu.
+#   · Job `ios`: compila para el simulador sin firma. Siempre.
+#   · Con `testflight=true`:
+#       - Job `registra` (Ubuntu, barato): registra el App ID y comprueba que la
+#         app existe en App Store Connect antes de gastar minutos de macOS.
+#       - Job `testflight` (macOS): fastlane match + archivo firmado + subida.
+#     Secrets: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (contenido del .p8),
+#     APPLE_TEAM_ID y MATCH_PASSWORD (los mismos que en Fifth Square).
+# Versión de marketing: la de package.json. Número de build: el del run.
 name: iOS build
 
 on:
   workflow_dispatch:
+    inputs:
+      testflight:
+        description: "Archivar firmado y subir a TestFlight"
+        type: boolean
+        default: false
+      perfil_nuevo:
+        description: "Regenerar el perfil de aprovisionamiento (al cambiar capacidades)"
+        type: boolean
+        default: false
 
 jobs:
+  registra:
+    if: ${{ inputs.testflight }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+      - name: Clave de la API de App Store Connect
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          test -n "$ASC_KEY_ID" && test -n "$ASC_ISSUER_ID" && test -n "$ASC_KEY_P8" \
+            || { echo "Faltan los secrets ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_P8 en este repo"; exit 1; }
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+          echo "AUTH_KEY=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
+      - name: App ID y app en App Store Connect
+        run: |
+          gem install fastlane --no-document
+          fastlane ios registra
+
   ios:
     runs-on: macos-26
     timeout-minutes: 40
@@ -38,3 +78,53 @@ jobs:
             -configuration Debug -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO build | tail -n 40
+
+  testflight:
+    if: ${{ inputs.testflight }}
+    needs: [registra, ios]
+    runs-on: macos-26
+    timeout-minutes: 60
+    permissions:
+      contents: write   # match guarda certificado y perfil cifrados en la rama `certs`
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_URL: https://github.com/${{ github.repository }}.git
+      MATCH_FORCE: ${{ inputs.perfil_nuevo }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode 26
+        run: |
+          XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          test -n "$XC" || { echo "No hay Xcode 26 en este runner"; exit 1; }
+          sudo xcode-select -s "$XC"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Bundle web y pods
+        run: |
+          npm ci
+          npm run build
+          npx cap sync ios
+          cd ios/App && pod install
+      - name: Versión de marketing
+        run: |
+          V=$(node -p "require('./package.json').version")
+          echo "APP_VERSION=$V" >> "$GITHUB_ENV"
+          echo "versión $V, build $BUILD_NUMBER"
+      - name: Clave de la API de App Store Connect
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          test -n "$ASC_KEY_ID" && test -n "$ASC_ISSUER_ID" && test -n "$APPLE_TEAM_ID" && test -n "$ASC_KEY_P8" && test -n "$MATCH_PASSWORD" \
+            || { echo "Faltan secrets ASC_KEY_ID / ASC_ISSUER_ID / APPLE_TEAM_ID / ASC_KEY_P8 / MATCH_PASSWORD"; exit 1; }
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+          echo "AUTH_KEY=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
+          echo "MATCH_GIT_BASIC_AUTHORIZATION=$(printf 'x-access-token:%s' "${{ secrets.GITHUB_TOKEN }}" | base64 | tr -d '\n')" >> "$GITHUB_ENV"
+      - name: fastlane beta (match, archivo firmado, TestFlight)
+        run: fastlane ios beta
