@@ -18,6 +18,10 @@ on:
         description: "Archivar firmado y subir a TestFlight"
         type: boolean
         default: false
+      solo_claves:
+        description: "Solo comprobar las claves de Apple y el App ID (Ubuntu, sin gastar macOS)"
+        type: boolean
+        default: false
       perfil_nuevo:
         description: "Regenerar el perfil de aprovisionamiento (al cambiar capacidades)"
         type: boolean
@@ -25,7 +29,7 @@ on:
 
 jobs:
   registra:
-    if: ${{ inputs.testflight }}
+    if: ${{ inputs.testflight || inputs.solo_claves }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -45,12 +49,22 @@ jobs:
             || { echo "Faltan los secrets ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_P8 en este repo"; exit 1; }
           printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
           echo "AUTH_KEY=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
+      - name: Formato de las claves (sin mostrar su valor)
+        run: |
+          ok=1
+          [[ "$ASC_KEY_ID" =~ ^[A-Z0-9]{10}$ ]] && echo "ASC_KEY_ID: formato correcto (10 caracteres)" || { echo "ASC_KEY_ID: formato incorrecto (${#ASC_KEY_ID} caracteres; deben ser 10, mayúsculas y números, sin espacios)"; ok=0; }
+          [[ "$ASC_ISSUER_ID" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] && echo "ASC_ISSUER_ID: formato correcto (UUID)" || { echo "ASC_ISSUER_ID: formato incorrecto (${#ASC_ISSUER_ID} caracteres; debe ser un UUID en minúsculas)"; ok=0; }
+          head -1 "$AUTH_KEY" | grep -qx -- '-----BEGIN PRIVATE KEY-----' && echo "ASC_KEY_P8: primera línea correcta" || { echo "ASC_KEY_P8: la primera línea no es -----BEGIN PRIVATE KEY-----"; ok=0; }
+          grep -q -- '-----END PRIVATE KEY-----' "$AUTH_KEY" && echo "ASC_KEY_P8: última línea correcta" || { echo "ASC_KEY_P8: falta -----END PRIVATE KEY----- (con cinco guiones)"; ok=0; }
+          openssl pkey -in "$AUTH_KEY" -noout 2>/dev/null && echo "ASC_KEY_P8: es una clave privada válida" || { echo "ASC_KEY_P8: no se puede leer como clave privada"; ok=0; }
+          [ "$ok" = 1 ] || exit 1
       - name: App ID y app en App Store Connect
         run: |
           gem install fastlane --no-document
           fastlane ios registra
 
   ios:
+    if: ${{ !inputs.solo_claves }}
     runs-on: macos-26
     timeout-minutes: 40
     steps:
