@@ -39,6 +39,7 @@ npm run build
 | Nov 2026 | Ficha menos técnica: ISBN al pie y en pequeño; notas del lector | Lo que importa al lector va arriba |
 | Nov 2026 | Cuentas en el Supabase de Crate Mates (tablas aq_*), login con Apple y Google | Sin coste nuevo; borrar cuenta respeta a quien también usa Crate Mates |
 | Nov 2026 | Lista de deseos, valoración, importar de Goodreads y amigos | Las funciones de más valor vistas en Goodreads |
+| Nov 2026 | Los libros de ejemplo se ven solo hasta añadir el primero propio, y nunca se guardan en la cuenta | El anaquel no se ve vacío al empezar, sin mezclar ejemplos con libros reales |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
 

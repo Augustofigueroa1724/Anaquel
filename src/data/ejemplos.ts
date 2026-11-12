@@ -104,6 +104,7 @@ export const LIBROS_EJEMPLO: Libro[] = EJEMPLOS.map(([titulo, autor, anio, estad
   color: COLORES_TELA[i % COLORES_TELA.length],
   edicion: edicionDe(i),
   genero: GENERO_EJEMPLO[titulo],
+  ejemplo: true,
 }));
 
 /** Libro que devuelve «Simular lectura» en el escáner (no está en el anaquel). */
@@ -112,8 +113,9 @@ export const CANDIDATO_SIMULADO: Omit<Libro, 'id' | 'color' | 'edicion'> = {
   autor: 'Ursula K. Le Guin',
   anio: 1969,
   estado: 'pendiente',
-  isbn: '978-0-00-000000-0',
+  isbn: '9780441478125',
 };
 
-/** Los libros de ejemplo llevan ISBN falsos con este prefijo: no se suben a la cuenta. */
-export const esEjemplo = (l: Libro): boolean => l.isbn.startsWith('978-0-00-');
+/** Libro de muestra (los guardados antes de existir la marca se reconocen por su ISBN falso). */
+export const esEjemplo = (l: Libro): boolean => l.ejemplo === true || l.isbn.startsWith('978-0-00-');
+export const sinEjemplos = (libros: readonly Libro[]): Libro[] => libros.filter((l) => !esEjemplo(l));

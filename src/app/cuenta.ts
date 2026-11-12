@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
-import { esEjemplo, LIBROS_EJEMPLO } from '../data/ejemplos';
+import { LIBROS_EJEMPLO, sinEjemplos } from '../data/ejemplos';
 import { descargaLibros, subeCambios } from '../data/sincroniza';
 import { miPerfil, type Perfil } from '../data/social';
 import type { Libro } from '../domain/libro';
@@ -32,15 +32,13 @@ async function alEntrar() {
   useCuenta.setState({ sincronizando: true, avisoSync: null });
   try {
     const remotos = await descargaLibros();
-    const locales = useBiblioteca.getState().libros.filter((l) => !esEjemplo(l));
+    const locales = sinEjemplos(useBiblioteca.getState().libros);
     const ids = new Set(remotos.map((l) => l.id));
     const isbns = new Set(remotos.map((l) => l.isbn).filter(Boolean));
     const soloAqui = locales.filter((l) => !ids.has(l.id) && !(l.isbn && isbns.has(l.isbn)));
-    // Cuenta nueva (sin libros): empieza con los de ejemplo para que el anaquel no se vea vacío.
-    // Sin el ISBN falso, que no debe parecer real; luego son libros suyos como cualquier otro.
-    const semilla = remotos.length === 0 ? LIBROS_EJEMPLO.map((l) => ({ ...l, isbn: '' })) : [];
     base = remotos;
-    useBiblioteca.getState().reemplazaLibros([...remotos, ...semilla, ...soloAqui]); // la suscripción los sube
+    // Sin libros, reemplazaLibros enseña los de ejemplo; esos no se suben nunca.
+    useBiblioteca.getState().reemplazaLibros([...remotos, ...soloAqui]); // la suscripción sube soloAqui
     useCuenta.setState({ perfil: await miPerfil() });
   } catch {
     useCuenta.setState({ avisoSync: 'Sin conexión: tus libros se sincronizarán cuando vuelva la red.' });
@@ -60,7 +58,7 @@ function programaSubida() {
   clearTimeout(temporizador);
   temporizador = setTimeout(async () => {
     if (!base || !useCuenta.getState().sesion) return;
-    const ahora = useBiblioteca.getState().libros;
+    const ahora = sinEjemplos(useBiblioteca.getState().libros);
     try {
       await subeCambios(base, ahora);
       base = ahora;

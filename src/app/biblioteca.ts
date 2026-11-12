@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CANDIDATO_SIMULADO, GENERO_EJEMPLO, LIBROS_EJEMPLO } from '../data/ejemplos';
+import { CANDIDATO_SIMULADO, GENERO_EJEMPLO, LIBROS_EJEMPLO, sinEjemplos } from '../data/ejemplos';
 import { buscarPorIsbn, type Busqueda } from '../data/buscar-isbn';
 import { repositorioLocal } from '../data/repositorio-local';
 import type { LibroImportado } from '../data/goodreads';
@@ -82,19 +82,22 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
     if (candidato.isbn && libros.some((l) => l.isbn === candidato.isbn)) return;
     const { id: _sinId, color: _c, edicion: _e, ...datos } = candidato;
     const nuevo = conTela({ ...datos, ...(posesion === 'quiero' ? { posesion: 'quiero' as const } : {}) }, nuevoId());
-    const siguiente = [...libros, nuevo];
+    // El primer libro propio retira los de ejemplo.
+    const siguiente = [...sinEjemplos(libros), nuevo];
     repositorioLocal.guardar(siguiente);
-    set({ libros: siguiente, candidato: null, busqueda: null, filtro: 'todos' });
+    set({ libros: siguiente, candidato: null, busqueda: null, filtro: 'todos', filtroGenero: null });
   },
 
-  reemplazaLibros: (libros) => {
+  reemplazaLibros: (recibidos) => {
+    // Sin libros propios se enseñan los de ejemplo para que el anaquel no se vea vacío.
+    const libros = recibidos.length ? recibidos : LIBROS_EJEMPLO;
     repositorioLocal.guardar(libros);
     set({ libros, abierto: null });
   },
 
   importa: (nuevos) => {
     if (!nuevos.length) return 0;
-    const libros = [...get().libros, ...nuevos.map((l, i) => conTela(l, nuevoId(i * 100)))];
+    const libros = [...sinEjemplos(get().libros), ...nuevos.map((l, i) => conTela(l, nuevoId(i * 100)))];
     repositorioLocal.guardar(libros);
     set({ libros });
     return nuevos.length;

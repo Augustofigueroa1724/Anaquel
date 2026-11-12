@@ -21,6 +21,8 @@ export interface Libro {
   posesion?: 'tengo' | 'quiero';
   /** Valoración de 1 a 5. */
   valoracion?: number;
+  /** Libro de muestra: se ve hasta que el usuario añade el primero suyo y nunca se sube a la cuenta. */
+  ejemplo?: true;
 }
 
 export const ESTADOS: readonly Estado[] = ['leido', 'leyendo', 'pendiente'];
