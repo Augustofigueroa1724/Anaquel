@@ -59,16 +59,26 @@ async function run() {
     if (pendientes === 0) errores.push('el filtro Pendientes no muestra libros');
     await page.locator('.chip[data-f="todos"]').click();
 
+    const antes = await page.locator('#cuenta').innerText();
     await page.locator('#tab-escanear').click();
     if (await page.locator('.acciones button', { hasText: /^Escanear$/ }).count() > 0) {
       errores.push('en la web no debe aparecer el botón de escaneo nativo');
     }
-    const antes = await page.locator('#cuenta').innerText();
     await page.locator('#simular').click();
     await page.locator('.hoja.abierta .btn', { hasText: 'Añadir al anaquel' }).click();
     await page.waitForSelector('.hoja:not(.abierta)');
+    await page.locator('#tab-estanteria').click();
     const despues = await page.locator('#cuenta').innerText();
     if (antes === despues) errores.push('añadir un libro simulado no sube el contador');
+
+    // Pestañas nuevas: lista de deseos, amigos (sin sesión) y ajustes.
+    for (const id of ['#tab-deseos', '#tab-amigos', '#tab-estanteria']) {
+      await page.locator(id).click();
+      await page.waitForTimeout(200);
+    }
+    await page.locator('.rueda').click();
+    await page.waitForSelector('.panel');
+    await page.locator('.panel .cerrar').click();
 
     await navegador.close();
   } finally {

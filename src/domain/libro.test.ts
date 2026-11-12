@@ -14,6 +14,9 @@ describe('edicionDe', () => {
     const usadas = new Set(Array.from({ length: 12 }, (_, i) => edicionDe(i)));
     expect(usadas.size).toBe(3);
   });
+  it('ids grandes (Date.now) siguen dando una edición válida', () => {
+    expect(['clasico', 'moderno', 'condensado']).toContain(edicionDe(Date.now() * 100 + 37));
+  });
   it('es estable: el mismo id da siempre la misma edición', () => {
     expect(edicionDe(7)).toBe(edicionDe(7));
   });

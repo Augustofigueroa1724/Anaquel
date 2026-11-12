@@ -1,13 +1,13 @@
 import { useLayoutEffect, useRef } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
-import { contar, FILTROS, type Filtro } from '../../domain/libro';
+import { contar, delAnaquel, FILTROS, type Filtro } from '../../domain/libro';
 
 /** Control segmentado; la pastilla se desliza al chip activo. */
 export function Filtros() {
   const filtro = useBiblioteca((s) => s.filtro);
   const setFiltro = useBiblioteca((s) => s.setFiltro);
   const libros = useBiblioteca((s) => s.libros);
-  const cuenta = contar(libros);
+  const cuenta = contar(delAnaquel(libros));
 
   const ref = useRef<HTMLDivElement>(null);
   const indicador = useRef<HTMLSpanElement>(null);

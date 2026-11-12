@@ -1,0 +1,13 @@
+{
+  "name": "anaquel-apple-signin",
+  "version": "0.1.0",
+  "description": "Sign in with Apple (AuthenticationServices) para Anaquel, plugin local de Capacitor",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "UNLICENSED",
+  "private": true,
+  "author": "Anaquel",
+  "files": ["ios/Sources", "AnaquelAppleSignin.podspec", "index.js", "index.d.ts"],
+  "capacitor": { "ios": { "src": "ios" } },
+  "peerDependencies": { "@capacitor/core": ">=6.0.0" }
+}

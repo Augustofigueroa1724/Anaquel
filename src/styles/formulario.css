@@ -41,3 +41,61 @@
 .campo textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .notas{margin:6px 0 12px}
 .isbn-pie{margin:14px 0 0;text-align:center;font:400 11px var(--mono);letter-spacing:.04em;color:var(--muted);opacity:.8}
+
+/* Valoración en latón */
+.valoracion{display:flex;gap:2px;margin:2px 0 6px}
+.valoracion button{border:0;background:none;font-size:24px;line-height:1;color:var(--line);min-width:40px;min-height:40px;cursor:pointer;padding:0}
+.valoracion button.llena{color:var(--accent)}
+.hoja .botones .btn.ancho{flex-basis:100%}
+.btn.enlace{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+
+/* Cabecera: rueda de ajustes */
+.cab-derecha{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.rueda{border:0;background:none;color:var(--muted);width:44px;height:44px;display:grid;place-items:center;cursor:pointer;margin-right:-10px}
+.rueda svg{width:22px;height:22px}
+
+/* Pestañas con contenido desplazable */
+section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.titulo-seccion{font:500 28px/1.1 var(--display);margin:4px 0 12px}
+.lista-deseos,.amigos{padding:8px max(16px,env(safe-area-inset-right,0px)) 120px max(16px,env(safe-area-inset-left,0px))}
+.lista-deseos ul,.personas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.lista-deseos li button{width:100%;display:flex;gap:14px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:14px;padding:10px 14px;cursor:pointer;min-height:60px}
+.mini-tela{flex:none;width:18px;height:44px;border-radius:2px;box-shadow:inset -3px 0 0 rgba(0,0,0,.25)}
+.lista-deseos .texto{display:flex;flex-direction:column;min-width:0}
+.lista-deseos .texto b{font:500 18px/1.2 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lista-deseos .texto span{color:var(--muted);font-size:13px}
+
+/* Amigos */
+.amigos .grupo{margin-top:18px}
+.fila-anadir{display:flex;gap:10px;align-items:flex-end}
+.fila-anadir .campo{flex:1;margin:0}
+.fila-anadir .btn{min-height:46px}
+.personas li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:8px 12px}
+.persona{display:flex;flex-direction:column;flex:1;min-width:0}
+.persona b{font-weight:700}
+.persona span{color:var(--muted);font-size:13px}
+.persona-boton{flex:1;display:flex;align-items:center;gap:8px;border:0;background:none;color:var(--fg);text-align:left;cursor:pointer;min-height:44px;padding:0}
+.personas .quitar{margin:0}
+.anaquel-amigo{position:absolute;inset:0;display:flex;flex-direction:column}
+.cab-amigo{padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.cab-amigo .quitar{margin:0;padding:10px 0;text-decoration:none}
+.contenedor-amigo{position:relative;flex:1;min-height:0}
+.tarjeta-amigo{position:fixed;left:0;right:0;bottom:0;z-index:12;background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -18px 40px rgba(0,0,0,.28);
+  padding:18px max(20px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+.tarjeta-amigo h3{font:500 24px/1.1 var(--display);margin:0 0 2px}
+
+/* Login */
+.login{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.login .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.login svg{width:20px;height:20px}
+
+/* Panel de ajustes */
+.panel{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;
+  padding:calc(12px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(30px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px))}
+.panel-cab{display:flex;justify-content:space-between;align-items:center}
+.panel-cab h2{font:500 32px/1.1 var(--display);margin:0}
+.panel .cerrar{border:0;background:none;color:var(--fg);font-size:32px;width:44px;height:44px;cursor:pointer}
+.bloque{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px}
+.bloque p{margin:6px 0}
+.archivo{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:10px}
+.archivo input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:16px}

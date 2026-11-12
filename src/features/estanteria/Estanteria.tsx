@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomo, anchoLomo, ETIQUETA, filtrar, generoDe, repartePorBaldas, tintaPara, type Libro,
+  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, repartePorBaldas, tintaPara, type Libro,
 } from '../../domain/libro';
 
 /** Interior del lomo según la edición (clásico, moderno o condensado). */
@@ -18,8 +18,9 @@ export function Interior({ libro }: { libro: Libro }) {
   return <><span className="franja" />{titulo}</>;
 }
 
-function Lomo({ libro }: { libro: Libro }) {
-  const abrir = useBiblioteca((s) => s.abrir);
+function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }) {
+  const abrirEnStore = useBiblioteca((s) => s.abrir);
+  const abrir = (id: number) => (onAbrir ? onAbrir(libro) : abrirEnStore(id));
   const { tinta, oro } = tintaPara(libro.color);
   const estilo = {
     '--c': libro.color,
@@ -43,7 +44,9 @@ function Lomo({ libro }: { libro: Libro }) {
   );
 }
 
-function Balda({ libros, etiqueta }: { libros: Libro[]; etiqueta?: string }) {
+function Balda({ libros, etiqueta, onAbrir, soloLectura }: {
+  libros: Libro[]; etiqueta?: string; onAbrir?: (l: Libro) => void; soloLectura?: boolean;
+}) {
   const setFiltroGenero = useBiblioteca((s) => s.setFiltroGenero);
   return (
     <div className={`balda${etiqueta ? ' con-placa' : ''}`}>
@@ -53,24 +56,28 @@ function Balda({ libros, etiqueta }: { libros: Libro[]; etiqueta?: string }) {
       <span className="suelo" />
       <span className="luz" />
       <span className="halo" />
-      {libros.map((l) => <Lomo key={l.id} libro={l} />)}
-      {etiqueta && (
-        <button className="placa" onClick={() => setFiltroGenero(etiqueta)} aria-label={`Ver solo ${etiqueta}`}>
-          {etiqueta}
-        </button>
-      )}
+      {libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} />)}
+      {etiqueta && (soloLectura
+        ? <span className="placa">{etiqueta}</span>
+        : (
+          <button className="placa" onClick={() => setFiltroGenero(etiqueta)} aria-label={`Ver solo ${etiqueta}`}>
+            {etiqueta}
+          </button>
+        ))}
     </div>
   );
 }
 
 /** Estantería HTML: vista principal. Las baldas se reparten según el ancho real de la pantalla. */
-export function Estanteria() {
-  const libros = useBiblioteca((s) => s.libros);
+export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l: Libro) => void } = {}) {
+  const propios = useBiblioteca((s) => s.libros);
   const filtro = useBiblioteca((s) => s.filtro);
   const filtroGenero = useBiblioteca((s) => s.filtroGenero);
+  const soloLectura = ajenos !== undefined;
+  const libros = useMemo(() => delAnaquel(ajenos ?? propios), [ajenos, propios]);
   const lista = useMemo(
-    () => filtrar(libros, filtro).filter((l) => !filtroGenero || generoDe(l) === filtroGenero),
-    [libros, filtro, filtroGenero],
+    () => (soloLectura ? libros : filtrar(libros, filtro).filter((l) => !filtroGenero || generoDe(l) === filtroGenero)),
+    [libros, filtro, filtroGenero, soloLectura],
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -96,10 +103,14 @@ export function Estanteria() {
   return (
     <div id="plano" className="plano" ref={ref}>
       {lista.length === 0 ? (
-        <p className="vacio">Ningún libro en este filtro.</p>
+        <p className="vacio">
+          {libros.length === 0
+            ? (soloLectura ? 'Su anaquel aún está vacío.' : 'Tu anaquel está vacío. Escanea el código de barras de tu primer libro.')
+            : 'Ningún libro en este filtro.'}
+        </p>
       ) : (
         <div className="mueble">
-          {baldas.map((b) => <Balda key={b.clave} libros={b.libros} etiqueta={b.etiqueta} />)}
+          {baldas.map((b) => <Balda key={b.clave} libros={b.libros} etiqueta={b.etiqueta} onAbrir={onAbrir} soloLectura={soloLectura} />)}
         </div>
       )}
     </div>

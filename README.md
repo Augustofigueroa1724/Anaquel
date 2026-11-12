@@ -37,5 +37,7 @@ npm run build
 | Nov 2026 | Icono: monograma «A» en latón con dos libros apoyados (C·2) | Elegido entre seis propuestas; editorial y legible a 60 px |
 | Nov 2026 | Una balda por género, con su nombre en la placa de latón | El mueble ya tenía placa; tocarla filtra por género |
 | Nov 2026 | Ficha menos técnica: ISBN al pie y en pequeño; notas del lector | Lo que importa al lector va arriba |
+| Nov 2026 | Cuentas en el Supabase de Crate Mates (tablas aq_*), login con Apple y Google | Sin coste nuevo; borrar cuenta respeta a quien también usa Crate Mates |
+| Nov 2026 | Lista de deseos, valoración, importar de Goodreads y amigos | Las funciones de más valor vistas en Goodreads |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { esIsbn13, formateaIsbn } from './isbn';
+import { esIsbn13, formateaIsbn, isbn10a13 } from './isbn';
 
 describe('esIsbn13', () => {
   it('acepta un ISBN-13 con dígito de control correcto', () => {
@@ -20,5 +20,18 @@ describe('esIsbn13', () => {
 describe('formateaIsbn', () => {
   it('separa el prefijo', () => {
     expect(formateaIsbn('9780306406157')).toBe('978-0306406157');
+  });
+});
+
+describe('isbn10a13', () => {
+  it('convierte un ISBN-10 válido', () => {
+    expect(isbn10a13('0306406152')).toBe('9780306406157');
+  });
+  it('acepta X como dígito de control', () => {
+    expect(isbn10a13('080442957X')).toBe('9780804429573');
+  });
+  it('rechaza un ISBN-10 con control erróneo o un ASIN de Kindle', () => {
+    expect(isbn10a13('0306406153')).toBeNull();
+    expect(isbn10a13('B07XYZ1234')).toBeNull();
   });
 });

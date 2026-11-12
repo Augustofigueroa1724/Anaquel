@@ -52,8 +52,30 @@ platform :ios do
       in_house: false
     )
     setup_ci
+
+    # Sign in with Apple tiene que estar activado en el App ID o el perfil no lo
+    # incluye y la firma falla. Se activa aquí con la clave de la API (como en Fifth
+    # Square) y, si se acaba de activar, se regenera el perfil.
+    capacidad_nueva = false
+    begin
+      Spaceship::ConnectAPI.token = token_asc
+      bundle = Spaceship::ConnectAPI::BundleId.find(APP_ID)
+      tipo = Spaceship::ConnectAPI::BundleIdCapability::Type::APPLE_ID_AUTH
+      if bundle && bundle.get_capabilities.none? { |c| c.is_type?(tipo) }
+        ajustes = [{
+          key: Spaceship::ConnectAPI::BundleIdCapability::Settings::APPLE_ID_AUTH_APP_CONSENT,
+          options: [{ key: Spaceship::ConnectAPI::BundleIdCapability::Options::PRIMARY_APP_CONSENT }]
+        }]
+        bundle.create_capability(tipo, settings: ajustes)
+        capacidad_nueva = true
+        UI.success("Sign in with Apple activado en el App ID #{APP_ID}")
+      end
+    rescue => e
+      UI.important("No se pudo comprobar Sign in with Apple en el App ID: #{e.message}")
+    end
+
     match(
-      force: ENV["MATCH_FORCE"] == "true",
+      force: capacidad_nueva || ENV["MATCH_FORCE"] == "true",
       type: "appstore",
       app_identifier: APP_ID,
       team_id: ENV.fetch("APPLE_TEAM_ID"),

@@ -1,9 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  ESTADOS, ETIQUETA, formateaFecha, GENEROS_BASE, hoyIso, validaDatos, validaPrestamo,
+  ESTADOS, esDeseo, ETIQUETA, formateaFecha, GENEROS_BASE, hoyIso, validaDatos, validaPrestamo,
   type DatosLibro, type Estado, type Libro,
 } from '../../domain/libro';
+
+/** Valoración de 1 a 5 en latón. Tocar la misma estrella la quita. */
+function Valoracion({ libro }: { libro: Libro }) {
+  const valorar = useBiblioteca((s) => s.valorar);
+  const v = libro.valoracion ?? 0;
+  return (
+    <div className="valoracion" role="group" aria-label="Valoración">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          className={n <= v ? 'llena' : ''}
+          aria-label={`${n} de 5`}
+          aria-pressed={n === v}
+          onClick={() => valorar(libro.id, n === v ? undefined : n)}
+        >★</button>
+      ))}
+    </div>
+  );
+}
 
 type Modo = 'ver' | 'editar' | 'borrar' | 'prestar';
 
@@ -45,7 +64,7 @@ function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
 function Cabecera({ libro }: { libro: Libro }) {
   return (
     <>
-      <p className="eti">{ETIQUETA[libro.estado]}{libro.genero ? ` · ${libro.genero}` : ''}</p>
+      <p className="eti">{esDeseo(libro) ? 'Lo quiero' : ETIQUETA[libro.estado]}{libro.genero ? ` · ${libro.genero}` : ''}</p>
       <h2>{libro.titulo}</h2>
       <p className="autor">{[libro.autor, libro.anio || null].filter(Boolean).join(' · ')}</p>
     </>
@@ -68,16 +87,19 @@ function Vista({
   const devolver = useBiblioteca((s) => s.devolver);
   const repetido = useBiblioteca((s) => s.libros.some((l) => l.isbn === libro.isbn));
   const busqueda = useBiblioteca((s) => s.busqueda);
+  const editar = useBiblioteca((s) => s.editarLibro);
+  const deseo = enEstante && esDeseo(libro);
 
   return (
     <>
       <Cabecera libro={libro} />
+      {enEstante && !deseo && <Valoracion libro={libro} />}
       {enEstante && libro.prestamo && modo !== 'prestar' && (
         <p className="prestado">
           Prestado a <b>{libro.prestamo.a}</b> desde el {formateaFecha(libro.prestamo.desde)}
         </p>
       )}
-      {enEstante && (
+      {enEstante && !deseo && (
         <div className="estados" role="group" aria-label="Estado de lectura">
           {ESTADOS.map((e: Estado) => (
             <button key={e} className="chip" aria-pressed={libro.estado === e} onClick={() => cambiaEstado(libro.id, e)}>
@@ -106,7 +128,12 @@ function Vista({
       {!(enEstante && (modo === 'borrar' || modo === 'prestar')) && (
         <>
           <div className="botones">
-            {enEstante ? (
+            {deseo ? (
+              <>
+                <a className="btn sec enlace" href={`https://www.amazon.es/s?k=${encodeURIComponent(libro.isbn || `${libro.titulo} ${libro.autor}`)}`} target="_blank" rel="noreferrer">Buscar en Amazon</a>
+                <button className="btn" onClick={() => editar(libro.id, { posesion: 'tengo' })}>Ya lo tengo</button>
+              </>
+            ) : enEstante ? (
               <>
                 {libro.prestamo
                   ? <button className="btn sec" onClick={() => devolver(libro.id)}>Marcar devuelto</button>
@@ -115,10 +142,11 @@ function Vista({
               </>
             ) : (
               <>
-                <button className="btn sec" onClick={descartar}>Cancelar</button>
                 {repetido
                   ? <p className="nota">Este libro ya está en tu anaquel.</p>
-                  : <button className="btn" onClick={anadir}>Añadir al anaquel</button>}
+                  : <button className="btn ancho" onClick={() => anadir('tengo')}>Añadir al anaquel</button>}
+                {!repetido && <button className="btn sec" onClick={() => anadir('quiero')}>Lo quiero</button>}
+                <button className="btn sec" onClick={descartar}>Cancelar</button>
               </>
             )}
           </div>
@@ -200,8 +228,11 @@ function FormularioPrestamo({ libro, onListo }: { libro: Libro; onListo: () => v
 
 function Formulario({ libro, onListo }: { libro: Libro; onListo: () => void }) {
   const editar = useBiblioteca((s) => s.editarLibro);
-  const generosUsados = useBiblioteca((s) => s.libros.map((l) => l.genero).filter((g): g is string => !!g));
-  const sugerencias = [...new Set([...generosUsados, ...GENEROS_BASE])].sort((a, b) => a.localeCompare(b, 'es'));
+  const libros = useBiblioteca((s) => s.libros);
+  const sugerencias = useMemo(() => {
+    const usados = libros.map((l) => l.genero).filter((g): g is string => !!g);
+    return [...new Set([...usados, ...GENEROS_BASE])].sort((a, b) => a.localeCompare(b, 'es'));
+  }, [libros]);
   const [datos, setDatos] = useState<DatosLibro>({
     titulo: libro.titulo,
     autor: libro.autor,

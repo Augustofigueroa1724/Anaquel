@@ -2,9 +2,13 @@ import { create } from 'zustand';
 import { CANDIDATO_SIMULADO, GENERO_EJEMPLO, LIBROS_EJEMPLO } from '../data/ejemplos';
 import { buscarPorIsbn, type Busqueda } from '../data/buscar-isbn';
 import { repositorioLocal } from '../data/repositorio-local';
+import type { LibroImportado } from '../data/goodreads';
 import {
-  candidatoDesdeIsbn, COLORES_TELA, edicionDe, type Estado, type Filtro, type Libro,
+  candidatoDesdeIsbn, COLORES_TELA, edicionDe, nuevoId, type Estado, type Filtro, type Libro,
 } from '../domain/libro';
+
+const conTela = (l: LibroImportado | Omit<Libro, 'color' | 'edicion'>, id: number): Libro =>
+  ({ ...l, id, color: COLORES_TELA[id % COLORES_TELA.length], edicion: edicionDe(id) });
 
 interface Biblioteca {
   libros: Libro[];
@@ -20,7 +24,10 @@ interface Biblioteca {
   cambiaEstado(id: number, estado: Estado): void;
   simularLectura(): void;
   leerIsbn(isbn: string): void;
-  anadirCandidato(): void;
+  anadirCandidato(posesion?: 'tengo' | 'quiero'): void;
+  reemplazaLibros(libros: Libro[]): void;
+  importa(nuevos: LibroImportado[]): number;
+  valorar(id: number, valoracion: number | undefined): void;
   descartarCandidato(): void;
   editarLibro(id: number, cambios: Partial<Omit<Libro, 'id' | 'color' | 'edicion'>>): void;
   borrarLibro(id: number): void;
@@ -69,15 +76,39 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
     });
   },
 
-  anadirCandidato: () => {
+  anadirCandidato: (posesion = 'tengo') => {
     const { libros, candidato } = get();
     if (!candidato) return;
-    if (libros.some((l) => l.isbn === candidato.isbn)) return;
-    const id = libros.reduce((max, l) => Math.max(max, l.id), -1) + 1;
-    const nuevo: Libro = { ...candidato, id, color: COLORES_TELA[id % COLORES_TELA.length], edicion: edicionDe(id) };
+    if (candidato.isbn && libros.some((l) => l.isbn === candidato.isbn)) return;
+    const { id: _sinId, color: _c, edicion: _e, ...datos } = candidato;
+    const nuevo = conTela({ ...datos, ...(posesion === 'quiero' ? { posesion: 'quiero' as const } : {}) }, nuevoId());
     const siguiente = [...libros, nuevo];
     repositorioLocal.guardar(siguiente);
     set({ libros: siguiente, candidato: null, busqueda: null, filtro: 'todos' });
+  },
+
+  reemplazaLibros: (libros) => {
+    repositorioLocal.guardar(libros);
+    set({ libros, abierto: null });
+  },
+
+  importa: (nuevos) => {
+    if (!nuevos.length) return 0;
+    const libros = [...get().libros, ...nuevos.map((l, i) => conTela(l, nuevoId(i * 100)))];
+    repositorioLocal.guardar(libros);
+    set({ libros });
+    return nuevos.length;
+  },
+
+  valorar: (id, valoracion) => {
+    const libros = get().libros.map((l) => {
+      if (l.id !== id) return l;
+      if (valoracion) return { ...l, valoracion };
+      const { valoracion: _quitada, ...resto } = l;
+      return resto;
+    });
+    repositorioLocal.guardar(libros);
+    set({ libros });
   },
 
   editarLibro: (id, cambios) => {

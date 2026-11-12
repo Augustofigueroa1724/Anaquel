@@ -49,5 +49,16 @@
 	<string>Anaquel usa la cámara para leer el código de barras de tus libros.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.anaquel.catalogo</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>anaquel</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

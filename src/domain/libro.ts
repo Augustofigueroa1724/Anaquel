@@ -17,6 +17,10 @@ export interface Libro {
   genero?: string;
   /** Notas o comentarios del lector. */
   notas?: string;
+  /** «quiero» = lista de deseos (aún no lo tiene). Sin valor = lo tiene. */
+  posesion?: 'tengo' | 'quiero';
+  /** Valoración de 1 a 5. */
+  valoracion?: number;
 }
 
 export const ESTADOS: readonly Estado[] = ['leido', 'leyendo', 'pendiente'];
@@ -44,8 +48,15 @@ const EDICIONES: readonly Edicion[] = ['clasico', 'moderno', 'condensado'];
 
 /** Reparte las tres ediciones de forma estable según el id. */
 export function edicionDe(i: number): Edicion {
-  return EDICIONES[(i * 2 + (i >> 2)) % 3];
+  // Math.floor en vez de >> para que los ids grandes (Date.now) no se vuelvan negativos.
+  return EDICIONES[(((i * 2 + Math.floor(i / 4)) % 3) + 3) % 3];
 }
+
+export const esDeseo = (l: Libro): boolean => l.posesion === 'quiero';
+/** Los libros que se ven en el anaquel (los de la lista de deseos van aparte). */
+export const delAnaquel = (libros: readonly Libro[]): Libro[] => libros.filter((l) => !esDeseo(l));
+/** Id para un libro nuevo: único entre dispositivos sin tener que preguntar al servidor. */
+export const nuevoId = (desplazamiento = 0): number => Date.now() * 100 + desplazamiento + Math.floor(Math.random() * 100);
 
 /** Luminancia relativa (WCAG) de un color #rrggbb. */
 export function luminancia(hex: string): number {
@@ -168,7 +179,7 @@ export function agrupaPorGenero(libros: readonly Libro[]): { genero: string; lib
 export function generoDesdeCategorias(categorias: readonly string[]): string | undefined {
   const texto = categorias.join(' / ').toLowerCase();
   const tabla: [RegExp, string][] = [
-    [/science fiction/, 'Ciencia ficción'],
+    [/science fiction|sci-fi|scifi/, 'Ciencia ficción'],
     [/fantasy/, 'Fantasía'],
     [/horror/, 'Terror'],
     [/mystery|detective|crime|thriller/, 'Policiaca'],

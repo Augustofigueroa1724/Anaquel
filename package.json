@@ -12,6 +12,8 @@
   "dependencies": {
     "@capacitor-mlkit/barcode-scanning": "^6.2.0",
     "@capacitor/android": "^6.2.3",
+    "@capacitor/app": "^6.0.3",
+    "@capacitor/browser": "^6.0.6",
     "@capacitor/cli": "^6.2.3",
     "@capacitor/core": "^6.2.3",
     "@capacitor/ios": "^6.2.3",
@@ -19,6 +21,8 @@
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/manrope": "^5.3.0",
     "@fontsource/oswald": "^5.3.0",
+    "@supabase/supabase-js": "^2.119.0",
+    "anaquel-apple-signin": "file:plugins/apple-signin",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.1.0"

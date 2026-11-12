@@ -114,3 +114,6 @@ export const CANDIDATO_SIMULADO: Omit<Libro, 'id' | 'color' | 'edicion'> = {
   estado: 'pendiente',
   isbn: '978-0-00-000000-0',
 };
+
+/** Los libros de ejemplo llevan ISBN falsos con este prefijo: no se suben a la cuenta. */
+export const esEjemplo = (l: Libro): boolean => l.isbn.startsWith('978-0-00-');
