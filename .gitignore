@@ -18,3 +18,4 @@ android/local.properties
 
 # Almacén de firma de Android (lo crea el CI desde un secret; nunca en el repo)
 *.jks
+tools/salida/

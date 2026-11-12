@@ -9,6 +9,7 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - CI: `.github/workflows/ci.yml` (en cada push a main y PR: pruebas, build y humo). `android-build.yml` (a mano: APK de depuración y release firmada opcional). `ios-build.yml` (a mano: compila para el simulador sin firma; con `testflight=true`, registra el App ID en Ubuntu y después firma con fastlane match y sube a TestFlight; `fastlane/Fastfile`, bundle `app.anaquel.catalogo`).
 - TestFlight necesita en este repo los secrets ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, APPLE_TEAM_ID y MATCH_PASSWORD, y la app creada a mano en App Store Connect (la API de Apple no la crea).
 - **Certificados de distribución de Apple (12 nov 2026):** la cuenta tiene un tope (2 o 3). Anaquel lo alcanzó porque cada app creó el suyo con match. Se revocaron dos sobrantes (no los de Fifth Square `78G9JJ88JS` ni Crate Mates `4Z5BYZ528H`). Regla para el futuro: **una app nueva reutiliza un certificado existente**, no crea otro; la lane `registra` lista los activos.
+- **Icono (12 nov 2026):** Monograma C·2 (la «A» de Bodoni en latón con dos libros apoyados). Fuente: `tools/icono.svg`; `npm run iconos` regenera iOS (AppIcon y arranque), Android (mipmaps, adaptativo con fondo `#161618`, arranque) y la web (`public/favicon.png`, `apple-touch-icon.png`). Propuestas en `docs/mocks/iconos.html` e `icono-c.html`.
 - Pendiente: Play Store, arrastre del libro en móvil real, backend (al final).
 
 ## Stack (aprobado)

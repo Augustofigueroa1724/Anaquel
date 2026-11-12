@@ -6,7 +6,8 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
     "preview": "vite preview --host",
-    "humo": "node tests/humo.mjs"
+    "humo": "node tests/humo.mjs",
+    "iconos": "node tools/genera-iconos.mjs && python3 tools/coloca_iconos.py"
   },
   "dependencies": {
     "@capacitor-mlkit/barcode-scanning": "^6.2.0",

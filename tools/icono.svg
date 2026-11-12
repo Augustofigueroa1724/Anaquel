@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs>
+  <linearGradient id="c-fondo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f1f22"/><stop offset="1" stop-color="#0e0e0f"/></linearGradient>
+  <linearGradient id="c-laton" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d58f"/><stop offset=".55" stop-color="#d4ad66"/><stop offset="1" stop-color="#9b7230"/></linearGradient>
+  <linearGradient id="c-vol" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".35" stop-color="#fff" stop-opacity=".16"/><stop offset=".6" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></linearGradient>
+  <linearGradient id="c-hojas" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#cdbf9f"/><stop offset="1" stop-color="#efe6d0"/></linearGradient>
+  <radialGradient id="c-sombra" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1024" height="1024" fill="url(#c-fondo)"/>
+<g transform="translate(0,-30)"><ellipse cx="720" cy="744" rx="170" ry="16" fill="url(#c-sombra)"/>
+<text x="400" y="742" text-anchor="middle" font-family="Bodoni Moda, Didot, Georgia, serif" font-weight="500" font-size="640" fill="url(#c-laton)">A</text>
+<g transform="translate(646 742) rotate(-24)">
+<polygon points="84,-370 106,-384 106,-14 84,0" fill="#3e1412"/>
+<polygon points="0,-370 84,-370 106,-384 22,-384" fill="url(#c-hojas)"/>
+<rect x="0" y="-370" width="84" height="370" fill="#6e2a26"/>
+<rect x="0" y="-370" width="84" height="370" fill="url(#c-vol)"/>
+<rect x="0" y="-344" width="84" height="4" fill="url(#c-laton)"/>
+<rect x="0" y="-334" width="84" height="2" fill="url(#c-laton)"/>
+<rect x="0" y="-40" width="84" height="4" fill="url(#c-laton)"/>
+<rect x="0" y="-30" width="84" height="2" fill="url(#c-laton)"/>
+<rect x="18.48" y="-229.4" width="47.040000000000006" height="81.4" rx="3" fill="none" stroke="url(#c-laton)" stroke-width="3"/>
+</g>
+<g transform="translate(742.949447394508 742) rotate(-24)">
+<polygon points="72,-335 94,-349 94,-14 72,0" fill="#101a2e"/>
+<polygon points="0,-335 72,-335 94,-349 22,-349" fill="url(#c-hojas)"/>
+<rect x="0" y="-335" width="72" height="335" fill="#1f2d47"/>
+<rect x="0" y="-335" width="72" height="335" fill="url(#c-vol)"/>
+<rect x="0" y="-309" width="72" height="4" fill="url(#c-laton)"/>
+<rect x="0" y="-299" width="72" height="2" fill="url(#c-laton)"/>
+<rect x="0" y="-40" width="72" height="4" fill="url(#c-laton)"/>
+<rect x="0" y="-30" width="72" height="2" fill="url(#c-laton)"/>
+</g>
+<polygon points="170,742 870,742 884,730 184,730" fill="#f3d58f" opacity=".55"/>
+<rect x="170" y="742" width="700" height="14" fill="url(#c-laton)"/>
+<rect x="170" y="756" width="700" height="6" fill="#000" opacity=".35"/></g>
+</svg>

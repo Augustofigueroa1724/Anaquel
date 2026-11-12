@@ -34,5 +34,6 @@ npm run build
 | Nov 2026 | CI: Ubuntu para todo lo barato; macOS solo a mano | Cada minuto de macOS cuesta diez veces más |
 | Nov 2026 | Préstamo = nombre libre y fecha, en el propio libro | Sin contactos ni servidor todavía; basta para saber dónde está el libro |
 | Nov 2026 | Quitar libro con confirmación en la propia hoja, sin diálogos del sistema | Los diálogos nativos no encajan con la app y pueden no mostrarse en la web |
+| Nov 2026 | Icono: monograma «A» en latón con dos libros apoyados (C·2) | Elegido entre seis propuestas; editorial y legible a 60 px |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
