@@ -41,3 +41,9 @@ npm run build
 | Nov 2026 | Lista de deseos, valoración, importar de Goodreads y amigos | Las funciones de más valor vistas en Goodreads |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
+
+## Configuración de Supabase para el login (una vez, en el panel)
+Proyecto `cratemates` → Authentication:
+1. **Providers → Apple**: añadir `app.anaquel.catalogo` a «Client IDs» (separado por coma de los que ya hay de Crate Mates).
+2. **URL Configuration → Redirect URLs**: añadir `anaquel://auth` y `https://augustofigueroa1724.github.io/Anaquel/`.
+3. **Providers → Google**: ya está activo por Crate Mates; no hace falta tocarlo.
