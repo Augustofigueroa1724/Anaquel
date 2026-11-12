@@ -58,8 +58,8 @@
 section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .titulo-seccion{font:500 28px/1.1 var(--display);margin:4px 0 12px}
 .lista-deseos,.amigos{padding:8px max(16px,env(safe-area-inset-right,0px)) 120px max(16px,env(safe-area-inset-left,0px))}
-.lista-deseos ul,.personas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.lista-deseos li button{width:100%;display:flex;gap:14px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:14px;padding:10px 14px;cursor:pointer;min-height:60px}
+.lista-deseos > ul,.personas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.lista-deseos > ul > li > button{width:100%;display:flex;gap:14px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:14px;padding:10px 14px;cursor:pointer;min-height:60px}
 .mini-tela{flex:none;width:18px;height:44px;border-radius:2px;box-shadow:inset -3px 0 0 rgba(0,0,0,.25)}
 .lista-deseos .texto{display:flex;flex-direction:column;min-width:0}
 .lista-deseos .texto b{font:500 18px/1.2 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -105,3 +105,16 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .avatar::before{content:"";position:absolute;inset:-6px}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .avatar span{font:500 18px/1 var(--display);color:var(--fg)}
+
+/* Sugerencias: filas que se desplazan en horizontal dentro de su caja (la página no) */
+.sugerencias{margin-top:22px;display:flex;flex-direction:column;gap:18px}
+.fila-sug .nota{margin:0 0 8px}
+.fila-sug ul{list-style:none;margin:0;padding:2px 0 8px;display:flex;flex-direction:row;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.tarjeta-sug{flex:none;width:118px;display:flex;flex-direction:column;gap:4px;scroll-snap-align:start}
+.portada-sug{width:118px;height:172px;border-radius:3px 6px 6px 3px;overflow:hidden;box-shadow:0 8px 18px -10px rgba(0,0,0,.5);display:grid;place-items:center}
+.portada-sug img{width:100%;height:100%;object-fit:cover;display:block}
+.portada-sug span{padding:10px;color:#f4ecdc;font:italic 500 15px/1.15 var(--display);text-align:center}
+.tarjeta-sug b{font:500 15px/1.2 var(--display);min-height:2.4em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.autor-sug{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tarjeta-sug .btn{min-height:36px;padding:0 10px;font-size:13px;border-radius:10px;margin-top:2px}
+.tarjeta-sug .quitar{margin:0;padding:6px 0;min-height:32px;font-size:12px}

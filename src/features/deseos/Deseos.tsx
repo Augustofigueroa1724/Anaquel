@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import { esDeseo } from '../../domain/libro';
+import { Sugerencias } from './Sugerencias';
 
 /** Lista de deseos: libros que quieres pero aún no tienes. */
 export function Deseos() {
@@ -26,6 +27,7 @@ export function Deseos() {
           ))}
         </ul>
       )}
+      <Sugerencias />
     </div>
   );
 }
