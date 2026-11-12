@@ -99,3 +99,9 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .bloque p{margin:6px 0}
 .archivo{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:10px}
 .archivo input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:16px}
+
+/* Círculo con tu foto (o tu inicial) cuando has entrado */
+.avatar{width:36px;height:36px;margin:4px -2px 4px 0;border-radius:50%;padding:0;border:2px solid var(--accent);background:var(--card);overflow:hidden;cursor:pointer;display:grid;place-items:center;position:relative}
+.avatar::before{content:"";position:absolute;inset:-6px}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar span{font:500 18px/1 var(--display);color:var(--fg)}

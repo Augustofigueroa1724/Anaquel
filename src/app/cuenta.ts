@@ -36,8 +36,11 @@ async function alEntrar() {
     const ids = new Set(remotos.map((l) => l.id));
     const isbns = new Set(remotos.map((l) => l.isbn).filter(Boolean));
     const soloAqui = locales.filter((l) => !ids.has(l.id) && !(l.isbn && isbns.has(l.isbn)));
+    // Cuenta nueva (sin libros): empieza con los de ejemplo para que el anaquel no se vea vacío.
+    // Sin el ISBN falso, que no debe parecer real; luego son libros suyos como cualquier otro.
+    const semilla = remotos.length === 0 ? LIBROS_EJEMPLO.map((l) => ({ ...l, isbn: '' })) : [];
     base = remotos;
-    useBiblioteca.getState().reemplazaLibros([...remotos, ...soloAqui]); // la suscripción sube soloAqui
+    useBiblioteca.getState().reemplazaLibros([...remotos, ...semilla, ...soloAqui]); // la suscripción los sube
     useCuenta.setState({ perfil: await miPerfil() });
   } catch {
     useCuenta.setState({ avisoSync: 'Sin conexión: tus libros se sincronizarán cuando vuelva la red.' });
