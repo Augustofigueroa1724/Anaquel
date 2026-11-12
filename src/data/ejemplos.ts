@@ -1,5 +1,52 @@
 import { COLORES_TELA, edicionDe, type Estado, type Libro } from '../domain/libro';
 
+/** Género de cada libro de ejemplo (también rellena los guardados antes de existir el género). */
+export const GENERO_EJEMPLO: Record<string, string> = {
+  "Cien años de soledad": "Novela",
+  "El nombre de la rosa": "Novela",
+  "1984": "Ciencia ficción",
+  "Rayuela": "Novela",
+  "Pedro Páramo": "Novela",
+  "La sombra del viento": "Novela",
+  "Dune": "Ciencia ficción",
+  "Fundación": "Ciencia ficción",
+  "El hobbit": "Fantasía",
+  "Frankenstein": "Clásicos",
+  "Matar a un ruiseñor": "Clásicos",
+  "Orgullo y prejuicio": "Clásicos",
+  "Ficciones": "Novela",
+  "Sapiens": "Ensayo",
+  "Persépolis": "Cómic",
+  "Crónica de una muerte anunciada": "Novela",
+  "Un mundo feliz": "Ciencia ficción",
+  "Stoner": "Novela",
+  "El Principito": "Clásicos",
+  "Ensayo sobre la ceguera": "Novela",
+  "La metamorfosis": "Clásicos",
+  "Hombres buenos": "Historia",
+  "Los miserables": "Clásicos",
+  "Drácula": "Terror",
+  "La carretera": "Novela",
+  "El señor de las moscas": "Clásicos",
+  "Moby Dick": "Clásicos",
+  "Crimen y castigo": "Clásicos",
+  "Mujercitas": "Clásicos",
+  "La insoportable levedad del ser": "Novela",
+  "Demian": "Novela",
+  "Neuromante": "Ciencia ficción",
+  "Kafka en la orilla": "Novela",
+  "Tokio blues": "Novela",
+  "El perfume": "Novela",
+  "Sin noticias de Gurb": "Novela",
+  "Los renglones torcidos de Dios": "Policiaca",
+  "Caballo de Troya": "Novela",
+  "Shogun": "Historia",
+  "Bajo la misma estrella": "Novela",
+  "El gran Gatsby": "Clásicos",
+  "Cumbres borrascosas": "Clásicos",
+  "Rebelión en la granja": "Clásicos"
+};
+
 /** Datos de ejemplo del prototipo. No son la colección de nadie; los ISBN son falsos. */
 const EJEMPLOS: [titulo: string, autor: string, anio: number, estado: Estado][] = [
   ['Cien años de soledad', 'Gabriel García Márquez', 1967, 'leido'],
@@ -56,6 +103,7 @@ export const LIBROS_EJEMPLO: Libro[] = EJEMPLOS.map(([titulo, autor, anio, estad
   isbn: `978-0-00-${String(100000 + i * 7919).slice(0, 6)}-${i % 10}`,
   color: COLORES_TELA[i % COLORES_TELA.length],
   edicion: edicionDe(i),
+  genero: GENERO_EJEMPLO[titulo],
 }));
 
 /** Libro que devuelve «Simular lectura» en el escáner (no está en el anaquel). */

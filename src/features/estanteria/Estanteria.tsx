@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  altoLomo, anchoLomo, ETIQUETA, filtrar, repartePorBaldas, tintaPara, type Libro,
+  agrupaPorGenero, altoLomo, anchoLomo, ETIQUETA, filtrar, generoDe, repartePorBaldas, tintaPara, type Libro,
 } from '../../domain/libro';
 
 /** Interior del lomo según la edición (clásico, moderno o condensado). */
@@ -43,9 +43,10 @@ function Lomo({ libro }: { libro: Libro }) {
   );
 }
 
-function Balda({ libros }: { libros: Libro[] }) {
+function Balda({ libros, etiqueta }: { libros: Libro[]; etiqueta?: string }) {
+  const setFiltroGenero = useBiblioteca((s) => s.setFiltroGenero);
   return (
-    <div className="balda">
+    <div className={`balda${etiqueta ? ' con-placa' : ''}`}>
       <span className="techo" />
       <span className="pared izq" />
       <span className="pared der" />
@@ -53,6 +54,11 @@ function Balda({ libros }: { libros: Libro[] }) {
       <span className="luz" />
       <span className="halo" />
       {libros.map((l) => <Lomo key={l.id} libro={l} />)}
+      {etiqueta && (
+        <button className="placa" onClick={() => setFiltroGenero(etiqueta)} aria-label={`Ver solo ${etiqueta}`}>
+          {etiqueta}
+        </button>
+      )}
     </div>
   );
 }
@@ -61,7 +67,11 @@ function Balda({ libros }: { libros: Libro[] }) {
 export function Estanteria() {
   const libros = useBiblioteca((s) => s.libros);
   const filtro = useBiblioteca((s) => s.filtro);
-  const lista = useMemo(() => filtrar(libros, filtro), [libros, filtro]);
+  const filtroGenero = useBiblioteca((s) => s.filtroGenero);
+  const lista = useMemo(
+    () => filtrar(libros, filtro).filter((l) => !filtroGenero || generoDe(l) === filtroGenero),
+    [libros, filtro, filtroGenero],
+  );
 
   const ref = useRef<HTMLDivElement>(null);
   const [ancho, setAncho] = useState(390);
@@ -75,7 +85,13 @@ export function Estanteria() {
     return () => observador.disconnect();
   }, []);
 
-  const baldas = useMemo(() => repartePorBaldas(lista, Math.max(120, ancho - 106)), [lista, ancho]);
+  // Cada género ocupa sus propias baldas; la primera lleva la placa con el nombre.
+  const baldas = useMemo(() => {
+    const util = Math.max(120, ancho - 106);
+    return agrupaPorGenero(lista).flatMap(({ genero, libros: delGenero }) =>
+      repartePorBaldas(delGenero, util).map((b, i) => ({ libros: b, etiqueta: i === 0 ? genero : undefined, clave: `${genero}-${i}` })),
+    );
+  }, [lista, ancho]);
 
   return (
     <div id="plano" className="plano" ref={ref}>
@@ -83,7 +99,7 @@ export function Estanteria() {
         <p className="vacio">Ningún libro en este filtro.</p>
       ) : (
         <div className="mueble">
-          {baldas.map((b, i) => <Balda key={i} libros={b} />)}
+          {baldas.map((b) => <Balda key={b.clave} libros={b.libros} etiqueta={b.etiqueta} />)}
         </div>
       )}
     </div>

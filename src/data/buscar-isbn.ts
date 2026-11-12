@@ -1,8 +1,11 @@
 /** Metadatos de un libro encontrados por ISBN. */
+import { generoDesdeCategorias } from '../domain/libro';
+
 export interface MetaLibro {
   titulo: string;
   autor: string;
   anio: number;
+  genero?: string;
 }
 
 export type Busqueda = 'buscando' | 'encontrado' | 'no-encontrado' | 'sin-red';
@@ -16,10 +19,13 @@ export function parseGoogleBooks(json: unknown): MetaLibro | null {
   if (!info || typeof info.title !== 'string') return null;
   const autores = Array.isArray(info.authors) ? info.authors.filter((a): a is string => typeof a === 'string') : [];
   const anio = Number.parseInt(String(info.publishedDate ?? ''), 10);
+  const categorias = Array.isArray(info.categories) ? info.categories.filter((c): c is string => typeof c === 'string') : [];
+  const genero = generoDesdeCategorias(categorias);
   return {
     titulo: info.title,
     autor: autores.join(', ') || 'Autor desconocido',
     anio: Number.isFinite(anio) ? anio : 0,
+    ...(genero ? { genero } : {}),
   };
 }
 

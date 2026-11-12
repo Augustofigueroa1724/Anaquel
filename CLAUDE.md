@@ -46,7 +46,9 @@ App móvil para catalogar libros (iPhone y Android con Capacitor). El usuario es
 - Mantener los ids del prototipo mientras se porta (`#estanteria`, `#escanear`, `#plano`, `#filtros`, `#hoja`, `#velo`, `#tab-estanteria`, `#tab-escanear`, `#simular`, `#cuenta`, `#pista`).
 
 ## Datos
-- Modelo: `Libro { id, titulo, autor, anio, isbn, estado: 'leido'|'leyendo'|'pendiente', color, edicion: 'clasico'|'moderno'|'condensado' }`.
+- Modelo: `Libro { id, titulo, autor, anio, isbn, estado, color, edicion, genero?, notas?, prestamo? }`.
+- **Géneros:** cada género ocupa sus propias baldas (`agrupaPorGenero`), la placa de latón de la primera balda lleva el nombre y al tocarla filtra (`filtroGenero` en el store; la pastilla `GeneroActivo` lo quita). Un ISBN escaneado trae el género de las categorías de Google Books (`generoDesdeCategorias`).
+- **Ficha:** estado y género arriba, autor y año en una línea, notas del lector (se guardan solas) e ISBN pequeño al pie.
 - Los datos de ejemplo son ficticios; los ISBN son falsos.
 - Un ISBN leído se busca por Google Books (con CORS) y después Open Library. No se guarda nada del usuario en esas consultas, solo el ISBN.
 

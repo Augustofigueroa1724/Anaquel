@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CANDIDATO_SIMULADO, LIBROS_EJEMPLO } from '../data/ejemplos';
+import { CANDIDATO_SIMULADO, GENERO_EJEMPLO, LIBROS_EJEMPLO } from '../data/ejemplos';
 import { buscarPorIsbn, type Busqueda } from '../data/buscar-isbn';
 import { repositorioLocal } from '../data/repositorio-local';
 import {
@@ -9,10 +9,12 @@ import {
 interface Biblioteca {
   libros: Libro[];
   filtro: Filtro;
+  filtroGenero: string | null;
   abierto: number | null;
   candidato: Libro | null;
   busqueda: Busqueda | null;
   setFiltro(f: Filtro): void;
+  setFiltroGenero(g: string | null): void;
   abrir(id: number): void;
   cerrar(): void;
   cambiaEstado(id: number, estado: Estado): void;
@@ -27,16 +29,21 @@ interface Biblioteca {
 }
 
 const guardados = repositorioLocal.cargar();
-const inicial = guardados && guardados.length > 0 ? guardados : LIBROS_EJEMPLO;
+// Los libros guardados antes de existir el género lo toman de los ejemplos si coinciden.
+const inicial = guardados && guardados.length > 0
+  ? guardados.map((l) => (l.genero || !GENERO_EJEMPLO[l.titulo] ? l : { ...l, genero: GENERO_EJEMPLO[l.titulo] }))
+  : LIBROS_EJEMPLO;
 
 export const useBiblioteca = create<Biblioteca>((set, get) => ({
   libros: inicial,
   filtro: 'todos',
+  filtroGenero: null,
   abierto: null,
   candidato: null,
   busqueda: null,
 
   setFiltro: (filtro) => set({ filtro }),
+  setFiltroGenero: (filtroGenero) => set({ filtroGenero }),
   abrir: (id) => set({ abierto: id, candidato: null }),
   cerrar: () => set({ abierto: null, candidato: null, busqueda: null }),
 

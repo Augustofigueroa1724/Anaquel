@@ -21,3 +21,23 @@
 .hoja .btn{min-height:46px}
 .acciones-libro{margin-top:0}
 .acciones-libro .quitar{margin-top:2px}
+
+/* Géneros: la placa de latón de la balda lleva el nombre y filtra al tocarla. */
+.balda.con-placa::after{display:none}
+.placa{position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);z-index:4;max-width:70%;
+  border:0;border-radius:2px;padding:2px 10px;font:800 9.5px/1.3 var(--sans);letter-spacing:.16em;text-transform:uppercase;
+  color:#2a1d0c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
+  background:linear-gradient(180deg,#f0d696,#b4873c 55%,#7c5b25);box-shadow:inset 0 0 0 1px rgba(60,40,10,.5),0 1px 2px rgba(0,0,0,.4)}
+.placa::before{content:"";position:absolute;inset:-14px -8px}
+.genero-activo{display:flex;justify-content:center;padding:6px 16px 0}
+.genero-activo button{display:inline-flex;gap:8px;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--fg);font:700 13px var(--sans);cursor:pointer}
+.genero-activo button span:last-child{color:var(--accent);font-size:16px}
+
+/* Ficha: autor y año en una línea, ISBN discreto al pie, notas del lector. */
+.prestado{margin:2px 0 8px;font-size:14px;color:var(--muted)}
+.prestado b{color:var(--fg);font-weight:700}
+.campo textarea{font:500 16px/1.45 var(--sans);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;box-sizing:border-box;resize:vertical;min-height:84px}
+.campo textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.notas{margin:6px 0 12px}
+.isbn-pie{margin:14px 0 0;text-align:center;font:400 11px var(--mono);letter-spacing:.04em;color:var(--muted);opacity:.8}

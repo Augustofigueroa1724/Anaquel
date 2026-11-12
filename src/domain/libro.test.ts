@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha,
+  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -69,7 +69,7 @@ describe('repartePorBaldas', () => {
 });
 
 describe('validaDatos', () => {
-  const base = { titulo: 'Dune', autor: 'Frank Herbert', anio: 1965, isbn: '', estado: 'leido' as const };
+  const base = { titulo: 'Dune', autor: 'Frank Herbert', anio: 1965, isbn: '', estado: 'leido' as const, genero: '' };
   it('acepta datos correctos y sin año (0)', () => {
     expect(validaDatos(base)).toBeNull();
     expect(validaDatos({ ...base, anio: 0 })).toBeNull();
@@ -96,5 +96,23 @@ describe('préstamos', () => {
 describe('formateaFecha', () => {
   it('muestra la fecha en español', () => {
     expect(formateaFecha('2026-11-09')).toBe('9 nov 2026');
+  });
+});
+
+describe('géneros', () => {
+  it('agrupa por género, los numerosos primero y «Sin género» al final', () => {
+    const ls = [
+      { ...libro(0), genero: 'Ensayo' }, { ...libro(1), genero: 'Novela' }, { ...libro(2), genero: 'Novela' },
+      { ...libro(3) }, { ...libro(4), genero: '  ' },
+    ];
+    expect(agrupaPorGenero(ls).map((g) => [g.genero, g.libros.length])).toEqual([
+      ['Novela', 2], ['Ensayo', 1], [SIN_GENERO, 2],
+    ]);
+  });
+  it('traduce categorías de Google Books', () => {
+    expect(generoDesdeCategorias(['Fiction / Science Fiction / General'])).toBe('Ciencia ficción');
+    expect(generoDesdeCategorias(['Fiction'])).toBe('Novela');
+    expect(generoDesdeCategorias(['History'])).toBe('Historia');
+    expect(generoDesdeCategorias([])).toBeUndefined();
   });
 });

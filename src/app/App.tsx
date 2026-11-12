@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Escanear } from '../features/escaner/Escanear';
 import { Estanteria } from '../features/estanteria/Estanteria';
 import { Filtros } from '../features/estanteria/Filtros';
+import { GeneroActivo } from '../features/estanteria/GeneroActivo';
 import { Hoja } from '../features/ficha/Hoja';
 import { LibroVuelo } from '../features/libro3d/LibroVuelo';
 import { filtrar } from '../domain/libro';
@@ -36,6 +37,7 @@ export default function App() {
         </header>
 
         {pestana === 'estanteria' && <Filtros />}
+        {pestana === 'estanteria' && <GeneroActivo />}
 
         <main>
           {pestana === 'estanteria' ? (

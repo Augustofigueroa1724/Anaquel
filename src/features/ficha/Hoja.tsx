@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  ESTADOS, ETIQUETA, formateaFecha, hoyIso, validaDatos, validaPrestamo, type DatosLibro, type Estado, type Libro,
+  ESTADOS, ETIQUETA, formateaFecha, GENEROS_BASE, hoyIso, validaDatos, validaPrestamo,
+  type DatosLibro, type Estado, type Libro,
 } from '../../domain/libro';
 
 type Modo = 'ver' | 'editar' | 'borrar' | 'prestar';
@@ -40,6 +41,17 @@ function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
   return <Vista libro={libro} enEstante={enEstante} modo={modo} setModo={setModo} />;
 }
 
+/** Cabecera común: estado y género, título, autor y año en una línea. */
+function Cabecera({ libro }: { libro: Libro }) {
+  return (
+    <>
+      <p className="eti">{ETIQUETA[libro.estado]}{libro.genero ? ` · ${libro.genero}` : ''}</p>
+      <h2>{libro.titulo}</h2>
+      <p className="autor">{[libro.autor, libro.anio || null].filter(Boolean).join(' · ')}</p>
+    </>
+  );
+}
+
 function Vista({
   libro, enEstante, modo, setModo,
 }: {
@@ -59,18 +71,11 @@ function Vista({
 
   return (
     <>
-      <p className="eti">{ETIQUETA[libro.estado]}</p>
-      <h2>{libro.titulo}</h2>
-      <p className="autor">{libro.autor}</p>
-      <div className="fila par">
-        <div><span>Año</span><span>{libro.anio || '—'}</span></div>
-        <div><span>ISBN</span><span className="mono">{libro.isbn || '—'}</span></div>
-      </div>
+      <Cabecera libro={libro} />
       {enEstante && libro.prestamo && modo !== 'prestar' && (
-        <>
-          <div className="fila"><span>Prestado a</span><span>{libro.prestamo.a}</span></div>
-          <div className="fila"><span>Desde</span><span>{formateaFecha(libro.prestamo.desde)}</span></div>
-        </>
+        <p className="prestado">
+          Prestado a <b>{libro.prestamo.a}</b> desde el {formateaFecha(libro.prestamo.desde)}
+        </p>
       )}
       {enEstante && (
         <div className="estados" role="group" aria-label="Estado de lectura">
@@ -81,6 +86,8 @@ function Vista({
           ))}
         </div>
       )}
+
+      {enEstante && modo === 'ver' && <Notas libro={libro} />}
 
       {enEstante && modo === 'borrar' && (
         <div className="confirmar">
@@ -126,7 +133,39 @@ function Vista({
           {!enEstante && busqueda === 'sin-red' && <p className="nota">Sin conexión: el libro se añade sin datos.</p>}
         </>
       )}
+      {libro.isbn && <p className="isbn-pie">ISBN {libro.isbn}</p>}
     </>
+  );
+}
+
+/** Notas del lector: se guardan solas al dejar de escribir. */
+function Notas({ libro }: { libro: Libro }) {
+  const editar = useBiblioteca((s) => s.editarLibro);
+  const [texto, setTexto] = useState(libro.notas ?? '');
+  const ultimoGuardado = useRef(libro.notas ?? '');
+
+  useEffect(() => {
+    if (texto === ultimoGuardado.current) return;
+    const t = setTimeout(() => {
+      ultimoGuardado.current = texto;
+      editar(libro.id, { notas: texto });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [texto, editar, libro.id]);
+
+  return (
+    <label className="campo notas">
+      <span>Tus notas</span>
+      <textarea
+        value={texto}
+        rows={3}
+        placeholder="Qué te pareció, una cita, a quién se lo recomendarías…"
+        onChange={(e) => setTexto(e.target.value)}
+        onBlur={() => {
+          if (texto !== ultimoGuardado.current) { ultimoGuardado.current = texto; editar(libro.id, { notas: texto }); }
+        }}
+      />
+    </label>
   );
 }
 
@@ -161,18 +200,23 @@ function FormularioPrestamo({ libro, onListo }: { libro: Libro; onListo: () => v
 
 function Formulario({ libro, onListo }: { libro: Libro; onListo: () => void }) {
   const editar = useBiblioteca((s) => s.editarLibro);
+  const generosUsados = useBiblioteca((s) => s.libros.map((l) => l.genero).filter((g): g is string => !!g));
+  const sugerencias = [...new Set([...generosUsados, ...GENEROS_BASE])].sort((a, b) => a.localeCompare(b, 'es'));
   const [datos, setDatos] = useState<DatosLibro>({
     titulo: libro.titulo,
     autor: libro.autor,
     anio: libro.anio,
     isbn: libro.isbn,
     estado: libro.estado,
+    genero: libro.genero ?? '',
   });
   const [error, setError] = useState<string | null>(null);
 
   function guardar(e: React.FormEvent) {
     e.preventDefault();
-    const limpio: DatosLibro = { ...datos, titulo: datos.titulo.trim(), autor: datos.autor.trim(), isbn: datos.isbn.trim() };
+    const limpio: DatosLibro = {
+      ...datos, titulo: datos.titulo.trim(), autor: datos.autor.trim(), isbn: datos.isbn.trim(), genero: datos.genero.trim(),
+    };
     const fallo = validaDatos(limpio);
     if (fallo) { setError(fallo); return; }
     editar(libro.id, limpio);
@@ -189,6 +233,11 @@ function Formulario({ libro, onListo }: { libro: Libro; onListo: () => void }) {
       <label className="campo">
         <span>Autor</span>
         <input value={datos.autor} onChange={(e) => setDatos({ ...datos, autor: e.target.value })} autoComplete="off" />
+      </label>
+      <label className="campo">
+        <span>Género</span>
+        <input list="generos" value={datos.genero} onChange={(e) => setDatos({ ...datos, genero: e.target.value })} autoComplete="off" placeholder="Novela, Ensayo…" />
+        <datalist id="generos">{sugerencias.map((g) => <option key={g} value={g} />)}</datalist>
       </label>
       <label className="campo">
         <span>Año</span>

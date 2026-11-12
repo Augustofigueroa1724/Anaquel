@@ -13,6 +13,10 @@ export interface Libro {
   edicion: Edicion;
   /** Préstamo activo: a quién y desde qué día (AAAA-MM-DD). Ausente si el libro está en casa. */
   prestamo?: { a: string; desde: string };
+  /** Género o categoría: cada uno ocupa sus propias baldas. */
+  genero?: string;
+  /** Notas o comentarios del lector. */
+  notas?: string;
 }
 
 export const ESTADOS: readonly Estado[] = ['leido', 'leyendo', 'pendiente'];
@@ -103,6 +107,7 @@ export interface DatosLibro {
   anio: number;
   isbn: string;
   estado: Estado;
+  genero: string;
 }
 
 /** Valida lo que escribe el usuario. Devuelve el mensaje de error o null si está bien. */
@@ -131,4 +136,50 @@ export function formateaFecha(iso: string): string {
   const [a, m, d] = iso.split('-').map(Number);
   if (!a || !m || !d) return iso;
   return new Date(a, m - 1, d).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+export const SIN_GENERO = 'Sin género';
+
+/** Sugerencias al escribir el género (el usuario puede poner cualquiera). */
+export const GENEROS_BASE: readonly string[] = [
+  'Novela', 'Clásicos', 'Ciencia ficción', 'Fantasía', 'Policiaca', 'Terror', 'Ensayo',
+  'Historia', 'Biografía', 'Poesía', 'Cómic', 'Infantil',
+];
+
+export const generoDe = (l: Libro): string => l.genero?.trim() || SIN_GENERO;
+
+/** Agrupa por género: los más numerosos primero, «Sin género» al final. */
+export function agrupaPorGenero(libros: readonly Libro[]): { genero: string; libros: Libro[] }[] {
+  const grupos = new Map<string, Libro[]>();
+  for (const l of libros) {
+    const g = generoDe(l);
+    grupos.set(g, [...(grupos.get(g) ?? []), l]);
+  }
+  return [...grupos.entries()]
+    .map(([genero, ls]) => ({ genero, libros: ls }))
+    .sort((a, b) => {
+      if (a.genero === SIN_GENERO) return 1;
+      if (b.genero === SIN_GENERO) return -1;
+      return b.libros.length - a.libros.length || a.genero.localeCompare(b.genero, 'es');
+    });
+}
+
+/** Traduce las categorías de Google Books (en inglés) a un género de la app. */
+export function generoDesdeCategorias(categorias: readonly string[]): string | undefined {
+  const texto = categorias.join(' / ').toLowerCase();
+  const tabla: [RegExp, string][] = [
+    [/science fiction/, 'Ciencia ficción'],
+    [/fantasy/, 'Fantasía'],
+    [/horror/, 'Terror'],
+    [/mystery|detective|crime|thriller/, 'Policiaca'],
+    [/comics|graphic novel/, 'Cómic'],
+    [/juvenile/, 'Infantil'],
+    [/poetry/, 'Poesía'],
+    [/biography|autobiography/, 'Biografía'],
+    [/history/, 'Historia'],
+    [/philosophy|social science|science|psychology|political|business|economics/, 'Ensayo'],
+    [/classics/, 'Clásicos'],
+    [/fiction/, 'Novela'],
+  ];
+  return tabla.find(([re]) => re.test(texto))?.[1];
 }

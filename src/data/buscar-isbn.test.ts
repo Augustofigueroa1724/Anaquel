@@ -17,6 +17,10 @@ describe('parsers', () => {
   it('Google Books: título, autor y año', () => {
     expect(parseGoogleBooks(googleOk)).toEqual({ titulo: 'Dune', autor: 'Frank Herbert', anio: 1965 });
   });
+  it('Google Books: la categoría se traduce a género', () => {
+    const json = { items: [{ volumeInfo: { title: 'Dune', authors: ['Frank Herbert'], publishedDate: '1965', categories: ['Fiction / Science Fiction'] } }] };
+    expect(parseGoogleBooks(json)?.genero).toBe('Ciencia ficción');
+  });
   it('Google Books: sin items devuelve null', () => {
     expect(parseGoogleBooks({ totalItems: 0 })).toBeNull();
   });
