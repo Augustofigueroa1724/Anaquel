@@ -41,7 +41,7 @@ describe('buscarPorIsbn', () => {
     const r = await buscarPorIsbn('9780441013593', fetchDesde({
       'googleapis.com': { totalItems: 0 },
       'openlibrary.org': { title: 'Dune', publish_date: '1965' },
-    }));
+    }), 8000, async () => null);
     expect(r.estado).toBe('encontrado');
     expect(r.meta?.anio).toBe(1965);
   });
