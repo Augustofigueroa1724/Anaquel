@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO, seccionesPorAutor, apellido, conPestana,
+  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO, seccionesPorAutor, apellido, conPestana, ordenaPorPreferencia,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -145,4 +145,15 @@ it('la letra lleva pestaña solo con más de 2 libros', () => {
   expect(conPestana(sec(2))).toBe(false);
   expect(conPestana(sec(3))).toBe(true);
   expect(conPestana({ tipo: 'autor', etiqueta: 'X', libros: [] })).toBe(true);
+});
+
+describe('orden de las baldas', () => {
+  const g = (genero: string) => ({ genero });
+  it('pone primero los géneros elegidos y deja detrás los nuevos', () => {
+    const r = ordenaPorPreferencia([g('Novela'), g('Clásicos'), g('Poesía'), g('Ensayo')], ['poesía', 'Novela']);
+    expect(r.map((x) => x.genero)).toEqual(['Poesía', 'Novela', 'Clásicos', 'Ensayo']);
+  });
+  it('sin preferencia deja el orden por defecto', () => {
+    expect(ordenaPorPreferencia([g('A'), g('B')], []).map((x) => x.genero)).toEqual(['A', 'B']);
+  });
 });

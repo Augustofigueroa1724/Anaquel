@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { agrupaPorGenero, delAnaquel } from '../../domain/libro';
 import { useBiblioteca } from '../../app/biblioteca';
 import { useCuenta } from '../../app/cuenta';
 import { libroDesdeGoodreads, sinRepetidos } from '../../data/goodreads';
@@ -12,6 +13,18 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
   const aviso = useCuenta((s) => s.avisoSync);
   const libros = useBiblioteca((s) => s.libros);
   const importa = useBiblioteca((s) => s.importa);
+  const ordenGeneros = useBiblioteca((s) => s.ordenGeneros);
+  const setOrdenGeneros = useBiblioteca((s) => s.setOrdenGeneros);
+  const baldas = useMemo(() => agrupaPorGenero(delAnaquel(libros), ordenGeneros).map((g) => ({ genero: g.genero, n: g.libros.length })), [libros, ordenGeneros]);
+
+  // Sube o baja un género una posición y guarda el orden completo de las baldas actuales.
+  function mueve(i: number, paso: -1 | 1) {
+    const orden = baldas.map((b) => b.genero);
+    const j = i + paso;
+    if (j < 0 || j >= orden.length) return;
+    [orden[i], orden[j]] = [orden[j], orden[i]];
+    setOrdenGeneros(orden);
+  }
   const [confirmaBorrar, setConfirmaBorrar] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
@@ -69,6 +82,28 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
           </>
         )}
       </div>
+
+      {baldas.length > 1 && (
+        <div className="bloque" id="orden-baldas">
+          <p className="eti">Orden de las baldas</p>
+          <ol className="orden-baldas">
+            {baldas.map((b, i) => (
+              <li key={b.genero}>
+                <span className="nombre">{b.genero}</span><span className="n">{b.n}</span>
+                <button type="button" className="flecha" onClick={() => mueve(i, -1)} disabled={i === 0} aria-label={`Subir ${b.genero}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
+                </button>
+                <button type="button" className="flecha" onClick={() => mueve(i, 1)} disabled={i === baldas.length - 1} aria-label={`Bajar ${b.genero}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+              </li>
+            ))}
+          </ol>
+          {ordenGeneros.length > 0 && (
+            <button type="button" className="enlace" onClick={() => setOrdenGeneros([])}>Volver al orden automático (por número de libros)</button>
+          )}
+        </div>
+      )}
 
       <div className="bloque">
         <p className="eti">Importar</p>

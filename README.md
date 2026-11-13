@@ -45,6 +45,7 @@ npm run build
 | Nov 2026 | Catálogo común de géneros con «+ Nuevo», como los tipos de sitio de Fifth Square | Lista cerrada pero ampliable, sin duplicados |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
+| 13 nov 2026 | Orden de las baldas personalizable en ajustes (subir y bajar cada género) | Cada uno quiere ver primero lo que más lee; preferencia del dispositivo |
 | 13 nov 2026 | Mueble nórdico rediseñado en Claude Design: «Lamas» (aluminio de 3 px, lamas de roble, pared de yeso, Dymo en Courier) | El primer nórdico parecía genérico; referencia en `docs/mocks/nordico-lamas.html` |
 | 13 nov 2026 | Baldas más altas (236 px) con lomos de 124 a 164 px en los dos muebles | Con los lomos bajos se cortaban los títulos; las pestañas siguen cabiendo encima |
 | 13 nov 2026 | Mueble nórdico alternativo con botón en la cabecera (roble claro, montantes negros, etiquetas Dymo en relieve, pared de listones de roble) | Una opción moderna y escandinava sin tocar el diseño «Nogal y latón», que sigue por defecto |

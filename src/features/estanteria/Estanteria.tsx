@@ -101,6 +101,7 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
   const propios = useBiblioteca((s) => s.libros);
   const filtro = useBiblioteca((s) => s.filtro);
   const filtroGenero = useBiblioteca((s) => s.filtroGenero);
+  const ordenGeneros = useBiblioteca((s) => s.ordenGeneros);
   const soloLectura = ajenos !== undefined;
   const libros = useMemo(() => delAnaquel(ajenos ?? propios), [ajenos, propios]);
   const lista = useMemo(
@@ -112,8 +113,8 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
 
   // Una balda por género, en carrusel horizontal; la placa lleva el nombre y cuántos hay.
   const baldas = useMemo(
-    () => agrupaPorGenero(lista).map(({ genero, libros: delGenero }) => ({ libros: delGenero, etiqueta: genero, clave: genero })),
-    [lista],
+    () => agrupaPorGenero(lista, soloLectura ? [] : ordenGeneros).map(({ genero, libros: delGenero }) => ({ libros: delGenero, etiqueta: genero, clave: genero })),
+    [lista, ordenGeneros, soloLectura],
   );
 
   return (

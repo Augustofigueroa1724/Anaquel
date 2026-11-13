@@ -95,7 +95,21 @@ async function run() {
     }
     await page.locator('.rueda').click();
     await page.waitForSelector('.panel');
+    // Orden de las baldas: bajar la primera la cambia de sitio en la estantería.
+    if (await page.locator('#orden-baldas').count() === 0) {
+      await page.locator('.panel .cerrar').click();
+      await page.evaluate(() => { localStorage.removeItem('anaquel.libros.v1'); });
+      await page.reload();
+      await page.locator('.rueda').click();
+      await page.waitForSelector('#orden-baldas');
+    }
+    const primeraAntes = await page.locator('#orden-baldas .nombre').first().innerText();
+    await page.locator('#orden-baldas .flecha').nth(1).click();
+    const segunda = await page.locator('#orden-baldas .nombre').nth(1).innerText();
+    if (segunda !== primeraAntes) errores.push('bajar una balda en ajustes no la mueve');
     await page.locator('.panel .cerrar').click();
+    const placa = (await page.locator('.balda .placa').nth(1).innerText()).toLowerCase();
+    if (!placa.startsWith(primeraAntes.toLowerCase())) errores.push('la estantería no sigue el orden de las baldas: ' + placa);
 
     await navegador.close();
   } finally {

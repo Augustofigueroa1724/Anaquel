@@ -14,6 +14,9 @@ interface Biblioteca {
   libros: Libro[];
   filtro: Filtro;
   filtroGenero: string | null;
+  /** Orden de las baldas elegido en ajustes (preferencia del dispositivo). */
+  ordenGeneros: string[];
+  setOrdenGeneros(orden: string[]): void;
   abierto: number | null;
   candidato: Libro | null;
   busqueda: Busqueda | null;
@@ -35,6 +38,11 @@ interface Biblioteca {
   devolver(id: number): void;
 }
 
+const CLAVE_ORDEN = 'anaquel.orden-generos.v1';
+function leeOrden(): string[] {
+  try { const o: unknown = JSON.parse(localStorage.getItem(CLAVE_ORDEN) || '[]'); return Array.isArray(o) ? o.filter((g): g is string => typeof g === 'string') : []; } catch { return []; }
+}
+
 const guardados = repositorioLocal.cargar();
 // Los libros guardados antes de existir el género lo toman de los ejemplos si coinciden.
 const inicial = guardados && guardados.length > 0
@@ -45,12 +53,17 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
   libros: inicial,
   filtro: 'todos',
   filtroGenero: null,
+  ordenGeneros: leeOrden(),
   abierto: null,
   candidato: null,
   busqueda: null,
 
   setFiltro: (filtro) => set({ filtro }),
   setFiltroGenero: (filtroGenero) => set({ filtroGenero }),
+  setOrdenGeneros: (ordenGeneros) => {
+    try { localStorage.setItem(CLAVE_ORDEN, JSON.stringify(ordenGeneros)); } catch { /* sin almacenamiento: dura la sesión */ }
+    set({ ordenGeneros });
+  },
   abrir: (id) => set({ abierto: id, candidato: null }),
   cerrar: () => set({ abierto: null, candidato: null, busqueda: null }),
 

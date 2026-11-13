@@ -163,19 +163,31 @@ export const GENEROS_BASE: readonly string[] = [
 export const generoDe = (l: Libro): string => l.genero?.trim() || SIN_GENERO;
 
 /** Agrupa por género: los más numerosos primero, «Sin género» al final. */
-export function agrupaPorGenero(libros: readonly Libro[]): { genero: string; libros: Libro[] }[] {
+export function agrupaPorGenero(libros: readonly Libro[], orden: readonly string[] = []): { genero: string; libros: Libro[] }[] {
   const grupos = new Map<string, Libro[]>();
   for (const l of libros) {
     const g = generoDe(l);
     grupos.set(g, [...(grupos.get(g) ?? []), l]);
   }
-  return [...grupos.entries()]
+  const base = [...grupos.entries()]
     .map(([genero, ls]) => ({ genero, libros: ls }))
     .sort((a, b) => {
       if (a.genero === SIN_GENERO) return 1;
       if (b.genero === SIN_GENERO) return -1;
       return b.libros.length - a.libros.length || a.genero.localeCompare(b.genero, 'es');
     });
+  return ordenaPorPreferencia(base, orden);
+}
+
+/**
+ * Orden de las baldas elegido por el usuario: los géneros de `orden` van primero y en ese orden;
+ * los demás (géneros nuevos que aún no ha colocado) siguen detrás con el orden por defecto.
+ */
+export function ordenaPorPreferencia<T extends { genero: string }>(grupos: readonly T[], orden: readonly string[]): T[] {
+  const pos = new Map(orden.map((g, i) => [g.toLowerCase(), i]));
+  const fijos = grupos.filter((g) => pos.has(g.genero.toLowerCase()))
+    .sort((a, b) => pos.get(a.genero.toLowerCase())! - pos.get(b.genero.toLowerCase())!);
+  return [...fijos, ...grupos.filter((g) => !pos.has(g.genero.toLowerCase()))];
 }
 
 /** Traduce las categorías de Google Books (en inglés) a un género de la app. */
