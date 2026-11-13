@@ -5,18 +5,24 @@
   --bg:#eceeed; --fg:#141414; --muted:#5b6164; --card:#ffffff; --line:#d5d9da;
   --accent:#141414; --papel:none;
   --roble:#d9bf96; --roble-claro:#ead6b4; --roble-canto:#c3a476; --fondo-balda:#f7f6f3; --montante:#1b1b1b;
+  --liston:#dcc6a2; --liston-sombra:#d0b892; --junta:#b39a74;
 }
 @media (prefers-color-scheme: dark){
   :root[data-estilo="nordico"]:not([data-theme="light"]){
     --bg:#141516; --fg:#f1f1ef; --muted:#9a9ea1; --card:#1f2022; --line:#2e3033; --accent:#f1f1ef;
     --roble:#a8875d; --roble-claro:#c09f72; --roble-canto:#866a45; --fondo-balda:#1c1d1f; --montante:#d9dadb;
+    --liston:#4d3d2b; --liston-sombra:#463727; --junta:#2f2519;
   }
 }
 :root[data-estilo="nordico"][data-theme="dark"]{
   --bg:#141516; --fg:#f1f1ef; --muted:#9a9ea1; --card:#1f2022; --line:#2e3033; --accent:#f1f1ef;
   --roble:#a8875d; --roble-claro:#c09f72; --roble-canto:#866a45; --fondo-balda:#1c1d1f; --montante:#d9dadb;
+    --liston:#4d3d2b; --liston-sombra:#463727; --junta:#2f2519;
 }
 :root[data-estilo="nordico"] body{background:var(--bg)}
+/* Pared de listones de roble (panel acústico), con juntas suaves */
+:root[data-estilo="nordico"] body{background:
+  repeating-linear-gradient(90deg,var(--liston) 0 13px,var(--liston-sombra) 13px 15px,var(--junta) 15px 17px),var(--bg)}
 
 /* Cabecera y cifras sin serifa */
 :root[data-estilo="nordico"] .marca{font:800 38px/1 var(--sans);letter-spacing:-.04em}
