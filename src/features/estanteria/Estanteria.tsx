@@ -1,7 +1,7 @@
 import { Fragment, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 
 /** Interior del lomo según la edición (clásico, moderno o condensado). */
@@ -76,9 +76,11 @@ function Balda({ libros, etiqueta, onAbrir, soloLectura }: {
       <div className="riel" ref={riel}>
         {secciones.map((sec) => (
           <Fragment key={`${sec.tipo}:${sec.etiqueta}`}>
-            <span className={`separador ${sec.tipo}`} aria-hidden="true">
-              <span className="pestana"><span>{sec.etiqueta}</span></span>
-            </span>
+            {conPestana(sec) && (
+              <span className={`separador ${sec.tipo}`} aria-hidden="true">
+                <span className="pestana"><span>{sec.etiqueta}</span></span>
+              </span>
+            )}
             {sec.libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} />)}
           </Fragment>
         ))}

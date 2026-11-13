@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO, seccionesPorAutor, apellido,
+  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO, seccionesPorAutor, apellido, conPestana,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -138,4 +138,11 @@ it('apellido', () => {
   expect(apellido('Miguel de Cervantes')).toBe('Cervantes');
   expect(apellido('J. R. R. Tolkien')).toBe('Tolkien');
   expect(apellido('Mario Vargas Llosa')).toBe('Vargas');
+});
+
+it('la letra lleva pestaña solo con más de 2 libros', () => {
+  const sec = (n: number) => ({ tipo: 'letra' as const, etiqueta: 'A', libros: Array(n).fill(null) as Libro[] });
+  expect(conPestana(sec(2))).toBe(false);
+  expect(conPestana(sec(3))).toBe(true);
+  expect(conPestana({ tipo: 'autor', etiqueta: 'X', libros: [] })).toBe(true);
 });

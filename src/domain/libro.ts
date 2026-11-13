@@ -223,6 +223,9 @@ function nombrePestana(autor: string): string {
 
 export type Seccion = { tipo: 'autor' | 'letra'; etiqueta: string; libros: Libro[] };
 
+/** La pestaña del autor sale siempre; la de la letra, solo si agrupa más de 2 libros. */
+export const conPestana = (s: Seccion): boolean => s.tipo === 'autor' || s.libros.length > 2;
+
 /**
  * Separadores dentro de una balda: un autor con más de un libro tiene su pestaña con el nombre;
  * los autores con un solo libro se juntan bajo la letra de su apellido. Todo en orden alfabético
