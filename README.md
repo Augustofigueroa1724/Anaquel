@@ -45,6 +45,7 @@ npm run build
 | Nov 2026 | Catálogo común de géneros con «+ Nuevo», como los tipos de sitio de Fifth Square | Lista cerrada pero ampliable, sin duplicados |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
+| 13 nov 2026 | El autor se busca en todas las fuentes (Open Library con nombres de autor) y clave opcional de Google Books | Casi todo lo escaneado salía con «Autor desconocido»: Google Books sin clave da 429 por cupo compartido |
 | 13 nov 2026 | Modo claro u oscuro elegible en ajustes (o automático, como el móvil) | Poder usar el oscuro aunque el sistema esté en claro; la barra de estado del iPhone sigue al tema |
 | 13 nov 2026 | Tercera fuente para el ISBN: catálogo de la BnF (primero para ISBN franceses), por petición nativa en la app | Novedades francesas como «Le pays des étés» (Gallimard, agosto de 2026) no estaban en Google Books ni en Open Library |
 | 13 nov 2026 | Orden de las baldas personalizable en ajustes (subir y bajar cada género) | Cada uno quiere ver primero lo que más lee; preferencia del dispositivo |

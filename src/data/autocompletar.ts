@@ -2,6 +2,7 @@
  * Autocompletar del alta a mano: busca por título, por autor o por los dos en Google Books
  * (primero en español) y, si no hay nada, en Open Library. Solo se manda lo que se escribe.
  */
+import { conClaveBooks } from '../config';
 import { generoDesdeCategorias } from '../domain/libro';
 
 export interface Candidato {
@@ -112,7 +113,7 @@ export async function sugiereLibros(titulo: string, autor: string, senal?: Abort
   if (cache.has(q)) return cache.get(q)!;
   const campos = '&printType=books&maxResults=20&fields=items(volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,categories,imageLinks,language))';
   const libre = [limpia(titulo), limpia(autor)].filter(Boolean).join(' ');
-  const google = (consulta: string) => pide(`https://www.googleapis.com/books/v1/volumes?q=${consulta}${campos}`, fetchFn, senal)
+  const google = (consulta: string) => pide(conClaveBooks(`https://www.googleapis.com/books/v1/volumes?q=${consulta}${campos}`), fetchFn, senal)
     .then(parseGoogleCandidatos, () => [] as Candidato[]);
   const ol = new URLSearchParams({ q: libre, limit: '12', fields: 'title,author_name,first_publish_year,isbn,cover_i' });
   const [porCampos, enLibre, openLibrary] = await Promise.all([

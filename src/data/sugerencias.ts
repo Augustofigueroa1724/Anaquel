@@ -1,3 +1,4 @@
+import { conClaveBooks } from '../config';
 import { generoDesdeCategorias, type Libro } from '../domain/libro';
 import { IMPRESCINDIBLES } from './imprescindibles';
 
@@ -122,7 +123,7 @@ export async function paraTi(libros: readonly Libro[], fetchFn: typeof fetch = f
   const guardado = deCache(clave);
   if (guardado) return guardado;
   const resultados = await Promise.all(consultas.map((q) =>
-    json(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&langRestrict=es&printType=books&maxResults=10`, fetchFn)
+    json(conClaveBooks(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&langRestrict=es&printType=books&maxResults=10`), fetchFn)
       .then(parseGoogle).catch(() => [] as Sugerencia[])));
   // Intercala los resultados de cada consulta para que se mezclen autores y géneros.
   const mezcla: Sugerencia[] = [];

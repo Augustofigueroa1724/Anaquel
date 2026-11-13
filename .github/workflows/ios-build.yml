@@ -27,6 +27,10 @@ on:
         type: boolean
         default: false
 
+env:
+  # Clave de Google Books (opcional, ver src/config.ts)
+  VITE_GOOGLE_BOOKS_KEY: ${{ secrets.GOOGLE_BOOKS_KEY }}
+
 jobs:
   registra:
     if: ${{ inputs.testflight || inputs.solo_claves }}

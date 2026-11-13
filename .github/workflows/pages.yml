@@ -17,6 +17,10 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  # Clave de Google Books (opcional, ver src/config.ts)
+  VITE_GOOGLE_BOOKS_KEY: ${{ secrets.GOOGLE_BOOKS_KEY }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

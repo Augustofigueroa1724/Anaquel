@@ -1,4 +1,5 @@
 /** Metadatos de un libro encontrados por ISBN. */
+import { conClaveBooks } from '../config';
 import { generoDesdeCategorias } from '../domain/libro';
 import { pideTexto } from '../platform/http';
 
@@ -24,18 +25,27 @@ export function parseGoogleBooks(json: unknown): MetaLibro | null {
   const genero = generoDesdeCategorias(categorias);
   return {
     titulo: info.title,
-    autor: autores.join(', ') || 'Autor desconocido',
+    autor: autores.join(', ') || AUTOR_DESCONOCIDO,
     anio: Number.isFinite(anio) ? anio : 0,
     ...(genero ? { genero } : {}),
   };
 }
 
-/** Open Library: respaldo. Sin autor en este paso (exigiría una segunda consulta). */
+export const AUTOR_DESCONOCIDO = 'Autor desconocido';
+const conAutor = (m: MetaLibro | null): m is MetaLibro => !!m && m.autor !== AUTOR_DESCONOCIDO;
+
+/**
+ * Open Library. Admite la API de libros con datos (`/api/books?jscmd=data`, que trae los nombres de
+ * los autores en la misma respuesta) y, por compatibilidad, la ficha simple `/isbn/X.json` (sin autor).
+ */
 export function parseOpenLibrary(json: unknown): MetaLibro | null {
-  const libro = json as { title?: unknown; publish_date?: unknown };
+  const raiz = json as Record<string, unknown> | null;
+  const clave = raiz && Object.keys(raiz).find((k) => k.startsWith('ISBN:'));
+  const libro = (clave ? raiz![clave] : raiz) as { title?: unknown; publish_date?: unknown; authors?: { name?: unknown }[] } | null;
   if (typeof libro?.title !== 'string') return null;
   const anio = Number.parseInt(String(libro.publish_date ?? '').match(/\d{4}/)?.[0] ?? '', 10);
-  return { titulo: libro.title, autor: 'Autor desconocido', anio: Number.isFinite(anio) ? anio : 0 };
+  const autores = Array.isArray(libro.authors) ? libro.authors.map((a) => a?.name).filter((n): n is string => typeof n === 'string') : [];
+  return { titulo: libro.title, autor: autores.join(', ') || AUTOR_DESCONOCIDO, anio: Number.isFinite(anio) ? anio : 0 };
 }
 
 const ENTIDADES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
@@ -59,7 +69,7 @@ export function parseBnf(xml: string): MetaLibro | null {
     return nom ? `${nom} ${ap}` : ap;
   }).filter(Boolean);
   const anio = Number.parseInt(campo('date')[0]?.match(/\d{4}/)?.[0] ?? '', 10);
-  return { titulo, autor: autores.join(', ') || 'Autor desconocido', anio: Number.isFinite(anio) ? anio : 0 };
+  return { titulo, autor: autores.join(', ') || AUTOR_DESCONOCIDO, anio: Number.isFinite(anio) ? anio : 0 };
 }
 
 const urlBnf = (isbn: string) =>
@@ -88,35 +98,31 @@ export async function buscarPorIsbn(
   textoFn: (url: string, ms: number) => Promise<string | null> = pideTexto,
 ): Promise<{ estado: Busqueda; meta?: MetaLibro }> {
   let sinRed = false;
-  try {
-    const meta = parseGoogleBooks(await pideJson(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`, fetchFn, tiempoMs));
-    if (meta) return { estado: 'encontrado', meta };
-  } catch {
-    sinRed = true;
-  }
-  const bnf = async (): Promise<MetaLibro | null> => {
+  let sinAutor = null as MetaLibro | null;
+  const google = async () => {
+    try {
+      return parseGoogleBooks(await pideJson(conClaveBooks(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`), fetchFn, tiempoMs));
+    } catch { sinRed = true; return null; }
+  };
+  const openLibrary = async () => {
+    try {
+      return parseOpenLibrary(await pideJson(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`, fetchFn, tiempoMs));
+    } catch { sinRed = true; return null; }
+  };
+  const bnf = async () => {
     try {
       const xml = await textoFn(urlBnf(isbn), tiempoMs);
       return xml ? parseBnf(xml) : null;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   };
-  // Los ISBN franceses (978-2, 979-1) van antes a la BnF: Open Library no da el autor en este paso.
-  const frances = /^97(82|91)/.test(isbn);
-  if (frances) {
-    const meta = await bnf();
-    if (meta) return { estado: 'encontrado', meta };
+  // Los ISBN franceses (978-2, 979-1) van antes a la BnF. Se para en la primera fuente que da autor;
+  // si ninguna lo da, se queda el primer título encontrado (y el autor se puede escribir en la ficha).
+  const fuentes = /^97(82|91)/.test(isbn) ? [google, bnf, openLibrary] : [google, openLibrary, bnf];
+  for (const fuente of fuentes) {
+    const meta = await fuente();
+    if (conAutor(meta)) return { estado: 'encontrado', meta: sinAutor ? { ...meta, titulo: sinAutor.titulo, ...(sinAutor.genero ? { genero: sinAutor.genero } : {}) } : meta };
+    if (meta && !sinAutor) sinAutor = meta;
   }
-  try {
-    const meta = parseOpenLibrary(await pideJson(`https://openlibrary.org/isbn/${isbn}.json`, fetchFn, tiempoMs));
-    if (meta) return { estado: 'encontrado', meta };
-  } catch {
-    sinRed = true;
-  }
-  if (!frances) {
-    const meta = await bnf();
-    if (meta) return { estado: 'encontrado', meta };
-  }
+  if (sinAutor) return { estado: 'encontrado', meta: sinAutor };
   return { estado: sinRed ? 'sin-red' : 'no-encontrado' };
 }

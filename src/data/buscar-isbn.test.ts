@@ -82,3 +82,24 @@ describe('BnF', () => {
     expect(r).toEqual({ estado: 'encontrado', meta: { titulo: 'Le pays des étés', autor: 'Pierre Adrian', anio: 2026 } });
   });
 });
+
+describe('autor', () => {
+  it('Open Library con datos trae el autor', () => {
+    expect(parseOpenLibrary({ 'ISBN:9788433920423': { title: 'Los detectives salvajes', authors: [{ name: 'Roberto Bolaño' }], publish_date: '1998' } }))
+      .toEqual({ titulo: 'Los detectives salvajes', autor: 'Roberto Bolaño', anio: 1998 });
+  });
+  it('si Google no trae autor, lo busca en las otras fuentes', async () => {
+    const f = (async (url: string) => ({ ok: true, json: async () => (String(url).includes('googleapis')
+      ? { items: [{ volumeInfo: { title: 'Los detectives salvajes', publishedDate: '1998' } }] }
+      : { 'ISBN:9788433920423': { title: 'Los detectives salvajes', authors: [{ name: 'Roberto Bolaño' }], publish_date: '2010' } }) })) as unknown as typeof fetch;
+    const r = await buscarPorIsbn('9788433920423', f, 8000, async () => null);
+    expect(r.meta?.autor).toBe('Roberto Bolaño');
+    expect(r.meta?.titulo).toBe('Los detectives salvajes');
+  });
+  it('si nadie trae autor, se queda el título', async () => {
+    const f = (async (url: string) => ({ ok: true, json: async () => (String(url).includes('googleapis')
+      ? { items: [{ volumeInfo: { title: 'Sin autor' } }] } : {}) })) as unknown as typeof fetch;
+    const r = await buscarPorIsbn('9788400000000', f, 8000, async () => null);
+    expect(r).toMatchObject({ estado: 'encontrado', meta: { titulo: 'Sin autor', autor: 'Autor desconocido' } });
+  });
+});
