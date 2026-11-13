@@ -9,8 +9,9 @@ import '@fontsource/ibm-plex-mono/index.css';
 import './styles/anaquel.css';
 import './styles/formulario.css';
 import './styles/nordico.css';
-import { aplicaEstilo, leeEstilo } from './app/estilo';
+import { aplicaEstilo, aplicaTema, leeEstilo, leeTema } from './app/estilo';
 aplicaEstilo(leeEstilo());
+aplicaTema(leeTema());
 import App from './app/App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

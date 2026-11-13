@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { aplicaTema, leeTema, type Tema } from '../../app/estilo';
 import { agrupaPorGenero, delAnaquel } from '../../domain/libro';
 import { useBiblioteca } from '../../app/biblioteca';
 import { useCuenta } from '../../app/cuenta';
@@ -27,6 +28,8 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
   }
   const [confirmaBorrar, setConfirmaBorrar] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [tema, setTema] = useState<Tema>(leeTema);
+  const eligeTema = (t: Tema) => { setTema(t); aplicaTema(t); };
 
   async function alElegirCsv(e: React.ChangeEvent<HTMLInputElement>) {
     const fichero = e.target.files?.[0];
@@ -81,6 +84,16 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
             <BotonesLogin />
           </>
         )}
+      </div>
+
+      <div className="bloque" id="apariencia">
+        <p className="eti">Apariencia</p>
+        <div className="estados" role="group" aria-label="Modo claro u oscuro">
+          {([['auto', 'Automático'], ['claro', 'Claro'], ['oscuro', 'Oscuro']] as const).map(([t, nombre]) => (
+            <button key={t} type="button" className="chip" data-tema={t} aria-pressed={tema === t} onClick={() => eligeTema(t)}>{nombre}</button>
+          ))}
+        </div>
+        <p className="nota-suave">Automático sigue el modo del móvil.</p>
       </div>
 
       {baldas.length > 1 && (

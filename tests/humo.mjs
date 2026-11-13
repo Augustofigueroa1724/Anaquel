@@ -95,6 +95,11 @@ async function run() {
     }
     await page.locator('.rueda').click();
     await page.waitForSelector('.panel');
+    // Apariencia: forzar oscuro y volver a automático.
+    await page.locator('#apariencia [data-tema="oscuro"]').click();
+    if (await page.evaluate(() => document.documentElement.dataset.theme) !== 'dark') errores.push('el modo oscuro no se aplica');
+    await page.locator('#apariencia [data-tema="auto"]').click();
+    if (await page.evaluate(() => document.documentElement.dataset.theme)) errores.push('el modo automático no quita el tema forzado');
     // Orden de las baldas: bajar la primera la cambia de sitio en la estantería.
     if (await page.locator('#orden-baldas').count() === 0) {
       await page.locator('.panel .cerrar').click();
