@@ -33,7 +33,7 @@ describe('parsers', () => {
 
 describe('buscarPorIsbn', () => {
   it('usa Google Books si tiene el libro', async () => {
-    const r = await buscarPorIsbn('9780441013593', fetchDesde({ 'googleapis.com': googleOk }));
+    const r = await buscarPorIsbn('9780441013593', fetchDesde({ 'googleapis.com': googleOk }), 8000, async () => null);
     expect(r.estado).toBe('encontrado');
     expect(r.meta?.titulo).toBe('Dune');
   });
