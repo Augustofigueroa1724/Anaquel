@@ -88,8 +88,8 @@ export function contar(libros: readonly Libro[]): Record<Filtro, number> {
 }
 
 export const anchoLomo = (id: number): number => 26 + ((id * 7) % 4) * 3;
-/** Alto del lomo: entre 92 y 122 px (más bajos que el prototipo para dejar sitio arriba a las pestañas de los separadores). */
-export const altoLomo = (id: number): number => 92 + (id % 5) * 7.5;
+/** Alto del lomo: entre 124 y 164 px, como el prototipo; la balda es más alta (236 px) para que las pestañas de los separadores quepan encima. */
+export const altoLomo = (id: number): number => 124 + (id % 5) * 10;
 
 /** Llena las baldas por ancho: un lomo nuevo pasa a la balda siguiente si no cabe. */
 export function repartePorBaldas(libros: readonly Libro[], util: number, separacion = 2): Libro[][] {
