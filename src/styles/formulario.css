@@ -145,3 +145,12 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .estados.dos{grid-template-columns:repeat(2,minmax(0,1fr))}
 .panel .botones{display:flex;gap:10px;margin-top:12px}
 .panel .botones .btn{flex:1}
+
+/* Pestaña Añadir: dos tarjetas para elegir cómo */
+.puerta{position:absolute;inset:0;overflow-y:auto;padding:8px max(16px,env(safe-area-inset-right,0px)) 120px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.tarjeta-opcion{display:flex;align-items:center;gap:16px;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:20px;padding:22px 18px;cursor:pointer;min-height:110px;box-shadow:0 10px 24px -18px rgba(0,0,0,.45)}
+.tarjeta-opcion svg{flex:none;width:38px;height:38px;color:var(--accent)}
+.tarjeta-opcion span{display:flex;flex-direction:column;gap:4px}
+.tarjeta-opcion b{font:500 24px/1.1 var(--display)}
+.tarjeta-opcion small{font-size:14px;color:var(--muted);line-height:1.35}
+.volver-visor{position:absolute;top:12px;left:max(12px,env(safe-area-inset-left,0px));z-index:3;border:0;background:rgba(0,0,0,.35);color:#f2f0ec;border-radius:999px;padding:0 14px;min-height:40px;font:600 14px var(--sans);cursor:pointer}

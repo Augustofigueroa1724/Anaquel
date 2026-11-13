@@ -61,6 +61,7 @@ async function run() {
 
     const antes = await page.locator('#cuenta').innerText();
     await page.locator('#tab-escanear').click();
+    await page.locator('#opcion-codigo').click();
     if (await page.locator('.acciones button', { hasText: /^Escanear$/ }).count() > 0) {
       errores.push('en la web no debe aparecer el botón de escaneo nativo');
     }

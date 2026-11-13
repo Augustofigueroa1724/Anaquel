@@ -18,10 +18,10 @@ type Pestana = 'estanteria' | 'deseos' | 'escanear' | 'amigos';
 const ICONOS: Record<Pestana, string> = {
   estanteria: 'M3 20h18M5 20V6h3v14M8 20V4h3v16M13.5 20l-1.8-13.2 2.9-.4L16.4 19.6M17 20V9h3v11',
   deseos: 'M7 3.5h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5a1 1 0 0 1 1-1z',
-  escanear: 'M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M8 8v8M11 8v8M13.5 8v8M16 8v8',
+  escanear: 'M12 5v14M5 12h14',
   amigos: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.6-3.3 3.3-5.5 6.5-5.5s5.9 2.2 6.5 5.5M16 4.3a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.3 2.6 3.6 5.2',
 };
-const NOMBRES: Record<Pestana, string> = { estanteria: 'Anaquel', deseos: 'Lo quiero', escanear: 'Escanear', amigos: 'Amigos' };
+const NOMBRES: Record<Pestana, string> = { estanteria: 'Anaquel', deseos: 'Lo quiero', escanear: 'Añadir', amigos: 'Amigos' };
 
 export default function App() {
   const [pestana, setPestana] = useState<Pestana>('estanteria');
