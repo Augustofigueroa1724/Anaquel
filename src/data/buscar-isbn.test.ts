@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buscarPorIsbn, parseGoogleBooks, parseOpenLibrary } from './buscar-isbn';
+import { buscarPorIsbn, parseGoogleBooks, parseOpenLibrary, parseBnf } from './buscar-isbn';
 
 const googleOk = {
   items: [{ volumeInfo: { title: 'Dune', authors: ['Frank Herbert'], publishedDate: '1965-08-01' } }],
@@ -46,19 +46,39 @@ describe('buscarPorIsbn', () => {
     expect(r.meta?.anio).toBe(1965);
   });
   it('no-encontrado si ninguno lo tiene', async () => {
-    const r = await buscarPorIsbn('9780000000002', fetchDesde({}));
+    const r = await buscarPorIsbn('9780000000002', fetchDesde({}), 8000, async () => null);
     expect(r.estado).toBe('no-encontrado');
   });
   it('sin-red si la petición falla', async () => {
     const roto = (async () => { throw new TypeError('Failed to fetch'); }) as typeof fetch;
-    const r = await buscarPorIsbn('9780441013593', roto);
+    const r = await buscarPorIsbn('9780441013593', roto, 8000, async () => { throw new Error('sin red'); });
     expect(r.estado).toBe('sin-red');
   });
   it('corta si la red no responde (no se queda cargando)', async () => {
     const colgado = ((_url: string, init?: RequestInit) => new Promise((_, rechaza) => {
       init?.signal?.addEventListener('abort', () => rechaza(new DOMException('abort', 'AbortError')));
     })) as typeof fetch;
-    const r = await buscarPorIsbn('9780441013593', colgado, 20);
+    const r = await buscarPorIsbn('9780441013593', colgado, 20, async () => null);
     expect(r.estado).toBe('sin-red');
+  });
+});
+
+describe('BnF', () => {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><srw:searchRetrieveResponse><srw:numberOfRecords>1</srw:numberOfRecords><srw:records><srw:record><srw:recordData>
+<oai_dc:dc><dc:identifier>http://catalogue.bnf.fr/ark:/12148/cb47000000x</dc:identifier>
+<dc:title>Le pays des &#233;t&#233;s / Pierre Adrian</dc:title>
+<dc:creator>Adrian, Pierre (1991-....). Auteur du texte</dc:creator>
+<dc:publisher>[Paris] : Gallimard</dc:publisher><dc:date>2026</dc:date><dc:language>fre</dc:language>
+<dc:identifier>ISBN 978-2-07-314092-0</dc:identifier></oai_dc:dc></srw:recordData></srw:record></srw:records></srw:searchRetrieveResponse>`;
+  it('lee título, autor y año del Dublin Core', () => {
+    expect(parseBnf(xml)).toEqual({ titulo: 'Le pays des étés', autor: 'Pierre Adrian', anio: 2026 });
+  });
+  it('sin registros no devuelve nada', () => {
+    expect(parseBnf('<srw:numberOfRecords>0</srw:numberOfRecords>')).toBeNull();
+  });
+  it('un ISBN francés que Google no tiene sale de la BnF', async () => {
+    const vacio = (async () => ({ ok: true, json: async () => ({ totalItems: 0 }) })) as unknown as typeof fetch;
+    const r = await buscarPorIsbn('9782073140920', vacio, 8000, async (url) => (url.includes('catalogue.bnf.fr') ? xml : null));
+    expect(r).toEqual({ estado: 'encontrado', meta: { titulo: 'Le pays des étés', autor: 'Pierre Adrian', anio: 2026 } });
   });
 });
