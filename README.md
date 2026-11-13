@@ -40,7 +40,9 @@ npm run build
 | Nov 2026 | Cuentas en el Supabase de Crate Mates (tablas aq_*), login con Apple y Google | Sin coste nuevo; borrar cuenta respeta a quien también usa Crate Mates |
 | Nov 2026 | Lista de deseos, valoración, importar de Goodreads y amigos | Las funciones de más valor vistas en Goodreads |
 | Nov 2026 | Los libros de ejemplo se ven solo hasta añadir el primero propio, y nunca se guardan en la cuenta | El anaquel no se ve vacío al empezar, sin mezclar ejemplos con libros reales |
-| Nov 2026 | Sugerencias con Google Books (para ti) y Open Library (tendencias) | Sin proveedores ni claves nuevas; no hay API gratuita de los más vendidos en España |
+| Nov 2026 | Sugerencias: selección propia de literatura reconocida y otros libros de tus autores favoritos, sin autoayuda | Las tendencias de Open Library traían autoayuda y títulos en inglés |
+| Nov 2026 | Una balda por género en carrusel, sin límite de libros | Antes un género con muchos libros ocupaba varias baldas |
+| Nov 2026 | Catálogo común de géneros con «+ Nuevo», como los tipos de sitio de Fifth Square | Lista cerrada pero ampliable, sin duplicados |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
 

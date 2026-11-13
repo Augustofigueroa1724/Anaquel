@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import { COLORES_TELA } from '../../domain/libro';
-import { filtraConocidos, paraTi, tendencias, type Sugerencia } from '../../data/sugerencias';
+import { filtraConocidos, imprescindibles, paraTi, type Sugerencia } from '../../data/sugerencias';
 
-/** Filas de sugerencias: «Para ti» (tus gustos) y «Lo más leído esta semana». */
+/** Filas de sugerencias: «De tus autores» (Google Books) e «Imprescindibles» (selección literaria). */
 export function Sugerencias() {
   const libros = useBiblioteca((s) => s.libros);
   const [deTi, setDeTi] = useState<Sugerencia[]>([]);
-  const [semana, setSemana] = useState<Sugerencia[]>([]);
+
   const [cargando, setCargando] = useState(true);
 
   // Las consultas dependen de géneros y autores, no de cada cambio en los libros.
@@ -15,24 +15,18 @@ export function Sugerencias() {
   useEffect(() => {
     let vivo = true;
     setCargando(true);
-    Promise.allSettled([paraTi(useBiblioteca.getState().libros), tendencias()]).then(([a, b]) => {
-      if (!vivo) return;
-      setDeTi(a.status === 'fulfilled' ? a.value : []);
-      setSemana(b.status === 'fulfilled' ? b.value : []);
-      setCargando(false);
-    });
+    paraTi(useBiblioteca.getState().libros).then((a) => { if (vivo) setDeTi(a); }).catch(() => undefined).finally(() => { if (vivo) setCargando(false); });
     return () => { vivo = false; };
   }, [firma]);
 
   const filaTi = useMemo(() => filtraConocidos(deTi, libros).slice(0, 15), [deTi, libros]);
-  const filaSemana = useMemo(() => filtraConocidos(semana, libros).slice(0, 15), [semana, libros]);
+  const filaImprescindibles = useMemo(() => filtraConocidos(imprescindibles(libros), libros).slice(0, 20), [libros]);
 
-  if (cargando) return <p className="nota">Buscando sugerencias…</p>;
-  if (!filaTi.length && !filaSemana.length) return null;
   return (
     <div className="sugerencias">
-      {filaTi.length > 0 && <Fila titulo="Para ti" nota="Según tus géneros y tus autores favoritos" sugs={filaTi} />}
-      {filaSemana.length > 0 && <Fila titulo="Lo más leído esta semana" nota="Tendencias de Open Library" sugs={filaSemana} />}
+      {filaImprescindibles.length > 0 && <Fila titulo="Imprescindibles" nota="Clásicos y novelas premiadas; primero, tus géneros" sugs={filaImprescindibles} />}
+      {cargando && <p className="nota">Buscando más libros de tus autores…</p>}
+      {filaTi.length > 0 && <Fila titulo="De tus autores favoritos" nota="Otros libros de los autores que mejor valoras" sugs={filaTi} />}
     </div>
   );
 }

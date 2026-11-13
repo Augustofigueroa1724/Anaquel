@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, repartePorBaldas, tintaPara, type Libro,
+  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, tintaPara, type Libro,
 } from '../../domain/libro';
 
 /** Interior del lomo según la edición (clásico, moderno o condensado). */
@@ -44,24 +44,42 @@ function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }
   );
 }
 
+/**
+ * Una balda por género, en carrusel: los lomos van alineados a la izquierda y la balda
+ * se desliza en horizontal, sin límite de libros (100 novelas caben en la misma balda).
+ */
 function Balda({ libros, etiqueta, onAbrir, soloLectura }: {
   libros: Libro[]; etiqueta?: string; onAbrir?: (l: Libro) => void; soloLectura?: boolean;
 }) {
   const setFiltroGenero = useBiblioteca((s) => s.setFiltroGenero);
+  const riel = useRef<HTMLDivElement>(null);
+  const [hayMas, setHayMas] = useState(false);
+  useLayoutEffect(() => {
+    const el = riel.current;
+    if (!el) return;
+    const mira = () => setHayMas(el.scrollWidth - el.clientWidth - el.scrollLeft > 4);
+    mira();
+    el.addEventListener('scroll', mira, { passive: true });
+    const ro = new ResizeObserver(mira);
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', mira); ro.disconnect(); };
+  }, [libros.length]);
   return (
-    <div className={`balda${etiqueta ? ' con-placa' : ''}`}>
+    <div className={`balda carrusel${etiqueta ? ' con-placa' : ''}${hayMas ? ' hay-mas' : ''}`}>
       <span className="techo" />
       <span className="pared izq" />
       <span className="pared der" />
       <span className="suelo" />
       <span className="luz" />
       <span className="halo" />
-      {libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} />)}
+      <div className="riel" ref={riel}>
+        {libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} />)}
+      </div>
       {etiqueta && (soloLectura
-        ? <span className="placa">{etiqueta}</span>
+        ? <span className="placa">{etiqueta} · {libros.length}</span>
         : (
           <button className="placa" onClick={() => setFiltroGenero(etiqueta)} aria-label={`Ver solo ${etiqueta}`}>
-            {etiqueta}
+            {etiqueta} · {libros.length}
           </button>
         ))}
     </div>
@@ -81,24 +99,12 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
   );
 
   const ref = useRef<HTMLDivElement>(null);
-  const [ancho, setAncho] = useState(390);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const mide = () => setAncho(el.clientWidth || 390);
-    mide();
-    const observador = new ResizeObserver(mide);
-    observador.observe(el);
-    return () => observador.disconnect();
-  }, []);
 
-  // Cada género ocupa sus propias baldas; la primera lleva la placa con el nombre.
-  const baldas = useMemo(() => {
-    const util = Math.max(120, ancho - 106);
-    return agrupaPorGenero(lista).flatMap(({ genero, libros: delGenero }) =>
-      repartePorBaldas(delGenero, util).map((b, i) => ({ libros: b, etiqueta: i === 0 ? genero : undefined, clave: `${genero}-${i}` })),
-    );
-  }, [lista, ancho]);
+  // Una balda por género, en carrusel horizontal; la placa lleva el nombre y cuántos hay.
+  const baldas = useMemo(
+    () => agrupaPorGenero(lista).map(({ genero, libros: delGenero }) => ({ libros: delGenero, etiqueta: genero, clave: genero })),
+    [lista],
+  );
 
   return (
     <div id="plano" className="plano" ref={ref}>

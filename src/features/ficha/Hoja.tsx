@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { SelectorGenero } from './SelectorGenero';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  ESTADOS, esDeseo, ETIQUETA, formateaFecha, GENEROS_BASE, hoyIso, validaDatos, validaPrestamo,
+  ESTADOS, esDeseo, ETIQUETA, formateaFecha, hoyIso, validaDatos, validaPrestamo,
   type DatosLibro, type Estado, type Libro,
 } from '../../domain/libro';
 
@@ -228,11 +229,6 @@ function FormularioPrestamo({ libro, onListo }: { libro: Libro; onListo: () => v
 
 function Formulario({ libro, onListo }: { libro: Libro; onListo: () => void }) {
   const editar = useBiblioteca((s) => s.editarLibro);
-  const libros = useBiblioteca((s) => s.libros);
-  const sugerencias = useMemo(() => {
-    const usados = libros.map((l) => l.genero).filter((g): g is string => !!g);
-    return [...new Set([...usados, ...GENEROS_BASE])].sort((a, b) => a.localeCompare(b, 'es'));
-  }, [libros]);
   const [datos, setDatos] = useState<DatosLibro>({
     titulo: libro.titulo,
     autor: libro.autor,
@@ -265,11 +261,7 @@ function Formulario({ libro, onListo }: { libro: Libro; onListo: () => void }) {
         <span>Autor</span>
         <input value={datos.autor} onChange={(e) => setDatos({ ...datos, autor: e.target.value })} autoComplete="off" />
       </label>
-      <label className="campo">
-        <span>Género</span>
-        <input list="generos" value={datos.genero} onChange={(e) => setDatos({ ...datos, genero: e.target.value })} autoComplete="off" placeholder="Novela, Ensayo…" />
-        <datalist id="generos">{sugerencias.map((g) => <option key={g} value={g} />)}</datalist>
-      </label>
+      <SelectorGenero valor={datos.genero} onCambio={(genero) => setDatos({ ...datos, genero })} />
       <label className="campo">
         <span>Año</span>
         <input

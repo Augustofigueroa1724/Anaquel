@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { consultasParaTi, filtraConocidos, parseGoogle, parseTendencias, type Sugerencia } from './sugerencias';
+import { consultasParaTi, filtraConocidos, imprescindibles, parseGoogle, type Sugerencia } from './sugerencias';
 import { COLORES_TELA, type Libro } from '../domain/libro';
 
 const l = (o: Partial<Libro>): Libro => ({
@@ -7,15 +7,12 @@ const l = (o: Partial<Libro>): Libro => ({
 });
 
 describe('consultasParaTi', () => {
-  it('usa tus autores mejor valorados y tus géneros más leídos', () => {
-    const libros = [
-      l({ genero: 'Fantasía' }), l({ genero: 'Fantasía' }), l({ genero: 'Historia' }), l({ genero: 'Novela' }), l({ genero: 'Novela' }), l({ genero: 'Novela' }),
-      l({ autor: 'Ursula K. Le Guin', valoracion: 5 }), l({ autor: 'Otro', valoracion: 2 }),
-    ];
-    expect(consultasParaTi(libros)).toEqual(['inauthor:"Ursula K. Le Guin"', 'subject:"fiction"', 'subject:"fantasy"']);
+  it('busca otros libros de tus autores mejor valorados', () => {
+    const libros = [l({ autor: 'Ursula K. Le Guin', valoracion: 5 }), l({ autor: 'Otro', valoracion: 2 })];
+    expect(consultasParaTi(libros)).toEqual(['inauthor:"Ursula K. Le Guin"']);
   });
   it('ignora los libros de ejemplo y la lista de deseos', () => {
-    expect(consultasParaTi([l({ genero: 'Fantasía', ejemplo: true }), l({ genero: 'Historia', posesion: 'quiero' })])).toEqual([]);
+    expect(consultasParaTi([l({ autor: 'A', valoracion: 5, ejemplo: true }), l({ autor: 'B', valoracion: 5, posesion: 'quiero' })])).toEqual([]);
   });
 });
 
@@ -39,8 +36,23 @@ describe('parsers', () => {
     } }] });
     expect(r[0]).toMatchObject({ titulo: 'Terramar', isbn: '9788445076', portada: 'https://books.google.com/x.jpg', genero: 'Fantasía', anio: 1968 });
   });
-  it('Open Library: portada por cover_i', () => {
-    const r = parseTendencias({ works: [{ key: '/works/OL1W', title: 'Libro', author_name: ['A'], cover_i: 42, first_publish_year: 2020 }] });
-    expect(r[0]).toMatchObject({ titulo: 'Libro', autor: 'A', portada: 'https://covers.openlibrary.org/b/id/42-M.jpg', anio: 2020 });
+  it('Google Books: descarta autoayuda y empresa', () => {
+    const r = parseGoogle({ items: [
+      { id: 'a', volumeInfo: { title: 'Hábitos atómicos', categories: ['Self-Help / Personal Growth'] } },
+      { id: 'b', volumeInfo: { title: 'Ventas', categories: ['Business & Economics'] } },
+      { id: 'c', volumeInfo: { title: 'Novela buena', categories: ['Fiction'] } },
+    ] });
+    expect(r.map((x) => x.titulo)).toEqual(['Novela buena']);
+  });
+});
+
+describe('imprescindibles', () => {
+  it('pone primero tus géneros favoritos y cambia de orden cada día', () => {
+    const libros = [l({ genero: 'Poesía' }), l({ genero: 'Poesía' })];
+    expect(imprescindibles(libros, 1)[0].genero).toBe('Poesía');
+    expect(imprescindibles([], 1)[0].titulo).not.toBe(imprescindibles([], 2)[0].titulo);
+  });
+  it('no incluye autoayuda: todo tiene un género literario', () => {
+    expect(imprescindibles([]).every((s) => s.genero && s.genero !== 'Autoayuda')).toBe(true);
   });
 });
