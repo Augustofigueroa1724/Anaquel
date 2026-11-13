@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { sugiereLibros, type Candidato } from '../../data/autocompletar';
 import { useBiblioteca } from '../../app/biblioteca';
 import { sinRepetidos } from '../../data/goodreads';
 import { ESTADOS, ETIQUETA, validaDatos, type DatosLibro } from '../../domain/libro';
@@ -14,6 +15,45 @@ export function AnadirManual({ onCerrar, onAnadido }: {
   const [datos, setDatos] = useState<DatosLibro>({ titulo: '', autor: '', anio: 0, isbn: '', estado: 'pendiente', genero: '' });
   const [posesion, setPosesion] = useState<'tengo' | 'quiero'>('tengo');
   const [error, setError] = useState('');
+  const [activo, setActivo] = useState<'titulo' | 'autor' | null>(null);
+  const [sugs, setSugs] = useState<Candidato[]>([]);
+  const elegido = useRef(false);
+
+  // Autocompletar: busca al dejar de teclear (350 ms) con lo que haya en título y autor.
+  useEffect(() => {
+    if (!activo || elegido.current) { setSugs([]); return; }
+    const control = new AbortController();
+    const t = setTimeout(() => {
+      sugiereLibros(datos.titulo, datos.autor, control.signal).then((r) => { if (!control.signal.aborted) setSugs(r); }, () => {});
+    }, 350);
+    return () => { clearTimeout(t); control.abort(); };
+  }, [datos.titulo, datos.autor, activo]);
+
+  function escribe(campo: 'titulo' | 'autor', valor: string) {
+    elegido.current = false;
+    setDatos((d) => ({ ...d, [campo]: valor }));
+    setError('');
+  }
+
+  function elige(c: Candidato) {
+    elegido.current = true;
+    setDatos((d) => ({ ...d, titulo: c.titulo, autor: c.autor, anio: c.anio || d.anio, isbn: c.isbn || d.isbn, genero: d.genero || c.genero || '' }));
+    setSugs([]);
+    setActivo(null);
+  }
+
+  const lista = (campo: 'titulo' | 'autor') => activo === campo && sugs.length > 0 && (
+    <ul className="autocompleta" role="listbox" aria-label="Sugerencias">
+      {sugs.map((c) => (
+        <li key={`${c.titulo}|${c.autor}|${c.isbn}`}>
+          <button type="button" role="option" aria-selected="false" onMouseDown={(e) => e.preventDefault()} onClick={() => elige(c)}>
+            {c.portada ? <img src={c.portada} alt="" loading="lazy" /> : <span className="sin-portada" aria-hidden="true" />}
+            <span className="txt"><b>{c.titulo}</b><small>{c.autor}{c.anio ? ` · ${c.anio}` : ''}</small></span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
 
   function guarda(e: React.FormEvent) {
     e.preventDefault();
@@ -41,11 +81,13 @@ export function AnadirManual({ onCerrar, onAnadido }: {
           <button type="button" className="chip" aria-pressed={posesion === 'quiero'} onClick={() => setPosesion('quiero')}>Lo quiero</button>
         </div>
         <label className="campo"><span>Título</span>
-          <input value={datos.titulo} onChange={(e) => { setDatos({ ...datos, titulo: e.target.value }); setError(""); }} autoComplete="off" autoFocus />
+          <input id="manual-titulo" value={datos.titulo} onChange={(e) => escribe('titulo', e.target.value)} onFocus={() => setActivo('titulo')} onBlur={() => setActivo(null)} autoComplete="off" autoFocus />
         </label>
+        {lista('titulo')}
         <label className="campo"><span>Autor</span>
-          <input value={datos.autor} onChange={(e) => setDatos({ ...datos, autor: e.target.value })} autoComplete="off" />
+          <input id="manual-autor" value={datos.autor} onChange={(e) => escribe('autor', e.target.value)} onFocus={() => setActivo('autor')} onBlur={() => setActivo(null)} autoComplete="off" />
         </label>
+        {lista('autor')}
         <SelectorGenero valor={datos.genero} onCambio={(genero) => setDatos({ ...datos, genero })} />
         <label className="campo"><span>Año (opcional)</span>
           <input type="number" inputMode="numeric" value={datos.anio || ''} onChange={(e) => setDatos({ ...datos, anio: e.target.value === '' ? 0 : Number(e.target.value) })} />

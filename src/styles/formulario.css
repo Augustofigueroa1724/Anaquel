@@ -170,3 +170,13 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .balda .riel .separador .pestana span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   max-height:50px;color:#2a1d0e;font:800 7.5px/1 var(--sans);letter-spacing:.04em;text-transform:uppercase}
 .balda .riel .separador.letra .pestana span{font:700 13px/1 var(--display);letter-spacing:0;text-transform:none}
+
+/* Autocompletar del alta a mano: lista bajo el campo que se escribe. */
+.autocompleta{list-style:none;margin:-4px 0 4px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 10px 24px rgba(0,0,0,.14);display:grid;gap:2px}
+.autocompleta button{all:unset;box-sizing:border-box;width:100%;display:flex;gap:10px;align-items:center;padding:7px 8px;border-radius:10px;cursor:pointer;min-height:44px}
+.autocompleta button:hover,.autocompleta button:focus-visible{background:color-mix(in srgb,var(--fg) 7%,transparent)}
+.autocompleta img,.autocompleta .sin-portada{flex:none;width:28px;height:42px;border-radius:2px;object-fit:cover;background:var(--line)}
+.autocompleta .txt{display:grid;gap:2px;min-width:0}
+.autocompleta b{font:600 15px/1.2 var(--sans);color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.autocompleta small{font:400 13px/1.2 var(--sans);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
