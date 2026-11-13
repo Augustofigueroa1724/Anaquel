@@ -48,18 +48,18 @@
 /* Etiquetas Dymo: cinta de plástico negra brillante con las letras en relieve blancas.
    La lleva la placa del género y las pestañas de los separadores. */
 :root[data-estilo="nordico"]{--dymo-cinta:linear-gradient(180deg,#3a3a3a 0,#161616 38%,#0b0b0b 62%,#1c1c1c 100%);
-  --dymo-letra:#f4f4f2;--dymo-relieve:0 1px 0 rgba(0,0,0,.85),0 -1px 0 rgba(255,255,255,.28),0 0 1px rgba(255,255,255,.35)}
+  --dymo-letra:#f4f4f2;--dymo-font:"Courier New",Courier,"IBM Plex Mono",monospace;--dymo-relieve:0 1px 0 rgba(0,0,0,.85),0 -1px 0 rgba(255,255,255,.28),0 0 1px rgba(255,255,255,.35)}
 :root[data-estilo="nordico"] .placa{bottom:-21px;border-radius:2px;padding:4px 11px 3px;background:var(--dymo-cinta);color:var(--dymo-letra);
-  font:500 11px/1.2 var(--cond);letter-spacing:.22em;text-shadow:var(--dymo-relieve);transform:translateX(-50%) rotate(-1.2deg);
+  font:700 12px/1.2 var(--dymo-font);letter-spacing:.12em;text-shadow:var(--dymo-relieve);transform:translateX(-50%);
   box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 3px rgba(0,0,0,.35)}
 
 /* Separadores: varilla en tinta y pestaña de cinta Dymo vertical */
 :root[data-estilo="nordico"] .balda .riel .separador::before{background:var(--montante);opacity:.5;box-shadow:none}
 :root[data-estilo="nordico"] .balda .riel .separador .pestana{background:linear-gradient(90deg,#3a3a3a 0,#161616 38%,#0b0b0b 62%,#1c1c1c 100%);
-  border:0;border-radius:2px;box-shadow:1px 0 0 rgba(255,255,255,.14) inset,-2px 2px 4px rgba(0,0,0,.35)}
-:root[data-estilo="nordico"] .balda .riel .separador .pestana span{color:var(--dymo-letra);font:500 9px/1.5 var(--cond);letter-spacing:.16em;
+  border:0;border-radius:2px;max-height:70px;box-shadow:1px 0 0 rgba(255,255,255,.14) inset,-2px 2px 4px rgba(0,0,0,.35)}
+:root[data-estilo="nordico"] .balda .riel .separador .pestana span{color:var(--dymo-letra);font:700 9.5px/1.5 var(--dymo-font);letter-spacing:.04em;max-height:62px;
   text-shadow:1px 0 0 rgba(0,0,0,.85),-1px 0 0 rgba(255,255,255,.28),0 0 1px rgba(255,255,255,.35)}
-:root[data-estilo="nordico"] .balda .riel .separador.letra .pestana span{font:500 13px/1 var(--cond);letter-spacing:0}
+:root[data-estilo="nordico"] .balda .riel .separador.letra .pestana span{font:700 14px/1 var(--dymo-font);letter-spacing:0}
 
 /* Botón del mueble en la cabecera */
 .cambia-mueble{border:0;background:none;color:var(--muted);width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
