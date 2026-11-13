@@ -196,3 +196,61 @@ export function generoDesdeCategorias(categorias: readonly string[]): string | u
   ];
   return tabla.find(([re]) => re.test(texto))?.[1];
 }
+
+const PARTICULAS = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'van', 'von', 'da', 'di', 'le', 'du']);
+const sinTildes = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/**
+ * Apellido del autor: sin iniciales ni partículas, con tres palabras o más el segundo
+ * (García Márquez, Vargas Llosa: el primer apellido) y con dos, el último.
+ */
+export function apellido(autor: string): string {
+  const p = autor.trim().split(/\s+/).filter((t) => t && !/^\p{L}\.?$/u.test(t) && !t.endsWith('.') && !PARTICULAS.has(t.toLowerCase()));
+  if (p.length === 0) return autor.trim();
+  return p.length >= 3 ? p[1] : p[p.length - 1];
+}
+
+/** Clave para ordenar por apellido, sin tildes ni mayúsculas. */
+export const claveAutor = (autor: string): string => sinTildes(apellido(autor));
+
+/** Nombre corto para la pestaña: el nombre entero si cabe, si no desde el apellido. */
+function nombrePestana(autor: string): string {
+  if (autor.length <= 16) return autor;
+  const ap = apellido(autor);
+  const desde = autor.slice(autor.indexOf(ap));
+  return desde.length <= 16 ? desde : ap;
+}
+
+export type Seccion = { tipo: 'autor' | 'letra'; etiqueta: string; libros: Libro[] };
+
+/**
+ * Separadores dentro de una balda: un autor con más de un libro tiene su pestaña con el nombre;
+ * los autores con un solo libro se juntan bajo la letra de su apellido. Todo en orden alfabético
+ * por apellido (la letra va antes que los autores que empiezan por ella).
+ */
+export function seccionesPorAutor(libros: readonly Libro[]): Seccion[] {
+  const porAutor = new Map<string, Libro[]>();
+  for (const l of libros) {
+    const k = l.autor.trim().toLowerCase() || '?';
+    porAutor.set(k, [...(porAutor.get(k) ?? []), l]);
+  }
+  const grupos = new Map<string, { orden: string; s: Seccion }>();
+  for (const ls of porAutor.values()) {
+    const autor = ls[0].autor.trim();
+    const clave = claveAutor(autor) || '#';
+    ls.sort((a, b) => (a.anio || 0) - (b.anio || 0) || a.titulo.localeCompare(b.titulo, 'es'));
+    if (ls.length > 1) {
+      const etiqueta = nombrePestana(autor);
+      grupos.set(`a:${autor.toLowerCase()}`, { orden: `${clave} 1${sinTildes(autor)}`, s: { tipo: 'autor', etiqueta, libros: ls } });
+    } else {
+      const letra = /[a-zñ]/.test(clave[0]) ? clave[0].toUpperCase() : '#';
+      const g = grupos.get(`l:${letra}`) ?? { orden: `${letra.toLowerCase()} 0`, s: { tipo: 'letra', etiqueta: letra, libros: [] } };
+      g.s.libros.push(ls[0]);
+      grupos.set(`l:${letra}`, g);
+    }
+  }
+  for (const g of grupos.values()) {
+    if (g.s.tipo === 'letra') g.s.libros.sort((a, b) => claveAutor(a.autor).localeCompare(claveAutor(b.autor), 'es'));
+  }
+  return [...grupos.values()].sort((a, b) => a.orden.localeCompare(b.orden, 'es')).map((g) => g.s);
+}

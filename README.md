@@ -45,6 +45,7 @@ npm run build
 | Nov 2026 | Catálogo común de géneros con «+ Nuevo», como los tipos de sitio de Fifth Square | Lista cerrada pero ampliable, sin duplicados |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
+| 13 nov 2026 | Separadores en las baldas: pestaña con el autor (más de un libro) o la letra del apellido | Encontrar un libro de un vistazo, como las guías de una biblioteca |
 
 ## Configuración de Supabase para el login (una vez, en el panel)
 Proyecto `cratemates` → Authentication:

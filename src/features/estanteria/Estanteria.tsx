@@ -1,7 +1,7 @@
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { Fragment, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, tintaPara, type Libro,
+  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 
 /** Interior del lomo según la edición (clásico, moderno o condensado). */
@@ -54,6 +54,7 @@ function Balda({ libros, etiqueta, onAbrir, soloLectura }: {
   const setFiltroGenero = useBiblioteca((s) => s.setFiltroGenero);
   const riel = useRef<HTMLDivElement>(null);
   const [hayMas, setHayMas] = useState(false);
+  const secciones = useMemo(() => seccionesPorAutor(libros), [libros]);
   useLayoutEffect(() => {
     const el = riel.current;
     if (!el) return;
@@ -73,7 +74,14 @@ function Balda({ libros, etiqueta, onAbrir, soloLectura }: {
       <span className="luz" />
       <span className="halo" />
       <div className="riel" ref={riel}>
-        {libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} />)}
+        {secciones.map((sec) => (
+          <Fragment key={`${sec.tipo}:${sec.etiqueta}`}>
+            <span className={`separador ${sec.tipo}`} aria-hidden="true">
+              <span className="pestana"><span>{sec.etiqueta}</span></span>
+            </span>
+            {sec.libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} />)}
+          </Fragment>
+        ))}
       </div>
       {etiqueta && (soloLectura
         ? <span className="placa">{etiqueta} · {libros.length}</span>

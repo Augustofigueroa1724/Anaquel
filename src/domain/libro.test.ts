@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO,
+  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO, seccionesPorAutor, apellido,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -118,4 +118,24 @@ describe('géneros', () => {
     expect(generoDesdeCategorias(['History'])).toBe('Historia');
     expect(generoDesdeCategorias([])).toBeUndefined();
   });
+});
+
+describe('seccionesPorAutor', () => {
+  const l = (id: number, autor: string, anio = 2000): Libro =>
+    ({ id, titulo: `T${id}`, autor, anio, isbn: '', estado: 'pendiente', color: '#000', edicion: 'clasico' });
+  it('pestaña de autor con más de un libro y letra para los sueltos, en orden alfabético', () => {
+    const s = seccionesPorAutor([
+      l(1, 'Gabriel García Márquez', 1967), l(2, 'Gabriel García Márquez', 1985),
+      l(3, 'Julio Cortázar'), l(4, 'Carmen Laforet'), l(5, 'Juan Goytisolo'), l(6, 'Gabriel Gamoneda'),
+    ]);
+    expect(s.map((x) => `${x.tipo}:${x.etiqueta}`)).toEqual(['letra:C', 'letra:G', 'autor:García Márquez', 'letra:L']);
+    expect(s[1].libros.map((x) => x.id)).toEqual([6, 5]);
+    expect(s[2].libros.map((x) => x.id)).toEqual([1, 2]);
+  });
+});
+
+it('apellido', () => {
+  expect(apellido('Miguel de Cervantes')).toBe('Cervantes');
+  expect(apellido('J. R. R. Tolkien')).toBe('Tolkien');
+  expect(apellido('Mario Vargas Llosa')).toBe('Vargas');
 });
