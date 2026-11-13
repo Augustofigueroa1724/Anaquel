@@ -194,18 +194,18 @@ export function ordenaPorPreferencia<T extends { genero: string }>(grupos: reado
 export function generoDesdeCategorias(categorias: readonly string[]): string | undefined {
   const texto = categorias.join(' / ').toLowerCase();
   const tabla: [RegExp, string][] = [
-    [/science fiction|sci-fi|scifi/, 'Ciencia ficción'],
-    [/fantasy/, 'Fantasía'],
-    [/horror/, 'Terror'],
-    [/mystery|detective|crime|thriller/, 'Policiaca'],
-    [/comics|graphic novel/, 'Cómic'],
-    [/juvenile/, 'Infantil'],
-    [/poetry/, 'Poesía'],
-    [/biography|autobiography/, 'Biografía'],
-    [/history/, 'Historia'],
-    [/philosophy|social science|science|psychology|political|business|economics/, 'Ensayo'],
-    [/classics/, 'Clásicos'],
-    [/fiction/, 'Novela'],
+    [/science fiction|sci-fi|scifi|ciencia ficci|science-fiction/, 'Ciencia ficción'],
+    [/fantasy|fantas[ií]a|fantastique/, 'Fantasía'],
+    [/horror|terror|[ée]pouvante/, 'Terror'],
+    [/mystery|detective|crime|thriller|polic[ií]a|policier|roman noir|novela negra/, 'Policiaca'],
+    [/comics|graphic novel|bandes? dessin|c[óo]mic/, 'Cómic'],
+    [/juvenile|jeunesse|infantil|children/, 'Infantil'],
+    [/poetry|po[ée]sie|poes[ií]a/, 'Poesía'],
+    [/biography|autobiography|biograf|m[ée]moires|memoirs/, 'Biografía'],
+    [/history|histoire|historia/, 'Historia'],
+    [/philosophy|philosophie|filosof|social science|science|psychology|political|business|economics|essai|ensayo|essays/, 'Ensayo'],
+    [/classics|classiques|cl[áa]sicos/, 'Clásicos'],
+    [/fiction|novel|roman|novela|literature|litt[ée]rature|literatura|drama|th[ée][âa]tre|teatro/, 'Novela'],
   ];
   return tabla.find(([re]) => re.test(texto))?.[1];
 }

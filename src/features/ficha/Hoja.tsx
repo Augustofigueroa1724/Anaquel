@@ -89,6 +89,7 @@ function Vista({
   const repetido = useBiblioteca((s) => s.libros.some((l) => l.isbn === libro.isbn));
   const busqueda = useBiblioteca((s) => s.busqueda);
   const editar = useBiblioteca((s) => s.editarLibro);
+  const setGeneroCandidato = useBiblioteca((s) => s.setGeneroCandidato);
   const deseo = enEstante && esDeseo(libro);
 
   return (
@@ -124,6 +125,12 @@ function Vista({
 
       {enEstante && modo === 'prestar' && (
         <FormularioPrestamo libro={libro} onListo={() => setModo('ver')} />
+      )}
+
+      {!enEstante && busqueda !== 'buscando' && (
+        <div className="genero-candidato">
+          <SelectorGenero valor={libro.genero ?? ''} onCambio={setGeneroCandidato} />
+        </div>
       )}
 
       {!(enEstante && (modo === 'borrar' || modo === 'prestar')) && (

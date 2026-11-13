@@ -103,3 +103,22 @@ describe('autor', () => {
     expect(r).toMatchObject({ estado: 'encontrado', meta: { titulo: 'Sin autor', autor: 'Autor desconocido' } });
   });
 });
+
+describe('género', () => {
+  it('Open Library da el género por sus temas', () => {
+    expect(parseOpenLibrary({ 'ISBN:1': { title: 'La peste', authors: [{ name: 'Albert Camus' }], subjects: [{ name: 'French fiction' }] } })?.genero).toBe('Novela');
+  });
+  it('si la fuente con autor no trae género, lo toma de otra', async () => {
+    const f = (async (url: string) => ({ ok: true, json: async () => (String(url).includes('googleapis')
+      ? { items: [{ volumeInfo: { title: 'La peste', authors: ['Albert Camus'] } }] }
+      : { 'ISBN:9788400000001': { title: 'La peste', authors: [{ name: 'Albert Camus' }], subjects: ['Fiction'] } }) })) as unknown as typeof fetch;
+    const r = await buscarPorIsbn('9788400000001', f, 8000, async () => null);
+    expect(r.meta).toMatchObject({ autor: 'Albert Camus', genero: 'Novela' });
+  });
+  it('categorías en francés y español', async () => {
+    const { generoDesdeCategorias } = await import('../domain/libro');
+    expect(generoDesdeCategorias(['Romans français'])).toBe('Novela');
+    expect(generoDesdeCategorias(['Poésie'])).toBe('Poesía');
+    expect(generoDesdeCategorias(['Novela negra'])).toBe('Policiaca');
+  });
+});

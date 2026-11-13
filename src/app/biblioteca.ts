@@ -32,6 +32,8 @@ interface Biblioteca {
   importa(nuevos: LibroImportado[]): number;
   valorar(id: number, valoracion: number | undefined): void;
   descartarCandidato(): void;
+  /** Género del libro escaneado antes de añadirlo (lo detectado se puede cambiar). */
+  setGeneroCandidato(genero: string): void;
   editarLibro(id: number, cambios: Partial<Omit<Libro, 'id' | 'color' | 'edicion'>>): void;
   borrarLibro(id: number): void;
   prestar(id: number, a: string, desde: string): void;
@@ -87,6 +89,11 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
         busqueda: estado,
       });
     });
+  },
+
+  setGeneroCandidato: (genero) => {
+    const c = get().candidato;
+    if (c) set({ candidato: { ...c, genero: genero || undefined } });
   },
 
   anadirCandidato: (posesion = 'tengo') => {

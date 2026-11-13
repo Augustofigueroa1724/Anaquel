@@ -41,11 +41,13 @@ const conAutor = (m: MetaLibro | null): m is MetaLibro => !!m && m.autor !== AUT
 export function parseOpenLibrary(json: unknown): MetaLibro | null {
   const raiz = json as Record<string, unknown> | null;
   const clave = raiz && Object.keys(raiz).find((k) => k.startsWith('ISBN:'));
-  const libro = (clave ? raiz![clave] : raiz) as { title?: unknown; publish_date?: unknown; authors?: { name?: unknown }[] } | null;
+  const libro = (clave ? raiz![clave] : raiz) as { title?: unknown; publish_date?: unknown; authors?: { name?: unknown }[]; subjects?: ({ name?: unknown } | string)[] } | null;
   if (typeof libro?.title !== 'string') return null;
   const anio = Number.parseInt(String(libro.publish_date ?? '').match(/\d{4}/)?.[0] ?? '', 10);
   const autores = Array.isArray(libro.authors) ? libro.authors.map((a) => a?.name).filter((n): n is string => typeof n === 'string') : [];
-  return { titulo: libro.title, autor: autores.join(', ') || AUTOR_DESCONOCIDO, anio: Number.isFinite(anio) ? anio : 0 };
+  const temas = Array.isArray(libro.subjects) ? libro.subjects.map((t) => (typeof t === 'string' ? t : t?.name)).filter((t): t is string => typeof t === 'string') : [];
+  const genero = generoDesdeCategorias(temas);
+  return { titulo: libro.title, autor: autores.join(', ') || AUTOR_DESCONOCIDO, anio: Number.isFinite(anio) ? anio : 0, ...(genero ? { genero } : {}) };
 }
 
 const ENTIDADES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
@@ -118,11 +120,19 @@ export async function buscarPorIsbn(
   // Los ISBN franceses (978-2, 979-1) van antes a la BnF. Se para en la primera fuente que da autor;
   // si ninguna lo da, se queda el primer título encontrado (y el autor se puede escribir en la ficha).
   const fuentes = /^97(82|91)/.test(isbn) ? [google, bnf, openLibrary] : [google, openLibrary, bnf];
+  let encontrado = null as MetaLibro | null;
   for (const fuente of fuentes) {
     const meta = await fuente();
-    if (conAutor(meta)) return { estado: 'encontrado', meta: sinAutor ? { ...meta, titulo: sinAutor.titulo, ...(sinAutor.genero ? { genero: sinAutor.genero } : {}) } : meta };
-    if (meta && !sinAutor) sinAutor = meta;
+    if (!meta) continue;
+    if (!encontrado && conAutor(meta)) encontrado = { ...meta, ...(sinAutor ? { titulo: sinAutor.titulo } : {}), ...(meta.genero || !sinAutor?.genero ? {} : { genero: sinAutor.genero }) };
+    else if (!sinAutor) sinAutor = meta;
+    // Con autor y género ya está; si falta el género, se pregunta a las fuentes que quedan.
+    const genero = encontrado?.genero ?? meta.genero;
+    if (encontrado && !encontrado.genero && genero) encontrado = { ...encontrado, genero };
+    if (encontrado?.genero) break;
+    if (sinAutor && !sinAutor.genero && meta.genero) sinAutor = { ...sinAutor, genero: meta.genero };
   }
+  if (encontrado) return { estado: 'encontrado', meta: encontrado };
   if (sinAutor) return { estado: 'encontrado', meta: sinAutor };
   return { estado: sinRed ? 'sin-red' : 'no-encontrado' };
 }
