@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import '@fontsource/bodoni-moda/index.css';
 import '@fontsource/manrope/index.css';
+import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
 import '@fontsource/oswald/index.css';
 import '@fontsource/ibm-plex-mono/index.css';
 import './styles/anaquel.css';

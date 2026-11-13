@@ -1,69 +1,131 @@
-/* Estilo «nórdico»: alternativa al nogal y latón, con el botón del mueble de la cabecera.
-   Pared lisa casi blanca, estantería abierta de roble claro con montantes negros finos,
-   etiquetas en tinta y tipografía sin serifa en la cabecera. Solo redefine tokens y el mueble. */
+/* Estilo «nórdico», propuesta «Lamas» (Claude Design, 13 nov 2026; referencia en docs/mocks/nordico-lamas.html).
+   Idea: Bang & Olufsen. Perfiles y baldas de aluminio cepillado de 3 px sobre una trasera de lamas estrechas de
+   roble, colgado de una pared de yeso gris liso. Sin acento: el estado activo se marca con el color del texto.
+   Se activa con el botón del mueble (data-estilo="nordico" en <html>) y solo redefine tokens y piezas. */
+
 :root[data-estilo="nordico"]{
-  --bg:#eceeed; --fg:#141414; --muted:#5b6164; --card:#ffffff; --line:#d5d9da;
-  --accent:#141414; --papel:none;
-  --roble:#d9bf96; --roble-claro:#ead6b4; --roble-canto:#c3a476; --fondo-balda:#f7f6f3; --montante:#1b1b1b;
-  --liston:#dcc6a2; --liston-sombra:#d0b892; --junta:#b39a74;
+  /* Pared de yeso */
+  --n-pared:radial-gradient(140% 60% at 15% 0%,rgba(255,255,255,.7),rgba(255,255,255,0) 60%),linear-gradient(175deg,#e4e3e0 0%,#d0cecb 100%);
+  /* Texto e interfaz */
+  --n-texto:#18191a; --n-texto-2:#45474a; --n-filete:rgba(24,25,26,.16); --n-barra:#ecebe9; --n-aviso:rgba(250,250,249,.94);
+  /* Aluminio */
+  --n-alu:linear-gradient(180deg,#fbfbfb 0%,#dfe1e2 22%,#b9bcbe 62%,#8f9396 100%);
+  --n-alu-perfil:linear-gradient(90deg,#ffffff,#c4c7c9,#8f9396);
+  --n-alu-brillo:rgba(255,255,255,.9);
+  /* Lamas de roble: periodo de 12 px */
+  --n-lama-junta:#5d4a34; --n-lama-canto:#b3956e; --n-lama-luz:#d3b991; --n-lama:#c7ab82; --n-lama-sombra:#a88a62;
+  --n-lamas-velo:linear-gradient(180deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,0) 35%,rgba(0,0,0,.14) 100%);
+  --n-sombra-balda:rgba(0,0,0,.5);
+  /* Libros y separadores */
+  --n-cinta:#18191a; --n-separador:rgba(24,25,26,.5);
+  /* Tokens generales de la app (hojas, paneles) en el mismo lenguaje */
+  --bg:#dcdbd8; --fg:var(--n-texto); --muted:var(--n-texto-2); --card:#f7f7f6; --line:#c9c8c5; --accent:var(--n-texto); --papel:none;
 }
 @media (prefers-color-scheme: dark){
   :root[data-estilo="nordico"]:not([data-theme="light"]){
-    --bg:#141516; --fg:#f1f1ef; --muted:#9a9ea1; --card:#1f2022; --line:#2e3033; --accent:#f1f1ef;
-    --roble:#a8875d; --roble-claro:#c09f72; --roble-canto:#866a45; --fondo-balda:#1c1d1f; --montante:#d9dadb;
-    --liston:#4d3d2b; --liston-sombra:#463727; --junta:#2f2519;
+    --n-pared:radial-gradient(140% 60% at 15% 0%,rgba(255,255,255,.06),rgba(255,255,255,0) 60%),linear-gradient(175deg,#232426 0%,#17181a 100%);
+    --n-texto:#f3f3f1; --n-texto-2:#b4b5b6; --n-filete:rgba(255,255,255,.16); --n-barra:#161718; --n-aviso:rgba(28,29,31,.92);
+    --n-alu:linear-gradient(180deg,#8d9194 0%,#5c6063 25%,#3b3e41 65%,#26282a 100%);
+    --n-alu-perfil:linear-gradient(90deg,#707477,#9a9ea1,#3b3e41); --n-alu-brillo:rgba(255,255,255,.35);
+    --n-lama-junta:#0f0b08; --n-lama-canto:#3d2f23; --n-lama-luz:#56432f; --n-lama:#4a3a2a; --n-lama-sombra:#33271c;
+    --n-lamas-velo:linear-gradient(180deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 35%,rgba(0,0,0,.28) 100%);
+    --n-sombra-balda:rgba(0,0,0,.75); --n-cinta:#f3f3f1; --n-separador:rgba(255,255,255,.5);
+    --bg:#1c1d1f; --card:#232426; --line:#333538;
   }
 }
 :root[data-estilo="nordico"][data-theme="dark"]{
-  --bg:#141516; --fg:#f1f1ef; --muted:#9a9ea1; --card:#1f2022; --line:#2e3033; --accent:#f1f1ef;
-  --roble:#a8875d; --roble-claro:#c09f72; --roble-canto:#866a45; --fondo-balda:#1c1d1f; --montante:#d9dadb;
-    --liston:#4d3d2b; --liston-sombra:#463727; --junta:#2f2519;
+  --n-pared:radial-gradient(140% 60% at 15% 0%,rgba(255,255,255,.06),rgba(255,255,255,0) 60%),linear-gradient(175deg,#232426 0%,#17181a 100%);
+  --n-texto:#f3f3f1; --n-texto-2:#b4b5b6; --n-filete:rgba(255,255,255,.16); --n-barra:#161718; --n-aviso:rgba(28,29,31,.92);
+  --n-alu:linear-gradient(180deg,#8d9194 0%,#5c6063 25%,#3b3e41 65%,#26282a 100%);
+  --n-alu-perfil:linear-gradient(90deg,#707477,#9a9ea1,#3b3e41); --n-alu-brillo:rgba(255,255,255,.35);
+  --n-lama-junta:#0f0b08; --n-lama-canto:#3d2f23; --n-lama-luz:#56432f; --n-lama:#4a3a2a; --n-lama-sombra:#33271c;
+  --n-lamas-velo:linear-gradient(180deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 35%,rgba(0,0,0,.28) 100%);
+  --n-sombra-balda:rgba(0,0,0,.75); --n-cinta:#f3f3f1; --n-separador:rgba(255,255,255,.5);
+  --bg:#1c1d1f; --card:#232426; --line:#333538;
 }
-:root[data-estilo="nordico"] body{background:var(--bg)}
-/* Pared de listones de roble (panel acústico), con juntas suaves */
-:root[data-estilo="nordico"] body{background:
-  repeating-linear-gradient(90deg,var(--liston) 0 13px,var(--liston-sombra) 13px 15px,var(--junta) 15px 17px),var(--bg)}
 
-/* Cabecera y cifras sin serifa */
-:root[data-estilo="nordico"] .marca{font:800 38px/1 var(--sans);letter-spacing:-.04em}
-:root[data-estilo="nordico"] .cuenta b,:root[data-estilo="nordico"] .chip .n{font-family:var(--sans);font-weight:700}
+/* ---------- Pared ---------- */
+:root[data-estilo="nordico"] body{background:var(--n-pared) fixed,var(--bg)}
 
-/* El mueble: sin cornisa, zócalo ni pilastras; dos montantes negros y baldas de roble */
-:root[data-estilo="nordico"] .mueble{background:none;box-shadow:none;padding:0 6px;gap:26px;border-radius:0}
-:root[data-estilo="nordico"] .mueble::before,:root[data-estilo="nordico"] .mueble::after{top:-8px;bottom:-8px;height:auto;left:0;right:auto;width:3px;
-  border-radius:2px;background:var(--montante);box-shadow:none;clip-path:none}
+/* ---------- Cabecera ---------- */
+:root[data-estilo="nordico"] header{align-items:flex-start;padding:calc(24px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 0 max(24px,env(safe-area-inset-left,0px))}
+:root[data-estilo="nordico"] .titulo{padding-top:6px;gap:4px}
+:root[data-estilo="nordico"] .sobre{font:600 9.5px/1 var(--sans);letter-spacing:.28em;color:var(--n-texto-2)}
+:root[data-estilo="nordico"] .marca{font:500 32px/1.05 var(--sans);letter-spacing:-.03em;color:var(--n-texto)}
+:root[data-estilo="nordico"] .cab-botones .rueda,:root[data-estilo="nordico"] .cambia-mueble{color:var(--n-texto)}
+:root[data-estilo="nordico"] .cab-botones svg{stroke-width:1.25}
+:root[data-estilo="nordico"] .cuenta{padding-right:12px;font:600 9.5px/1 var(--sans);letter-spacing:.24em;color:var(--n-texto-2)}
+
+/* ---------- Filtros: texto con subrayado, sin píldora ---------- */
+:root[data-estilo="nordico"] .filtros{display:flex;justify-content:space-between;gap:0;margin:10px max(24px,env(safe-area-inset-right,0px)) 0 max(24px,env(safe-area-inset-left,0px));
+  padding:0;border:0;border-radius:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:inset 0 -1px 0 var(--n-filete)}
+:root[data-estilo="nordico"] .indicador{display:none}
+:root[data-estilo="nordico"] .chip{flex-direction:row;align-items:center;gap:6px;min-height:48px;padding:0 0 6px;border-radius:0;
+  font:500 13px/1 var(--sans);letter-spacing:.01em;color:var(--n-texto-2)}
+:root[data-estilo="nordico"] .chip .n{font:500 11px/1 var(--sans);color:var(--n-texto-2);opacity:1}
+:root[data-estilo="nordico"] .chip[aria-pressed="true"]{font-weight:600;color:var(--n-texto);box-shadow:inset 0 -1.5px 0 var(--n-texto)}
+:root[data-estilo="nordico"] .chip[aria-pressed="true"] .n{color:var(--n-texto-2)}
+
+/* ---------- Mueble: marco de aluminio con perfiles laterales de 3 px ---------- */
+:root[data-estilo="nordico"] .mueble{gap:0;margin:26px max(19px,env(safe-area-inset-right,0px)) 40px max(19px,env(safe-area-inset-left,0px));
+  padding:3px 3px 0;border-radius:0;background:var(--n-alu);box-shadow:0 34px 40px -26px rgba(0,0,0,.65)}
+:root[data-estilo="nordico"] .mueble::before,:root[data-estilo="nordico"] .mueble::after{top:0;bottom:0;left:0;right:auto;width:3px;height:auto;
+  border-radius:0;background:var(--n-alu-perfil);box-shadow:none;clip-path:none;z-index:2}
 :root[data-estilo="nordico"] .mueble::after{left:auto;right:0}
-:root[data-estilo="nordico"] .balda{background:var(--fondo-balda);box-shadow:0 1px 0 rgba(0,0,0,.04) inset;border-radius:0}
+
+/* ---------- Balda: 226 px de lamas + tabla de aluminio de 10 px ---------- */
+:root[data-estilo="nordico"] .balda{min-height:236px;height:236px;box-sizing:border-box;padding:0 0 10px;border-radius:0;
+  background:var(--n-lamas-velo),repeating-linear-gradient(90deg,var(--n-lama-junta) 0 1.5px,var(--n-lama-canto) 1.5px 2.5px,var(--n-lama-luz) 2.5px 6px,var(--n-lama) 6px 11px,var(--n-lama-sombra) 11px 12px);
+  background-size:100% 226px;background-repeat:no-repeat;box-shadow:inset 0 26px 24px -18px var(--n-sombra-balda)}
 :root[data-estilo="nordico"] .balda .techo,:root[data-estilo="nordico"] .balda .pared,
-:root[data-estilo="nordico"] .balda .luz,:root[data-estilo="nordico"] .balda .halo{display:none}
-/* La tabla de roble: canto claro arriba, veta suave y sombra corta debajo */
-:root[data-estilo="nordico"] .balda .suelo{left:-6px;right:-6px;bottom:-10px;height:12px;clip-path:none;z-index:2;border-radius:1px;
-  background:linear-gradient(180deg,var(--roble-claro) 0 2px,var(--roble) 2px calc(100% - 2px),var(--roble-canto)),
-    repeating-linear-gradient(90deg,rgba(120,80,30,.08) 0 2px,transparent 2px 23px);
-  background-blend-mode:multiply;box-shadow:0 6px 10px -6px rgba(0,0,0,.35)}
-:root[data-estilo="nordico"] .balda .riel{padding-bottom:0}
+:root[data-estilo="nordico"] .balda .luz,:root[data-estilo="nordico"] .balda .halo,
 :root[data-estilo="nordico"] .balda::after{display:none}
-:root[data-estilo="nordico"] .balda.hay-mas .riel{-webkit-mask-image:linear-gradient(90deg,#000 86%,transparent);mask-image:linear-gradient(90deg,#000 86%,transparent)}
+/* La tabla vuela 3 px por fuera de los perfiles laterales */
+:root[data-estilo="nordico"] .balda .suelo{left:-6px;right:-6px;bottom:0;height:10px;border-radius:1px;clip-path:none;z-index:3;
+  background:var(--n-alu);box-shadow:0 16px 20px -10px rgba(0,0,0,.6),inset 0 1px 0 var(--n-alu-brillo)}
+/* Tira de libros: abajo, gap de 2 px, primer libro a 24 px; las lamas no se mueven con el carrusel */
+:root[data-estilo="nordico"] .balda .riel{margin-top:0;padding:8px 24px 0;scroll-padding-left:24px;gap:2px}
+:root[data-estilo="nordico"] .balda.hay-mas .riel{-webkit-mask-image:none;mask-image:none}
 
-/* Etiquetas Dymo: cinta de plástico negra brillante con las letras en relieve blancas.
-   La lleva la placa del género y las pestañas de los separadores. */
-:root[data-estilo="nordico"]{--dymo-cinta:linear-gradient(180deg,#3a3a3a 0,#161616 38%,#0b0b0b 62%,#1c1c1c 100%);
-  --dymo-letra:#f4f4f2;--dymo-font:"Courier New",Courier,"IBM Plex Mono",monospace;--dymo-relieve:0 1px 0 rgba(0,0,0,.85),0 -1px 0 rgba(255,255,255,.28),0 0 1px rgba(255,255,255,.35)}
-:root[data-estilo="nordico"] .placa{bottom:-21px;border-radius:2px;padding:4px 11px 3px;background:var(--dymo-cinta);color:var(--dymo-letra);
-  font:700 12px/1.2 var(--dymo-font);letter-spacing:.12em;text-shadow:var(--dymo-relieve);transform:translateX(-50%);
-  box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 3px rgba(0,0,0,.35)}
+/* ---------- Libros ---------- */
+:root[data-estilo="nordico"] .balda .lomo{box-shadow:6px 2px 10px -3px rgba(0,0,0,.5),1px 0 0 rgba(0,0,0,.15)}
+:root[data-estilo="nordico"] .lomo .cinta{background:var(--n-cinta)}
 
-/* Separadores: varilla en tinta y pestaña de cinta Dymo vertical */
-:root[data-estilo="nordico"] .balda .riel .separador::before{background:var(--montante);opacity:.5;box-shadow:none}
-:root[data-estilo="nordico"] .balda .riel .separador .pestana{background:linear-gradient(90deg,#3a3a3a 0,#161616 38%,#0b0b0b 62%,#1c1c1c 100%);
-  border:0;border-radius:2px;max-height:70px;box-shadow:1px 0 0 rgba(255,255,255,.14) inset,-2px 2px 4px rgba(0,0,0,.35)}
-:root[data-estilo="nordico"] .balda .riel .separador .pestana span{color:var(--dymo-letra);font:700 9.5px/1.5 var(--dymo-font);letter-spacing:.04em;max-height:62px;
-  text-shadow:1px 0 0 rgba(0,0,0,.85),-1px 0 0 rgba(255,255,255,.28),0 0 1px rgba(255,255,255,.35)}
-:root[data-estilo="nordico"] .balda .riel .separador.letra .pestana span{font:700 14px/1 var(--dymo-font);letter-spacing:0}
+/* ---------- Etiquetas Dymo ---------- */
+:root[data-estilo="nordico"]{--dymo-cinta:linear-gradient(180deg,#3d3d40 0%,#17171a 20%,#09090a 58%,#26262a 100%);
+  --dymo-relieve:0 1px 0 rgba(0,0,0,.9),0 -1px 0 rgba(255,255,255,.3);--dymo-sombra:inset 0 1px 0 rgba(255,255,255,.28),0 2px 5px rgba(0,0,0,.45);
+  --dymo-font:"Courier New",Courier,"IBM Plex Mono",monospace}
+/* Placa del género: centrada y montada sobre la tabla (unos 24 px de alto; la zona táctil la amplía ::before) */
+:root[data-estilo="nordico"] .placa{bottom:-7px;z-index:4;max-width:80%;padding:5px 12px;border-radius:1px;background:var(--dymo-cinta);color:#f6f6f3;
+  font:700 13px/1.1 var(--dymo-font);letter-spacing:.22em;text-shadow:var(--dymo-relieve);box-shadow:var(--dymo-sombra);transform:translateX(-50%)}
+:root[data-estilo="nordico"] .placa::before{inset:-10px -8px}
+/* Separador: línea de 1,5 px desde la pestaña hasta la tabla; pestaña vertical abierta a la izquierda, arriba del todo */
+:root[data-estilo="nordico"] .balda .riel .separador,:root[data-estilo="nordico"] .balda .riel .separador:first-child{width:1.5px;margin:0 2px}
+:root[data-estilo="nordico"] .balda .riel .separador::before{left:0;width:1.5px;height:100%;background:var(--n-separador);box-shadow:none;opacity:1}
+:root[data-estilo="nordico"] .balda .riel .separador .pestana{left:auto;right:0;top:0;width:auto;min-height:0;max-height:none;padding:5px 3px;
+  border:0;border-radius:1px;background:var(--dymo-cinta);box-shadow:var(--dymo-sombra)}
+:root[data-estilo="nordico"] .balda .riel .separador .pestana span{max-height:none;color:#f6f6f3;font:700 9.5px/1 var(--dymo-font);letter-spacing:.08em;
+  text-transform:uppercase;text-shadow:1px 0 0 rgba(0,0,0,.9),-1px 0 0 rgba(255,255,255,.3);overflow:visible}
+:root[data-estilo="nordico"] .balda .riel .separador.letra .pestana span{font-size:13px;letter-spacing:0}
 
-/* Botón del mueble en la cabecera */
+/* ---------- Aviso «Toca un libro…» ---------- */
+:root[data-estilo="nordico"] .pista{bottom:16px;padding:8px 16px;border:0;border-radius:999px;background:var(--n-aviso);color:var(--n-texto);
+  -webkit-backdrop-filter:none;backdrop-filter:none;font:500 12px var(--sans);letter-spacing:.01em;
+  box-shadow:inset 0 0 0 1px var(--n-filete),0 10px 24px -14px rgba(0,0,0,.5)}
+
+/* ---------- Barra inferior ---------- */
+:root[data-estilo="nordico"] nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:0;background:var(--n-barra);
+  -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:inset 0 1px 0 var(--n-filete);
+  padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+:root[data-estilo="nordico"] nav button{min-height:64px;padding:0;gap:6px;justify-content:center;color:var(--n-texto-2);font:500 10.5px var(--sans);letter-spacing:.04em}
+:root[data-estilo="nordico"] nav button svg{width:22px;height:22px;stroke-width:1.25}
+:root[data-estilo="nordico"] nav button[aria-current="page"]{color:var(--n-texto);font-weight:600}
+:root[data-estilo="nordico"] nav button[aria-current="page"]::after{display:none}
+
+/* ---------- Botón del mueble en la cabecera (los dos estilos) ---------- */
 .cambia-mueble{border:0;background:none;color:var(--muted);width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
 .cambia-mueble svg{width:22px;height:22px}
 .cambia-mueble:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
 .cab-botones{display:flex;align-items:center;margin-right:-10px}
 .cab-botones .rueda{margin-right:0}
+:root[data-estilo="nordico"] .cab-botones{margin-right:0}
