@@ -1,0 +1,56 @@
+/* Estilo «nórdico»: alternativa al nogal y latón, con el botón del mueble de la cabecera.
+   Pared lisa casi blanca, estantería abierta de roble claro con montantes negros finos,
+   etiquetas en tinta y tipografía sin serifa en la cabecera. Solo redefine tokens y el mueble. */
+:root[data-estilo="nordico"]{
+  --bg:#eceeed; --fg:#141414; --muted:#5b6164; --card:#ffffff; --line:#d5d9da;
+  --accent:#141414; --papel:none;
+  --roble:#d9bf96; --roble-claro:#ead6b4; --roble-canto:#c3a476; --fondo-balda:#f7f6f3; --montante:#1b1b1b;
+}
+@media (prefers-color-scheme: dark){
+  :root[data-estilo="nordico"]:not([data-theme="light"]){
+    --bg:#141516; --fg:#f1f1ef; --muted:#9a9ea1; --card:#1f2022; --line:#2e3033; --accent:#f1f1ef;
+    --roble:#a8875d; --roble-claro:#c09f72; --roble-canto:#866a45; --fondo-balda:#1c1d1f; --montante:#d9dadb;
+  }
+}
+:root[data-estilo="nordico"][data-theme="dark"]{
+  --bg:#141516; --fg:#f1f1ef; --muted:#9a9ea1; --card:#1f2022; --line:#2e3033; --accent:#f1f1ef;
+  --roble:#a8875d; --roble-claro:#c09f72; --roble-canto:#866a45; --fondo-balda:#1c1d1f; --montante:#d9dadb;
+}
+:root[data-estilo="nordico"] body{background:var(--bg)}
+
+/* Cabecera y cifras sin serifa */
+:root[data-estilo="nordico"] .marca{font:800 38px/1 var(--sans);letter-spacing:-.04em}
+:root[data-estilo="nordico"] .cuenta b,:root[data-estilo="nordico"] .chip .n{font-family:var(--sans);font-weight:700}
+
+/* El mueble: sin cornisa, zócalo ni pilastras; dos montantes negros y baldas de roble */
+:root[data-estilo="nordico"] .mueble{background:none;box-shadow:none;padding:0 6px;gap:26px;border-radius:0}
+:root[data-estilo="nordico"] .mueble::before,:root[data-estilo="nordico"] .mueble::after{top:-8px;bottom:-8px;height:auto;left:0;right:auto;width:3px;
+  border-radius:2px;background:var(--montante);box-shadow:none;clip-path:none}
+:root[data-estilo="nordico"] .mueble::after{left:auto;right:0}
+:root[data-estilo="nordico"] .balda{background:var(--fondo-balda);box-shadow:0 1px 0 rgba(0,0,0,.04) inset;border-radius:0}
+:root[data-estilo="nordico"] .balda .techo,:root[data-estilo="nordico"] .balda .pared,
+:root[data-estilo="nordico"] .balda .luz,:root[data-estilo="nordico"] .balda .halo{display:none}
+/* La tabla de roble: canto claro arriba, veta suave y sombra corta debajo */
+:root[data-estilo="nordico"] .balda .suelo{left:-6px;right:-6px;bottom:-10px;height:12px;clip-path:none;z-index:2;border-radius:1px;
+  background:linear-gradient(180deg,var(--roble-claro) 0 2px,var(--roble) 2px calc(100% - 2px),var(--roble-canto)),
+    repeating-linear-gradient(90deg,rgba(120,80,30,.08) 0 2px,transparent 2px 23px);
+  background-blend-mode:multiply;box-shadow:0 6px 10px -6px rgba(0,0,0,.35)}
+:root[data-estilo="nordico"] .balda .riel{padding-bottom:0}
+:root[data-estilo="nordico"] .balda::after{display:none}
+:root[data-estilo="nordico"] .balda.hay-mas .riel{-webkit-mask-image:linear-gradient(90deg,#000 86%,transparent);mask-image:linear-gradient(90deg,#000 86%,transparent)}
+
+/* Etiqueta del género: tira negra con letra blanca, pegada al canto de la balda */
+:root[data-estilo="nordico"] .placa{bottom:-20px;border-radius:0;padding:3px 9px;background:var(--montante);color:var(--bg);box-shadow:none;letter-spacing:.2em;font-weight:700}
+
+/* Separadores: pestaña blanca con borde fino y letra negra */
+:root[data-estilo="nordico"] .balda .riel .separador::before{background:var(--montante);opacity:.5;box-shadow:none}
+:root[data-estilo="nordico"] .balda .riel .separador .pestana{background:var(--card);border:1px solid var(--line);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+:root[data-estilo="nordico"] .balda .riel .separador .pestana span{color:var(--fg);font-weight:700}
+:root[data-estilo="nordico"] .balda .riel .separador.letra .pestana span{font:700 12px/1 var(--sans)}
+
+/* Botón del mueble en la cabecera */
+.cambia-mueble{border:0;background:none;color:var(--muted);width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
+.cambia-mueble svg{width:22px;height:22px}
+.cambia-mueble:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+.cab-botones{display:flex;align-items:center;margin-right:-10px}
+.cab-botones .rueda{margin-right:0}

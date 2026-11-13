@@ -59,6 +59,13 @@ async function run() {
     if (pendientes === 0) errores.push('el filtro Pendientes no muestra libros');
     await page.locator('.chip[data-f="todos"]').click();
 
+    // Mueble nórdico: el botón cambia el estilo y vuelve al clásico.
+    await page.locator('#cambia-mueble').click();
+    if (await page.evaluate(() => document.documentElement.dataset.estilo) !== 'nordico') errores.push('el botón no cambia al mueble nórdico');
+    if (await page.locator('.lomo').count() === 0) errores.push('el mueble nórdico no muestra libros');
+    await page.locator('#cambia-mueble').click();
+    if (await page.evaluate(() => document.documentElement.dataset.estilo)) errores.push('el botón no vuelve al mueble clásico');
+
     const antes = await page.locator('#cuenta').innerText();
     await page.locator('#tab-escanear').click();
     await page.locator('#opcion-codigo').click();
