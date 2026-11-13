@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { consultaGoogle, parseGoogleCandidatos, parseOpenLibraryCandidatos, sugiereLibros } from './autocompletar';
+import { afinidad, consultaGoogle, parseGoogleCandidatos, parseOpenLibraryCandidatos, sugiereLibros, type Candidato } from './autocompletar';
 
 const google = { items: [
   { volumeInfo: { title: 'Tokio blues', authors: ['Haruki Murakami'], publishedDate: '2005-03', industryIdentifiers: [{ type: 'ISBN_10', identifier: '8483835045' }, { type: 'ISBN_13', identifier: '9788483835043' }], categories: ['Fiction'], imageLinks: { smallThumbnail: 'http://x/y.jpg' } } },
@@ -28,5 +28,23 @@ describe('autocompletar', () => {
     expect(await sugiereLibros('ab', '', undefined, falla)).toEqual([]);
     expect(llamadas).toBe(0);
     expect(await sugiereLibros('zzzq', '', undefined, falla)).toEqual([]);
+  });
+});
+
+describe('afinidad y mezcla', () => {
+  const c = (titulo: string, autor: string, idioma?: string): Candidato => ({ titulo, autor, anio: 0, isbn: '', ...(idioma ? { idioma } : {}) });
+  it('sin tildes y en cualquier idioma', () => {
+    expect(afinidad(c('Le pays des étés', 'Pierre Adrian', 'fr'), 'le pays des etes', '')).toBe(1);
+    expect(afinidad(c('Pays perdu', 'Pierre Jourde'), 'le pays des etes', '')).toBeLessThan(0.5);
+  });
+  it('junta Google y Open Library y pone primero lo que casa', async () => {
+    const respuestas: Record<string, unknown> = {
+      google: { items: [{ volumeInfo: { title: 'Pays perdu', authors: ['Pierre Jourde'], language: 'fr' } }] },
+      openlibrary: { docs: [{ title: 'Le pays des étés', author_name: ['Pierre Adrian'], first_publish_year: 2026, isbn: ['9782073140920'] }] },
+    };
+    const f = (async (url: string) => ({ ok: true, json: async () => respuestas[url.includes('openlibrary') ? 'openlibrary' : 'google'] })) as unknown as typeof fetch;
+    const r = await sugiereLibros('le pays des etes', 'adrian', undefined, f);
+    expect(r[0]).toMatchObject({ titulo: 'Le pays des étés', isbn: '9782073140920' });
+    expect(r.find((x) => x.titulo === 'Pays perdu')).toBeUndefined();
   });
 });

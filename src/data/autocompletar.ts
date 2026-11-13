@@ -11,13 +11,28 @@ export interface Candidato {
   isbn: string;
   genero?: string;
   portada?: string;
+  /** Idioma de la edición (código de Google Books), para poner primero lo que está en español. */
+  idioma?: string;
 }
 
 const TIEMPO_MAX_MS = 6000;
 const MAX = 6;
 
 const limpia = (t: string) => t.replace(/["+:]/g, ' ').replace(/\s+/g, ' ').trim();
-const clave = (c: Candidato) => `${c.titulo}|${c.autor}`.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const norm = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const clave = (c: Candidato) => norm(`${c.titulo}|${c.autor}`);
+
+/**
+ * Lo bien que un candidato casa con lo escrito: la parte de las palabras escritas (sin tildes)
+ * que aparecen en su título y autor. Las ediciones en español desempatan.
+ */
+export function afinidad(c: Candidato, titulo: string, autor: string): number {
+  const texto = norm(`${c.titulo} ${c.autor}`);
+  const palabras = norm(`${titulo} ${autor}`).split(/[^a-z0-9ñ]+/).filter((w) => w.length >= 2);
+  if (!palabras.length) return 0;
+  const dentro = palabras.filter((w) => texto.includes(w)).length / palabras.length;
+  return dentro + (c.idioma === 'es' ? 0.05 : 0);
+}
 
 /** Consulta de Google Books con lo que haya escrito en cada campo. */
 export function consultaGoogle(titulo: string, autor: string): string {
@@ -43,7 +58,8 @@ export function parseGoogleCandidatos(json: unknown): Candidato[] {
     const img = (info.imageLinks as { smallThumbnail?: string; thumbnail?: string } | undefined);
     const portada = (img?.smallThumbnail ?? img?.thumbnail)?.replace(/^http:/, 'https:');
     const titulo = typeof info.subtitle === 'string' && info.title.length < 4 ? `${info.title}: ${info.subtitle}` : info.title;
-    fuera.push({ titulo, autor: autores.join(', '), anio: Number.isFinite(anio) ? anio : 0, isbn, ...(genero ? { genero } : {}), ...(portada ? { portada } : {}) });
+    const idioma = typeof info.language === 'string' ? info.language : undefined;
+    fuera.push({ titulo, autor: autores.join(', '), anio: Number.isFinite(anio) ? anio : 0, isbn, ...(genero ? { genero } : {}), ...(portada ? { portada } : {}), ...(idioma ? { idioma } : {}) });
   }
   return unicos(fuera);
 }
@@ -65,9 +81,9 @@ export function parseOpenLibraryCandidatos(json: unknown): Candidato[] {
 }
 
 /** Sin repetidos (el mismo título y autor en varias ediciones), quedándose con el primero. */
-function unicos(cs: Candidato[]): Candidato[] {
+function unicos(cs: Candidato[], max = MAX): Candidato[] {
   const vistos = new Set<string>();
-  return cs.filter((c) => (vistos.has(clave(c)) ? false : (vistos.add(clave(c)), true))).slice(0, MAX);
+  return cs.filter((c) => (vistos.has(clave(c)) ? false : (vistos.add(clave(c)), true))).slice(0, max);
 }
 
 async function pide(url: string, fetchFn: typeof fetch, senal?: AbortSignal): Promise<unknown> {
@@ -84,25 +100,32 @@ async function pide(url: string, fetchFn: typeof fetch, senal?: AbortSignal): Pr
 
 const cache = new Map<string, Candidato[]>();
 
-/** Sugerencias para lo escrito (mínimo 3 letras en algún campo). Sin red devuelve []. */
+/**
+ * Sugerencias para lo escrito (mínimo 3 letras en algún campo). Pregunta a la vez a Google Books
+ * (por campos y en texto libre, en cualquier idioma) y a Open Library, junta lo que llegue y lo
+ * ordena por afinidad con lo escrito: así un libro en francés o recién publicado no queda tapado
+ * por resultados que no tienen nada que ver. Sin red devuelve [].
+ */
 export async function sugiereLibros(titulo: string, autor: string, senal?: AbortSignal, fetchFn: typeof fetch = fetch): Promise<Candidato[]> {
   const q = consultaGoogle(titulo, autor);
   if (limpia(titulo).length < 3 && limpia(autor).length < 3) return [];
   if (cache.has(q)) return cache.get(q)!;
-  const base = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q).replace(/%2B/g, '+')}&printType=books&maxResults=20&fields=items(volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,categories,imageLinks))`;
-  let res: Candidato[] = [];
-  try {
-    res = parseGoogleCandidatos(await pide(`${base}&langRestrict=es`, fetchFn, senal));
-    if (res.length < 3) res = unicos([...res, ...parseGoogleCandidatos(await pide(base, fetchFn, senal))]);
-  } catch { /* sin red o cancelada: se prueba el respaldo */ }
-  if (!res.length && !senal?.aborted) {
-    try {
-      const p = new URLSearchParams({ limit: '12', fields: 'title,author_name,first_publish_year,isbn,cover_i' });
-      if (limpia(titulo)) p.set('title', limpia(titulo));
-      if (limpia(autor)) p.set('author', limpia(autor));
-      res = parseOpenLibraryCandidatos(await pide(`https://openlibrary.org/search.json?${p}`, fetchFn, senal));
-    } catch { /* nada */ }
-  }
+  const campos = '&printType=books&maxResults=20&fields=items(volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,categories,imageLinks,language))';
+  const libre = [limpia(titulo), limpia(autor)].filter(Boolean).join(' ');
+  const google = (consulta: string) => pide(`https://www.googleapis.com/books/v1/volumes?q=${consulta}${campos}`, fetchFn, senal)
+    .then(parseGoogleCandidatos, () => [] as Candidato[]);
+  const ol = new URLSearchParams({ q: libre, limit: '12', fields: 'title,author_name,first_publish_year,isbn,cover_i' });
+  const [porCampos, enLibre, openLibrary] = await Promise.all([
+    google(encodeURIComponent(q).replace(/%2B/g, '+')),
+    google(encodeURIComponent(libre)),
+    pide(`https://openlibrary.org/search.json?${ol}`, fetchFn, senal).then(parseOpenLibraryCandidatos, () => [] as Candidato[]),
+  ]);
+  const todos = unicos([...porCampos, ...enLibre, ...openLibrary], 60)
+    .map((c, i) => ({ c, a: afinidad(c, titulo, autor), i }))
+    .filter((x) => x.a >= 0.5)
+    .sort((x, y) => y.a - x.a || x.i - y.i)
+    .map((x) => x.c);
+  const res = todos.slice(0, MAX);
   if (res.length) cache.set(q, res);
   return res;
 }
