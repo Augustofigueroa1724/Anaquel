@@ -140,3 +140,8 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .chip-genero .quita-genero{padding:0 10px 0 0;color:var(--muted)}
 .chip-genero.nuevo{padding:0 12px;min-height:38px;cursor:pointer;color:var(--accent);border-style:dashed}
 .selector-genero .fila-anadir{margin-top:10px}
+
+/* Formularios en panel (añadir a mano) */
+.estados.dos{grid-template-columns:repeat(2,minmax(0,1fr))}
+.panel .botones{display:flex;gap:10px;margin-top:12px}
+.panel .botones .btn{flex:1}

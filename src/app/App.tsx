@@ -8,6 +8,7 @@ import { Filtros } from '../features/estanteria/Filtros';
 import { GeneroActivo } from '../features/estanteria/GeneroActivo';
 import { Hoja } from '../features/ficha/Hoja';
 import { LibroVuelo } from '../features/libro3d/LibroVuelo';
+import { AnadirManual } from '../features/manual/AnadirManual';
 import { delAnaquel, esDeseo, filtrar } from '../domain/libro';
 import { useBiblioteca } from './biblioteca';
 import { arrancaCuenta, useCuenta } from './cuenta';
@@ -25,6 +26,7 @@ const NOMBRES: Record<Pestana, string> = { estanteria: 'Anaquel', deseos: 'Lo qu
 export default function App() {
   const [pestana, setPestana] = useState<Pestana>('estanteria');
   const [ajustes, setAjustes] = useState(false);
+  const [manual, setManual] = useState(false);
   const libros = useBiblioteca((s) => s.libros);
   const filtro = useBiblioteca((s) => s.filtro);
   const cerrar = useBiblioteca((s) => s.cerrar);
@@ -37,7 +39,7 @@ export default function App() {
 
   useEffect(() => { void arrancaCuenta(); }, []);
   useEffect(() => {
-    const alPulsar = (e: KeyboardEvent) => { if (e.key === 'Escape') { cerrar(); setAjustes(false); } };
+    const alPulsar = (e: KeyboardEvent) => { if (e.key === 'Escape') { cerrar(); setAjustes(false); setManual(false); } };
     window.addEventListener('keydown', alPulsar);
     return () => window.removeEventListener('keydown', alPulsar);
   }, [cerrar]);
@@ -77,7 +79,7 @@ export default function App() {
             </section>
           )}
           {pestana === 'deseos' && <section className="desplaza"><Deseos /></section>}
-          {pestana === 'escanear' && <section id="escanear"><Escanear /></section>}
+          {pestana === 'escanear' && <section id="escanear"><Escanear onManual={() => setManual(true)} /></section>}
           {pestana === 'amigos' && <section className="desplaza"><Amigos /></section>}
         </main>
 
@@ -99,6 +101,12 @@ export default function App() {
       <LibroVuelo />
       <Hoja />
       {ajustes && <Ajustes onCerrar={() => setAjustes(false)} />}
+      {manual && (
+        <AnadirManual
+          onCerrar={() => setManual(false)}
+          onAnadido={(posesion) => { setManual(false); setPestana(posesion === 'quiero' ? 'deseos' : 'estanteria'); }}
+        />
+      )}
     </>
   );
 }

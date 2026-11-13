@@ -71,6 +71,15 @@ async function run() {
     const despues = await page.locator('#cuenta').innerText();
     if (antes === despues) errores.push('añadir un libro simulado no sube el contador');
 
+    // Añadir a mano desde la pestaña Escanear.
+    await page.locator('#tab-escanear').click();
+    await page.locator('#manual').click();
+    await page.locator('.panel input').first().fill('Libro de prueba a mano');
+    await page.locator('.panel button[type=submit]').click();
+    await page.waitForSelector('.panel', { state: 'detached' });
+    const trasManual = await page.locator('#cuenta').innerText();
+    if (trasManual === despues) errores.push('añadir a mano no sube el contador');
+
     // Pestañas nuevas: lista de deseos, amigos (sin sesión) y ajustes.
     for (const id of ['#tab-deseos', '#tab-amigos', '#tab-estanteria']) {
       await page.locator(id).click();

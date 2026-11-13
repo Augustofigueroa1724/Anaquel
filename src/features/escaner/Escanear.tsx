@@ -12,7 +12,7 @@ const AVISOS: Record<string, string> = {
 };
 
 /** Visor de la cámara. En la app nativa lee el ISBN; en el navegador queda «Simular lectura». */
-export function Escanear() {
+export function Escanear({ onManual }: { onManual: () => void }) {
   const simular = useBiblioteca((s) => s.simularLectura);
   const leerIsbn = useBiblioteca((s) => s.leerIsbn);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -43,6 +43,7 @@ export function Escanear() {
           </button>
         )}
         {!NATIVO && <button className="btn" id="simular" onClick={simular}>Simular lectura</button>}
+        <button className="btn sec" id="manual" onClick={onManual}>Añadir a mano</button>
       </div>
     </div>
   );
