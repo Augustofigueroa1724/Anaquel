@@ -88,7 +88,8 @@ export function contar(libros: readonly Libro[]): Record<Filtro, number> {
 }
 
 export const anchoLomo = (id: number): number => 26 + ((id * 7) % 4) * 3;
-export const altoLomo = (id: number): number => 124 + (id % 5) * 10;
+/** Alto del lomo: entre 92 y 122 px (más bajos que el prototipo para dejar sitio arriba a las pestañas de los separadores). */
+export const altoLomo = (id: number): number => 92 + (id % 5) * 7.5;
 
 /** Llena las baldas por ancho: un lomo nuevo pasa a la balda siguiente si no cabe. */
 export function repartePorBaldas(libros: readonly Libro[], util: number, separacion = 2): Libro[][] {
@@ -213,13 +214,8 @@ export function apellido(autor: string): string {
 /** Clave para ordenar por apellido, sin tildes ni mayúsculas. */
 export const claveAutor = (autor: string): string => sinTildes(apellido(autor));
 
-/** Nombre para la pestaña: desde el apellido («García Márquez», «Murakami»), que es lo que se busca. */
-function nombrePestana(autor: string): string {
-  const ap = apellido(autor);
-  const i = autor.indexOf(ap);
-  const desde = i >= 0 ? autor.slice(i) : ap;
-  return desde.length <= 15 ? desde : ap;
-}
+/** Nombre para la pestaña: solo el primer apellido («García», «Murakami»), que siempre cabe. */
+const nombrePestana = (autor: string): string => apellido(autor);
 
 export type Seccion = { tipo: 'autor' | 'letra'; etiqueta: string; libros: Libro[] };
 

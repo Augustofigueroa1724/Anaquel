@@ -49,8 +49,8 @@ describe('dimensiones del lomo', () => {
     for (let id = 0; id < 50; id++) {
       expect(anchoLomo(id)).toBeGreaterThanOrEqual(26);
       expect(anchoLomo(id)).toBeLessThanOrEqual(35);
-      expect(altoLomo(id)).toBeGreaterThanOrEqual(124);
-      expect(altoLomo(id)).toBeLessThanOrEqual(164);
+      expect(altoLomo(id)).toBeGreaterThanOrEqual(92);
+      expect(altoLomo(id)).toBeLessThanOrEqual(122);
     }
   });
 });
@@ -128,7 +128,7 @@ describe('seccionesPorAutor', () => {
       l(1, 'Gabriel García Márquez', 1967), l(2, 'Gabriel García Márquez', 1985),
       l(3, 'Julio Cortázar'), l(4, 'Carmen Laforet'), l(5, 'Juan Goytisolo'), l(6, 'Gabriel Gamoneda'),
     ]);
-    expect(s.map((x) => `${x.tipo}:${x.etiqueta}`)).toEqual(['letra:C', 'letra:G', 'autor:García Márquez', 'letra:L']);
+    expect(s.map((x) => `${x.tipo}:${x.etiqueta}`)).toEqual(['letra:C', 'letra:G', 'autor:García', 'letra:L']);
     expect(s[1].libros.map((x) => x.id)).toEqual([6, 5]);
     expect(s[2].libros.map((x) => x.id)).toEqual([1, 2]);
   });
