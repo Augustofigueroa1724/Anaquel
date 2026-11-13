@@ -155,18 +155,20 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .tarjeta-opcion small{font-size:14px;color:var(--muted);line-height:1.35}
 .volver-visor{position:absolute;top:12px;left:max(12px,env(safe-area-inset-left,0px));z-index:3;border:0;background:rgba(0,0,0,.35);color:#f2f0ec;border-radius:999px;padding:0 14px;min-height:40px;font:600 14px var(--sans);cursor:pointer}
 
-/* Separador entre libros (guía de biblioteca): una tarjeta fina con una pestaña que sobresale
-   por arriba, con el autor (si tiene más de un libro) o la letra del apellido escritos en vertical. */
-.balda .riel .separador{flex:none;position:relative;width:17px;height:112px;margin:0 2px 0 4px;scroll-snap-align:start}
-.balda .riel .separador::before{content:"";position:absolute;left:0;bottom:0;width:5px;height:100%;border-radius:1px 1px 0 0;
-  background:linear-gradient(90deg,#2a2622,#4a433b 50%,#2a2622);box-shadow:2px 0 3px rgba(0,0,0,.35)}
+/* Separador entre libros (guía de biblioteca): una tarjeta de latón con una pestaña que sobresale
+   por encima de los lomos, con el apellido del autor (si tiene más de un libro) o la letra en vertical. */
+.balda .riel .separador{flex:none;position:relative;width:20px;height:96px;margin:0 3px 0 4px;scroll-snap-align:start}
 .balda .riel .separador:first-child{margin-left:0}
-.balda .riel .separador .pestana{position:absolute;left:0;bottom:calc(100% - 10px);width:17px;max-height:62px;min-height:22px;
-  padding:5px 0;box-sizing:border-box;border-radius:4px 4px 0 0;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(90deg,#3a342e,#5a5148 55%,#3a342e);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),2px 0 3px rgba(0,0,0,.3)}
+.balda .riel .separador::before{content:"";position:absolute;left:0;bottom:0;width:6px;height:100%;border-radius:1px 1px 0 0;
+  background:linear-gradient(90deg,#7a5c2a,#c9a25a 50%,#7a5c2a);box-shadow:2px 0 4px rgba(0,0,0,.45)}
+.balda .riel .separador .pestana{position:absolute;left:0;bottom:calc(100% - 12px);width:20px;min-height:28px;max-height:76px;
+  padding:6px 0;box-sizing:border-box;border-radius:5px 5px 0 0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(90deg,#a9853f,#e2bf78 50%,#a9853f);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),2px 0 5px rgba(0,0,0,.45)}
 .balda .riel .separador .pestana span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-height:52px;color:var(--accent);font:700 8.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}
-.balda .riel .separador.letra .pestana span{font:600 12px/1 var(--display);letter-spacing:0;text-transform:none}
-.balda .riel .separador.autor .pestana{max-height:92px}
-.balda .riel .separador.autor .pestana span{max-height:82px;font-size:8px;letter-spacing:.08em}
-.balda .riel .separador.autor{height:66px}
+  max-height:64px;color:#2a1d0e;font:800 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.balda .riel .separador.letra{height:110px}
+.balda .riel .separador.letra .pestana span{font:700 14px/1 var(--display);letter-spacing:0;text-transform:none}
+.balda .riel .separador.autor{height:62px}
+.balda .riel .separador.autor .pestana{max-height:106px}
+.balda .riel .separador.autor .pestana span{max-height:94px;font-size:8.5px;letter-spacing:.06em}

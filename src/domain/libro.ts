@@ -213,12 +213,12 @@ export function apellido(autor: string): string {
 /** Clave para ordenar por apellido, sin tildes ni mayúsculas. */
 export const claveAutor = (autor: string): string => sinTildes(apellido(autor));
 
-/** Nombre corto para la pestaña: el nombre entero si cabe, si no desde el apellido. */
+/** Nombre para la pestaña: desde el apellido («García Márquez», «Murakami»), que es lo que se busca. */
 function nombrePestana(autor: string): string {
-  if (autor.length <= 16) return autor;
   const ap = apellido(autor);
-  const desde = autor.slice(autor.indexOf(ap));
-  return desde.length <= 16 ? desde : ap;
+  const i = autor.indexOf(ap);
+  const desde = i >= 0 ? autor.slice(i) : ap;
+  return desde.length <= 15 ? desde : ap;
 }
 
 export type Seccion = { tipo: 'autor' | 'letra'; etiqueta: string; libros: Libro[] };
