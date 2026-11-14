@@ -19,7 +19,7 @@ section{background:var(--card);border-radius:20px;padding:18px;display:grid;gap:
 .ficha{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
 @media (max-width:560px){.ficha{grid-template-columns:1fr}}
 .tel{background:#1a1612;border-radius:22px;padding:22px 16px 0;display:grid;justify-items:center;gap:16px;overflow:hidden}
-.libro{width:150px;aspect-ratio:2/3;border-radius:2px 4px 4px 2px;transform:perspective(900px) rotateY(-18deg) rotateX(5deg);
+.libro{width:150px;aspect-ratio:128/195;background-size:100% 100%!important;border-radius:2px 4px 4px 2px;transform:perspective(900px) rotateY(-18deg) rotateX(5deg);
   box-shadow:-6px 0 0 rgba(0,0,0,.35) inset,18px 22px 30px rgba(0,0,0,.55);background:#7a2b25 center/cover;position:relative;overflow:hidden}
 .libro::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,.18),transparent 40%,rgba(0,0,0,.12))}
 .libro.gen{display:grid;place-items:center;text-align:center;color:#f4ecdc;padding:16px;box-sizing:border-box;font:italic 500 17px/1.15 var(--display);
@@ -65,7 +65,7 @@ section{background:var(--card);border-radius:20px;padding:18px;display:grid;gap:
 .leyenda b{color:var(--fg)}
 .portadas{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
 .portadas figure{margin:0;flex:none;width:86px}
-.portadas img{width:86px;height:128px;object-fit:cover;display:block;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.portadas{align-items:flex-end}.portadas img{width:86px;height:auto;display:block;box-shadow:0 4px 10px rgba(0,0,0,.25)}
 .portadas figcaption{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.25}
 </style>
 <main>
