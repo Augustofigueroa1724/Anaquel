@@ -19,3 +19,6 @@ jobs:
         with:
           node-version: 22
       - run: node tools/consulta-isbn.mjs "${{ inputs.isbn }}"
+      - name: Variantes de portada (solo con ISBN)
+        if: ${{ !contains(inputs.isbn, ' ') }}
+        run: node tools/prueba-portadas.mjs ${{ inputs.isbn }}
