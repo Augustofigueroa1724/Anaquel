@@ -3,7 +3,7 @@
  * Se mide con un lienzo y las mismas fuentes que el CSS de cada tipo de lomo. Si cambian las
  * fuentes o tamaños de `.lomo` en anaquel.css o formulario.css, hay que cambiarlos aquí.
  */
-import { coleccionDe, type Libro } from '../../domain/libro';
+import { ALTO_MAX_LOMO, apellido, coleccionDe, type Coleccion, type Libro } from '../../domain/libro';
 
 type Tipo = 'folio' | 'blanche' | 'albin' | 'clasico' | 'moderno' | 'condensado';
 interface Letra { fuente: string; px: number; espaciado: number; mayus?: boolean }
@@ -42,8 +42,44 @@ function largo(texto: string, l: Letra): number {
   return total;
 }
 
+const receta = (libro: Libro): Receta => RECETAS[(coleccionDe(libro) ?? libro.edicion) as Tipo];
+
+/**
+ * Autor que se escribe en el lomo: el nombre completo, o solo el apellido cuando con el nombre
+ * completo el lomo pasaría del tope de alto.
+ */
+export function autorLomo(libro: Libro): string {
+  const r = receta(libro);
+  if (!r.autor) return libro.autor;
+  const completo = largo(libro.titulo, r.titulo) + largo(libro.autor, r.autor) + r.fijo;
+  return completo > ALTO_MAX_LOMO ? apellido(libro.autor) : libro.autor;
+}
+
 /** { texto: px que ocupan autor y título; fijo: px del resto del lomo }. */
 export function medidaLomo(libro: Libro): { texto: number; fijo: number } {
-  const r = RECETAS[(coleccionDe(libro) ?? libro.edicion) as Tipo];
-  return { texto: largo(libro.titulo, r.titulo) + (r.autor ? largo(libro.autor, r.autor) : 0), fijo: r.fijo };
+  const r = receta(libro);
+  return { texto: largo(libro.titulo, r.titulo) + (r.autor ? largo(autorLomo(libro), r.autor) : 0), fijo: r.fijo };
 }
+
+/** Alto mínimo de cada colección (la Blanche es más alta que el bolsillo Folio). */
+const ALTO_BASE: Record<Coleccion, number> = { folio: 200, blanche: 220, albin: 215 };
+
+/**
+ * Todos los libros de una colección miden lo mismo, como en la estantería de verdad: el alto que
+ * necesita el de texto más largo (con tope), calculado sobre todo el anaquel para que no cambie
+ * al filtrar ni de una balda a otra.
+ */
+export function altosPorColeccion(libros: readonly Libro[]): Partial<Record<Coleccion, number>> {
+  const altos: Partial<Record<Coleccion, number>> = {};
+  for (const l of libros) {
+    const col = coleccionDe(l);
+    if (!col) continue;
+    const { texto, fijo } = medidaLomo(l);
+    altos[col] = Math.min(ALTO_MAX_LOMO, Math.max(altos[col] ?? ALTO_BASE[col], Math.ceil(texto + fijo)));
+  }
+  return altos;
+}
+
+/** Cuánto encoger la letra (hasta 0,78) si el texto no cabe en un lomo de ese alto. */
+export const escalaPara = (alto: number, texto: number, fijo: number): number =>
+  (texto > alto - fijo ? Math.max(0.78, (alto - fijo) / texto) : 1);

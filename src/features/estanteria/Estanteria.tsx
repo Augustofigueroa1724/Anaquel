@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomoDe, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomoDe, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, type Coleccion, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
-import { medidaLomo, olvidaMedidas } from './medida';
+import { altosPorColeccion, autorLomo, escalaPara, medidaLomo, olvidaMedidas } from './medida';
 
 /** Interior del lomo: el de su colección (Folio, Blanche, Albin Michel) o el de la edición genérica. */
 export function Interior({ libro }: { libro: Libro }) {
@@ -11,7 +11,7 @@ export function Interior({ libro }: { libro: Libro }) {
   const titulo = (
     <span className="zona"><span className="tit"><span>{libro.titulo}</span></span></span>
   );
-  const autor = <span className="aut"><span>{libro.autor}</span></span>;
+  const autor = <span className="aut"><span>{autorLomo(libro)}</span></span>;
   if (col === 'folio') return <>{autor}{titulo}<span className="logo">folio</span></>;
   if (col === 'blanche') return <><span className="filete" />{autor}{titulo}<span className="logo">nrf</span><span className="filete" /></>;
   if (col === 'albin') return <>{autor}{titulo}<span className="logo vertical"><span>Albin Michel</span></span></>;
@@ -30,13 +30,18 @@ export const claseLomo = (libro: Libro): string => {
   return col ? `ed-${col}` : libro.edicion;
 };
 
-function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }) {
+type Altos = Partial<Record<Coleccion, number>>;
+
+function Lomo({ libro, onAbrir, altos }: { libro: Libro; onAbrir?: (l: Libro) => void; altos: Altos }) {
   const abrirEnStore = useBiblioteca((s) => s.abrir);
   const abrir = (id: number) => (onAbrir ? onAbrir(libro) : abrirEnStore(id));
   const c = colorLomo(libro);
   const { tinta, oro } = tintaPara(c);
   const { texto, fijo } = medidaLomo(libro);
-  const { alto, escala } = altoLomoDe(libro.id, texto, fijo);
+  // Los de una colección miden todos lo mismo; el resto, lo que pide su texto.
+  const col = coleccionDe(libro);
+  const comun = col ? altos[col] : undefined;
+  const { alto, escala } = comun ? { alto: comun, escala: escalaPara(comun, texto, fijo) } : altoLomoDe(libro.id, texto, fijo);
   const estilo = {
     '--c': c,
     '--t': tinta,
@@ -64,8 +69,8 @@ function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }
  * Una balda por género, en carrusel: los lomos van alineados a la izquierda y la balda
  * se desliza en horizontal, sin límite de libros (100 novelas caben en la misma balda).
  */
-function Balda({ libros, etiqueta, onAbrir, soloLectura }: {
-  libros: Libro[]; etiqueta?: string; onAbrir?: (l: Libro) => void; soloLectura?: boolean;
+function Balda({ libros, etiqueta, onAbrir, soloLectura, altos }: {
+  libros: Libro[]; etiqueta?: string; onAbrir?: (l: Libro) => void; soloLectura?: boolean; altos: Altos;
 }) {
   const setFiltroGenero = useBiblioteca((s) => s.setFiltroGenero);
   const riel = useRef<HTMLDivElement>(null);
@@ -97,7 +102,7 @@ function Balda({ libros, etiqueta, onAbrir, soloLectura }: {
                 <span className="pestana"><span>{sec.etiqueta}</span></span>
               </span>
             )}
-            {sec.libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} />)}
+            {sec.libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} altos={altos} />)}
           </Fragment>
         ))}
       </div>
@@ -128,12 +133,14 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
   const ref = useRef<HTMLDivElement>(null);
 
   // Las alturas de los lomos se miden con las fuentes: al terminar de cargar se vuelven a medir.
-  const [, setFuentes] = useState(0);
+  const [fuentes, setFuentes] = useState(0);
   useEffect(() => {
     let vivo = true;
     void document.fonts?.ready.then(() => { if (vivo) { olvidaMedidas(); setFuentes((n) => n + 1); } });
     return () => { vivo = false; };
   }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const altos = useMemo(() => altosPorColeccion(libros), [libros, fuentes]);
 
   // Una balda por género, en carrusel horizontal; la placa lleva el nombre y cuántos hay.
   const baldas = useMemo(
@@ -151,7 +158,7 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
         </p>
       ) : (
         <div className="mueble">
-          {baldas.map((b) => <Balda key={b.clave} libros={b.libros} etiqueta={b.etiqueta} onAbrir={onAbrir} soloLectura={soloLectura} />)}
+          {baldas.map((b) => <Balda key={b.clave} libros={b.libros} etiqueta={b.etiqueta} onAbrir={onAbrir} soloLectura={soloLectura} altos={altos} />)}
         </div>
       )}
     </div>
