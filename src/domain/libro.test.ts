@@ -170,3 +170,14 @@ describe('coleccionDe', () => {
     expect(coleccionDe({ isbn: '', editorial: 'Folio' })).toBe('folio');
   });
 });
+
+describe('grosor por páginas', () => {
+  it('mínimo legible, crece con las páginas y tiene tope', async () => {
+    const { anchoPorPaginas, anchoLomoDe, anchoLomo } = await import('./libro');
+    expect(anchoPorPaginas(90)).toBe(26);
+    expect(anchoPorPaginas(300)).toBe(35);
+    expect(anchoPorPaginas(528)).toBe(49);
+    expect(anchoPorPaginas(1500)).toBe(60);
+    expect(anchoLomoDe({ id: 7 })).toBe(anchoLomo(7));
+  });
+});

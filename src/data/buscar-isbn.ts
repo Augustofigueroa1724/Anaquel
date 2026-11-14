@@ -11,6 +11,7 @@ export interface MetaLibro {
   /** Portada real (https). */
   portada?: string;
   editorial?: string;
+  paginas?: number;
 }
 
 /** URL https de la miniatura de Google Books, sin el doblez de página («edge=curl»). */
@@ -32,7 +33,9 @@ export function parseGoogleBooks(json: unknown): MetaLibro | null {
   const img = info.imageLinks as { thumbnail?: string; smallThumbnail?: string } | undefined;
   const portada = img?.thumbnail ?? img?.smallThumbnail;
   const editorial = typeof info.publisher === 'string' ? info.publisher : undefined;
+  const paginas = typeof info.pageCount === 'number' && info.pageCount > 0 ? info.pageCount : undefined;
   return {
+    ...(paginas ? { paginas } : {}),
     titulo: info.title,
     autor: autores.join(', ') || AUTOR_DESCONOCIDO,
     anio: Number.isFinite(anio) ? anio : 0,
@@ -53,7 +56,7 @@ export function parseOpenLibrary(json: unknown): MetaLibro | null {
   const raiz = json as Record<string, unknown> | null;
   const clave = raiz && Object.keys(raiz).find((k) => k.startsWith('ISBN:'));
   const libro = (clave ? raiz![clave] : raiz) as { title?: unknown; publish_date?: unknown; authors?: { name?: unknown }[]; subjects?: ({ name?: unknown } | string)[];
-    cover?: { large?: unknown; medium?: unknown }; publishers?: ({ name?: unknown } | string)[] } | null;
+    cover?: { large?: unknown; medium?: unknown }; publishers?: ({ name?: unknown } | string)[]; number_of_pages?: unknown } | null;
   if (typeof libro?.title !== 'string') return null;
   const anio = Number.parseInt(String(libro.publish_date ?? '').match(/\d{4}/)?.[0] ?? '', 10);
   const autores = Array.isArray(libro.authors) ? libro.authors.map((a) => a?.name).filter((n): n is string => typeof n === 'string') : [];
@@ -64,6 +67,7 @@ export function parseOpenLibrary(json: unknown): MetaLibro | null {
   return {
     titulo: libro.title, autor: autores.join(', ') || AUTOR_DESCONOCIDO, anio: Number.isFinite(anio) ? anio : 0,
     ...(genero ? { genero } : {}), ...(portada ? { portada: portada.replace(/^http:/, 'https:') } : {}), ...(ed ? { editorial: ed } : {}),
+    ...(typeof libro.number_of_pages === 'number' && libro.number_of_pages > 0 ? { paginas: libro.number_of_pages } : {}),
   };
 }
 
@@ -88,7 +92,13 @@ export function parseBnf(xml: string): MetaLibro | null {
     return nom ? `${nom} ${ap}` : ap;
   }).filter(Boolean);
   const anio = Number.parseInt(campo('date')[0]?.match(/\d{4}/)?.[0] ?? '', 10);
-  return { titulo, autor: autores.join(', ') || AUTOR_DESCONOCIDO, anio: Number.isFinite(anio) ? anio : 0 };
+  const genero = generoDesdeCategorias([...campo('subject'), ...campo('type').filter((t) => !/texte|text/i.test(t))]);
+  const editorial = campo('publisher')[0]?.split(':').pop()?.trim();
+  const paginas = Number.parseInt(campo('format').join(' ').match(/(\d+)\s*p\./)?.[1] ?? '', 10);
+  return {
+    titulo, autor: autores.join(', ') || AUTOR_DESCONOCIDO, anio: Number.isFinite(anio) ? anio : 0,
+    ...(genero ? { genero } : {}), ...(editorial ? { editorial } : {}), ...(paginas > 0 ? { paginas } : {}),
+  };
 }
 
 const urlBnf = (isbn: string) =>
@@ -144,6 +154,7 @@ export async function buscarPorIsbn(
     ...(base.genero || !otra?.genero ? {} : { genero: otra.genero }),
     ...(base.portada || !otra?.portada ? {} : { portada: otra.portada }),
     ...(base.editorial || !otra?.editorial ? {} : { editorial: otra.editorial }),
+    ...(base.paginas || !otra?.paginas ? {} : { paginas: otra.paginas }),
   });
   for (const fuente of fuentes) {
     const meta = await fuente();

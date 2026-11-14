@@ -15,6 +15,7 @@ export interface Candidato {
   /** Idioma de la edición (código de Google Books), para poner primero lo que está en español. */
   idioma?: string;
   editorial?: string;
+  paginas?: number;
 }
 
 const TIEMPO_MAX_MS = 6000;
@@ -62,7 +63,8 @@ export function parseGoogleCandidatos(json: unknown): Candidato[] {
     const titulo = typeof info.subtitle === 'string' && info.title.length < 4 ? `${info.title}: ${info.subtitle}` : info.title;
     const idioma = typeof info.language === 'string' ? info.language : undefined;
     const editorial = typeof info.publisher === 'string' ? info.publisher : undefined;
-    fuera.push({ titulo, autor: autores.join(', '), anio: Number.isFinite(anio) ? anio : 0, isbn, ...(genero ? { genero } : {}), ...(portada ? { portada } : {}), ...(idioma ? { idioma } : {}), ...(editorial ? { editorial } : {}) });
+    const paginas = typeof info.pageCount === 'number' && info.pageCount > 0 ? info.pageCount : undefined;
+    fuera.push({ titulo, autor: autores.join(', '), anio: Number.isFinite(anio) ? anio : 0, isbn, ...(genero ? { genero } : {}), ...(portada ? { portada } : {}), ...(idioma ? { idioma } : {}), ...(editorial ? { editorial } : {}), ...(paginas ? { paginas } : {}) });
   }
   return unicos(fuera);
 }
@@ -78,7 +80,8 @@ export function parseOpenLibraryCandidatos(json: unknown): Candidato[] {
     const isbn = isbns.find((i) => i.length === 13) ?? isbns[0] ?? '';
     const anio = typeof d.first_publish_year === 'number' ? d.first_publish_year : 0;
     const portada = typeof d.cover_i === 'number' ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : undefined;
-    fuera.push({ titulo: d.title, autor: autores[0], anio, isbn, ...(portada ? { portada } : {}) });
+    const paginas = typeof d.number_of_pages_median === 'number' ? d.number_of_pages_median : undefined;
+    fuera.push({ titulo: d.title, autor: autores[0], anio, isbn, ...(portada ? { portada } : {}), ...(paginas ? { paginas } : {}) });
   }
   return unicos(fuera);
 }
@@ -113,11 +116,11 @@ export async function sugiereLibros(titulo: string, autor: string, senal?: Abort
   const q = consultaGoogle(titulo, autor);
   if (limpia(titulo).length < 3 && limpia(autor).length < 3) return [];
   if (cache.has(q)) return cache.get(q)!;
-  const campos = '&printType=books&maxResults=20&fields=items(volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,categories,imageLinks,language,publisher))';
+  const campos = '&printType=books&maxResults=20&fields=items(volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,categories,imageLinks,language,publisher,pageCount))';
   const libre = [limpia(titulo), limpia(autor)].filter(Boolean).join(' ');
   const google = (consulta: string) => pide(conClaveBooks(`https://www.googleapis.com/books/v1/volumes?q=${consulta}${campos}`), fetchFn, senal)
     .then(parseGoogleCandidatos, () => [] as Candidato[]);
-  const ol = new URLSearchParams({ q: libre, limit: '12', fields: 'title,author_name,first_publish_year,isbn,cover_i' });
+  const ol = new URLSearchParams({ q: libre, limit: '12', fields: 'title,author_name,first_publish_year,isbn,cover_i,number_of_pages_median' });
   const [porCampos, enLibre, openLibrary] = await Promise.all([
     google(encodeURIComponent(q).replace(/%2B/g, '+')),
     google(encodeURIComponent(libre)),

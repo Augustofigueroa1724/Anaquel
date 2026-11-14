@@ -1,7 +1,7 @@
 import { Fragment, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomo, anchoLomo, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomo, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 
 /** Interior del lomo: el de su colección (Folio, Blanche, Albin Michel) o el de la edición genérica. */
@@ -38,7 +38,7 @@ function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }
     '--c': c,
     '--t': tinta,
     '--g': oro,
-    width: anchoLomo(libro.id),
+    width: anchoLomoDe(libro),
     height: altoLomo(libro.id),
   } as CSSProperties;
   return (

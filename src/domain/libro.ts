@@ -31,6 +31,10 @@ export interface Libro {
   portadaBuscada?: true;
   /** Color dominante de la portada: tiñe el lomo cuando no hay colección reconocida. */
   colorPortada?: string;
+  /** Número de páginas: da el grosor del lomo. */
+  paginas?: number;
+  /** Ya se buscaron las páginas (para no repetir la búsqueda). */
+  paginasBuscadas?: true;
 }
 
 export const ESTADOS: readonly Estado[] = ['leido', 'leyendo', 'pendiente'];
@@ -96,6 +100,13 @@ export function contar(libros: readonly Libro[]): Record<Filtro, number> {
 }
 
 export const anchoLomo = (id: number): number => 26 + ((id * 7) % 4) * 3;
+
+/** Grosor del lomo por páginas: 26 px (lo mínimo para leer el título) hasta 150 páginas y 60 px como mucho. */
+export const anchoPorPaginas = (paginas: number): number => Math.round(Math.min(60, Math.max(26, 26 + (paginas - 150) * 0.06)));
+
+/** Grosor del lomo de un libro: por sus páginas si se saben; si no, el de siempre. */
+export const anchoLomoDe = (l: Pick<Libro, 'id'> & { paginas?: number }): number =>
+  (l.paginas && l.paginas > 0 ? anchoPorPaginas(l.paginas) : anchoLomo(l.id));
 /** Alto del lomo: entre 124 y 164 px, como el prototipo; la balda es más alta (236 px) para que las pestañas de los separadores quepan encima. */
 export const altoLomo = (id: number): number => 124 + (id % 5) * 10;
 

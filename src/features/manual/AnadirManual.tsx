@@ -18,7 +18,7 @@ export function AnadirManual({ onCerrar, onAnadido }: {
   const [activo, setActivo] = useState<'titulo' | 'autor' | null>(null);
   const [sugs, setSugs] = useState<Candidato[]>([]);
   const elegido = useRef(false);
-  const [extra, setExtra] = useState<{ portada?: string; editorial?: string }>({});
+  const [extra, setExtra] = useState<{ portada?: string; editorial?: string; paginas?: number }>({});
 
   // Autocompletar: busca al dejar de teclear (350 ms) con lo que haya en título y autor.
   useEffect(() => {
@@ -39,7 +39,7 @@ export function AnadirManual({ onCerrar, onAnadido }: {
 
   function elige(c: Candidato) {
     elegido.current = true;
-    setExtra({ ...(c.portada ? { portada: c.portada } : {}), ...(c.editorial ? { editorial: c.editorial } : {}) });
+    setExtra({ ...(c.portada ? { portada: c.portada } : {}), ...(c.editorial ? { editorial: c.editorial } : {}), ...(c.paginas ? { paginas: c.paginas } : {}) });
     setDatos((d) => ({ ...d, titulo: c.titulo, autor: c.autor, anio: c.anio || d.anio, isbn: c.isbn || d.isbn, genero: d.genero || c.genero || '' }));
     setSugs([]);
     setActivo(null);

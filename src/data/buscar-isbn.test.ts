@@ -71,7 +71,7 @@ describe('BnF', () => {
 <dc:publisher>[Paris] : Gallimard</dc:publisher><dc:date>2026</dc:date><dc:language>fre</dc:language>
 <dc:identifier>ISBN 978-2-07-314092-0</dc:identifier></oai_dc:dc></srw:recordData></srw:record></srw:records></srw:searchRetrieveResponse>`;
   it('lee título, autor y año del Dublin Core', () => {
-    expect(parseBnf(xml)).toEqual({ titulo: 'Le pays des étés', autor: 'Pierre Adrian', anio: 2026 });
+    expect(parseBnf(xml)).toEqual({ titulo: 'Le pays des étés', autor: 'Pierre Adrian', anio: 2026, editorial: 'Gallimard' });
   });
   it('sin registros no devuelve nada', () => {
     expect(parseBnf('<srw:numberOfRecords>0</srw:numberOfRecords>')).toBeNull();
@@ -79,7 +79,7 @@ describe('BnF', () => {
   it('un ISBN francés que Google no tiene sale de la BnF', async () => {
     const vacio = (async () => ({ ok: true, json: async () => ({ totalItems: 0 }) })) as unknown as typeof fetch;
     const r = await buscarPorIsbn('9782073140920', vacio, 8000, async (url) => (url.includes('catalogue.bnf.fr') ? xml : null));
-    expect(r).toEqual({ estado: 'encontrado', meta: { titulo: 'Le pays des étés', autor: 'Pierre Adrian', anio: 2026 } });
+    expect(r).toMatchObject({ estado: 'encontrado', meta: { titulo: 'Le pays des étés', autor: 'Pierre Adrian', anio: 2026 } });
   });
 });
 
@@ -120,5 +120,20 @@ describe('género', () => {
     expect(generoDesdeCategorias(['Romans français'])).toBe('Novela');
     expect(generoDesdeCategorias(['Poésie'])).toBe('Poesía');
     expect(generoDesdeCategorias(['Novela negra'])).toBe('Policiaca');
+  });
+});
+
+describe('páginas', () => {
+  it('Google, Open Library y la BnF dan las páginas', () => {
+    expect(parseGoogleBooks({ items: [{ volumeInfo: { title: 'X', authors: ['A'], pageCount: 528 } }] })?.paginas).toBe(528);
+    expect(parseOpenLibrary({ 'ISBN:1': { title: 'X', authors: [{ name: 'A' }], number_of_pages: 320 } })?.paginas).toBe(320);
+    expect(parseBnf('<dc:title>X / A</dc:title><dc:creator>B, A</dc:creator><dc:format>1 vol. (528 p.) ; 21 cm</dc:format>')?.paginas).toBe(528);
+  });
+});
+
+describe('BnF: editorial y género', () => {
+  it('saca la editorial del dc:publisher y el género del dc:subject', () => {
+    const m = parseBnf('<dc:title>X / A</dc:title><dc:creator>B, A</dc:creator><dc:publisher>[Paris] : Gallimard</dc:publisher><dc:subject>Romans français</dc:subject>');
+    expect(m).toMatchObject({ editorial: 'Gallimard', genero: 'Novela' });
   });
 });

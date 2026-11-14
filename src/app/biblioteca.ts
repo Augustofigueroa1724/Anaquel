@@ -90,7 +90,7 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
       const actual = get().candidato;
       if (!actual || actual.isbn !== isbn) return; // el usuario ya cerró o leyó otro
       set({
-        candidato: meta ? { ...actual, ...meta, portadaBuscada: true } : actual,
+        candidato: meta ? { ...actual, ...meta, portadaBuscada: true, paginasBuscadas: true } : actual,
         busqueda: estado,
       });
       if (meta?.portada && !coleccionDe({ isbn, editorial: meta.editorial })) {
@@ -106,16 +106,18 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
     if (completando) return;
     completando = true;
     try {
-      const pendientes = get().libros.filter((l) => !l.ejemplo && l.isbn && !l.portada && !l.portadaBuscada).slice(0, 60);
+      const pendientes = get().libros.filter((l) => !l.ejemplo && l.isbn && ((!l.portada && !l.portadaBuscada) || (!l.paginas && !l.paginasBuscadas))).slice(0, 60);
       for (const p of pendientes) {
         const { meta, estado } = await buscarPorIsbn(p.isbn);
         if (estado === 'sin-red') break;
         let colorPortada: string | null = null;
-        if (meta?.portada && !coleccionDe({ isbn: p.isbn, editorial: meta.editorial ?? p.editorial })) colorPortada = await colorDominante(meta.portada);
+        if (meta?.portada && !p.colorPortada && !coleccionDe({ isbn: p.isbn, editorial: meta.editorial ?? p.editorial })) colorPortada = await colorDominante(meta.portada);
         const libros = get().libros.map((l) => (l.id !== p.id ? l : {
           ...l,
           portadaBuscada: true as const,
-          ...(meta?.portada ? { portada: meta.portada } : {}),
+          paginasBuscadas: true as const,
+          ...(meta?.portada && !l.portada ? { portada: meta.portada } : {}),
+          ...(meta?.paginas && !l.paginas ? { paginas: meta.paginas } : {}),
           ...(meta?.editorial && !l.editorial ? { editorial: meta.editorial } : {}),
           ...(colorPortada ? { colorPortada } : {}),
         }));
