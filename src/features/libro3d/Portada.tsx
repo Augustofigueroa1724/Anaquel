@@ -2,15 +2,38 @@ import { useState, type CSSProperties } from 'react';
 import { tintaPara, type Libro } from '../../domain/libro';
 
 /**
- * Portada real si la hay (Google Books u Open Library): ocupa la tapa entera sin recortar
- * (las cubiertas son casi 2:3, como la tapa). Si no hay o no carga, la generada.
+ * Fuentes de la portada, de más nítida a menos: la grande de Open Library por ISBN (de esa edición;
+ * con `default=false` da error si no la tiene) y después la guardada (la miniatura de Google Books,
+ * de 128 px, que se ve borrosa ampliada). Sin ISBN ni portada, ninguna.
+ */
+export function fuentesPortada(libro: Pick<Libro, 'isbn' | 'portada'>): string[] {
+  const isbn = (libro.isbn || '').replace(/[^0-9X]/gi, '');
+  return [
+    ...(isbn.length >= 10 ? [`https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`] : []),
+    ...(libro.portada ? [libro.portada] : []),
+  ];
+}
+
+/**
+ * Portada real si la hay: ocupa la tapa entera sin recortar (las cubiertas son casi 2:3, como la
+ * tapa). Prueba las fuentes en orden; una imagen que falla o sale diminuta pasa a la siguiente.
+ * Si ninguna sirve, la generada.
  */
 export function Portada({ libro }: { libro: Libro }) {
-  const [rota, setRota] = useState(false);
-  if (libro.portada && !rota) {
+  const fuentes = fuentesPortada(libro);
+  const [i, setI] = useState(0);
+  const src = libro.portada || libro.portadaBuscada ? fuentes[i] : undefined;
+  if (src) {
     return (
       <div className="portada real">
-        <img src={libro.portada} alt="" referrerPolicy="no-referrer" onError={() => setRota(true)} />
+        <img
+          key={src}
+          src={src}
+          alt=""
+          referrerPolicy="no-referrer"
+          onError={() => setI((n) => n + 1)}
+          onLoad={(e) => { if (e.currentTarget.naturalWidth < 60) setI((n) => n + 1); }}
+        />
       </div>
     );
   }
