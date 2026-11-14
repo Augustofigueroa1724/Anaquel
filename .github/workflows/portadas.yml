@@ -1,0 +1,30 @@
+name: Portadas
+# Baja portadas reales por ISBN (para mocks) y las deja en la rama «portadas».
+on:
+  workflow_dispatch:
+    inputs:
+      isbns:
+        description: ISBN separados por espacios
+        required: true
+env:
+  VITE_GOOGLE_BOOKS_KEY: ${{ secrets.GOOGLE_BOOKS_KEY }}
+permissions:
+  contents: write
+jobs:
+  portadas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/portadas.mjs salida ${{ inputs.isbns }}
+      - name: Publicar en la rama portadas
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout --orphan portadas
+          git rm -rfq . && git clean -fdq -e salida
+          mv salida/* . && rmdir salida
+          git add -A && git commit -qm "Portadas" && git push -f origin portadas
