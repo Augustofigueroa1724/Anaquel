@@ -181,3 +181,15 @@ describe('grosor por páginas', () => {
     expect(anchoLomoDe({ id: 7 })).toBe(anchoLomo(7));
   });
 });
+
+describe('alto del lomo según el texto', () => {
+  it('crece para que quepa, con tope, y encoge la letra solo si no cabe', async () => {
+    const { altoLomoDe, altoLomo, ALTO_MAX_LOMO } = await import('./libro');
+    expect(altoLomoDe(0, 60, 40)).toEqual({ alto: altoLomo(0), escala: 1 });       // texto corto: alto de base
+    expect(altoLomoDe(0, 190, 40)).toEqual({ alto: 230, escala: 1 });              // crece lo justo
+    const largo = altoLomoDe(0, 250, 40);
+    expect(largo.alto).toBe(ALTO_MAX_LOMO);
+    expect(largo.escala).toBeCloseTo(0.84, 2);
+    expect(altoLomoDe(0, 600, 40).escala).toBe(0.78);                              // suelo de la letra
+  });
+});

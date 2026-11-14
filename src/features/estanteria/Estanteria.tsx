@@ -1,8 +1,9 @@
-import { Fragment, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomo, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomoDe, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
+import { medidaLomo, olvidaMedidas } from './medida';
 
 /** Interior del lomo: el de su colección (Folio, Blanche, Albin Michel) o el de la edición genérica. */
 export function Interior({ libro }: { libro: Libro }) {
@@ -34,12 +35,15 @@ function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }
   const abrir = (id: number) => (onAbrir ? onAbrir(libro) : abrirEnStore(id));
   const c = colorLomo(libro);
   const { tinta, oro } = tintaPara(c);
+  const { texto, fijo } = medidaLomo(libro);
+  const { alto, escala } = altoLomoDe(libro.id, texto, fijo);
   const estilo = {
     '--c': c,
     '--t': tinta,
     '--g': oro,
     width: anchoLomoDe(libro),
-    height: altoLomo(libro.id),
+    height: alto,
+    '--esc': escala,
   } as CSSProperties;
   return (
     <button
@@ -122,6 +126,14 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
   );
 
   const ref = useRef<HTMLDivElement>(null);
+
+  // Las alturas de los lomos se miden con las fuentes: al terminar de cargar se vuelven a medir.
+  const [, setFuentes] = useState(0);
+  useEffect(() => {
+    let vivo = true;
+    void document.fonts?.ready.then(() => { if (vivo) { olvidaMedidas(); setFuentes((n) => n + 1); } });
+    return () => { vivo = false; };
+  }, []);
 
   // Una balda por género, en carrusel horizontal; la placa lleva el nombre y cuántos hay.
   const baldas = useMemo(

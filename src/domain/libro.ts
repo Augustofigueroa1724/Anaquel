@@ -110,6 +110,20 @@ export const anchoLomoDe = (l: Pick<Libro, 'id'> & { paginas?: number }): number
 /** Alto del lomo: entre 172 y 220 px, para que quepan los títulos y el grosor se lea en proporción; la balda mide 300 px para que las pestañas de los separadores quepan encima. */
 export const altoLomo = (id: number): number => 172 + (id % 5) * 12;
 
+/** Tope del alto de un lomo: lo que cabe en la balda (336 px) bajo las pestañas de los separadores. */
+export const ALTO_MAX_LOMO = 250;
+
+/**
+ * Alto del lomo según su texto: el que hace falta para que autor y título se lean enteros, nunca
+ * menos que el de base (variedad) ni más que el tope. Si ni con el tope cabe, `escala` (< 1) dice
+ * cuánto encoger la letra, hasta 0,78; por debajo de eso el título se corta con puntos.
+ */
+export function altoLomoDe(id: number, texto: number, fijo: number): { alto: number; escala: number } {
+  const alto = Math.min(ALTO_MAX_LOMO, Math.max(altoLomo(id), Math.ceil(texto + fijo)));
+  const hueco = alto - fijo;
+  return { alto, escala: texto > hueco ? Math.max(0.78, hueco / texto) : 1 };
+}
+
 /** Llena las baldas por ancho: un lomo nuevo pasa a la balda siguiente si no cabe. */
 export function repartePorBaldas(libros: readonly Libro[], util: number, separacion = 2): Libro[][] {
   const baldas: Libro[][] = [];

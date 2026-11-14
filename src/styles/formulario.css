@@ -121,7 +121,7 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* Balda en carrusel: lomos a la izquierda, se desliza en horizontal sin límite de libros.
    El riel ocupa el hueco entre las dos paredes; un degradado a la derecha avisa de que hay más. */
-.balda.carrusel{justify-content:flex-start;padding-left:0;padding-right:0;min-height:300px}
+.balda.carrusel{justify-content:flex-start;padding-left:0;padding-right:0;min-height:336px}
 .balda .riel{position:relative;z-index:1;display:flex;align-items:flex-end;gap:2px;width:100%;
   overflow-x:auto;overflow-y:hidden;padding:10px 18px 0;margin-top:-10px;box-sizing:border-box;
   scroll-snap-type:x proximity;scroll-padding-left:18px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
@@ -196,7 +196,7 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* ---------- Lomos por colección (Folio, Blanche NRF, Albin Michel) ----------
    Recreaciones de los lomos reales; la colección la deduce coleccionDe() por ISBN y editorial. */
-.lomo .aut{flex:none;max-height:34%;overflow:hidden;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
+.lomo .aut{flex:none;max-height:60%;overflow:hidden;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
 .lomo .aut span{display:block;overflow:hidden;text-overflow:ellipsis;max-height:100%}
 .lomo .logo{flex:none;white-space:nowrap;line-height:1}
 .lomo .logo.vertical{writing-mode:vertical-rl;transform:rotate(180deg)}
@@ -218,3 +218,13 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 /* Portada real en la tapa del libro 3D: entera, sin recortar (las cubiertas son casi 2:3, como la tapa). */
 .portada.real{background:#d9d6cf}
 .portada.real img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block}
+
+/* Letra del lomo encogida (--esc < 1) solo cuando el texto no cabe ni con el lomo al tope de alto.
+   Los tamaños base son los de cada tipo de lomo (ver también medida.ts). */
+.lomo.clasico .tit{font-size:calc(12.5px*var(--esc,1))}
+.lomo.moderno .tit{font-size:calc(9.5px*var(--esc,1))}
+.lomo.condensado .tit{font-size:calc(13px*var(--esc,1))}
+.lomo.ed-folio .tit{font-size:calc(12px*var(--esc,1))}
+.lomo.ed-folio .aut{font-size:calc(7.5px*var(--esc,1))}
+.lomo.ed-blanche .tit,.lomo.ed-albin .tit{font-size:calc(12.5px*var(--esc,1))}
+.lomo.ed-blanche .aut,.lomo.ed-albin .aut{font-size:calc(8.5px*var(--esc,1))}
