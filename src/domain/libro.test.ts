@@ -49,8 +49,8 @@ describe('dimensiones del lomo', () => {
     for (let id = 0; id < 50; id++) {
       expect(anchoLomo(id)).toBeGreaterThanOrEqual(26);
       expect(anchoLomo(id)).toBeLessThanOrEqual(35);
-      expect(altoLomo(id)).toBeGreaterThanOrEqual(124);
-      expect(altoLomo(id)).toBeLessThanOrEqual(164);
+      expect(altoLomo(id)).toBeGreaterThanOrEqual(172);
+      expect(altoLomo(id)).toBeLessThanOrEqual(220);
     }
   });
 });

@@ -107,8 +107,8 @@ export const anchoPorPaginas = (paginas: number): number => Math.round(Math.min(
 /** Grosor del lomo de un libro: por sus páginas si se saben; si no, el de siempre. */
 export const anchoLomoDe = (l: Pick<Libro, 'id'> & { paginas?: number }): number =>
   (l.paginas && l.paginas > 0 ? anchoPorPaginas(l.paginas) : anchoLomo(l.id));
-/** Alto del lomo: entre 124 y 164 px, como el prototipo; la balda es más alta (236 px) para que las pestañas de los separadores quepan encima. */
-export const altoLomo = (id: number): number => 124 + (id % 5) * 10;
+/** Alto del lomo: entre 172 y 220 px, para que quepan los títulos y el grosor se lea en proporción; la balda mide 300 px para que las pestañas de los separadores quepan encima. */
+export const altoLomo = (id: number): number => 172 + (id % 5) * 12;
 
 /** Llena las baldas por ancho: un lomo nuevo pasa a la balda siguiente si no cabe. */
 export function repartePorBaldas(libros: readonly Libro[], util: number, separacion = 2): Libro[][] {
