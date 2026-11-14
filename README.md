@@ -45,6 +45,7 @@ npm run build
 | Nov 2026 | Catálogo común de géneros con «+ Nuevo», como los tipos de sitio de Fifth Square | Lista cerrada pero ampliable, sin duplicados |
 | Nov 2026 | Búsqueda por ISBN: Google Books primero, Open Library de respaldo | Google Books tiene CORS y cobertura amplia; Open Library sin clave |
 | Nov 2026 | Libro 3D con CSS 3D y Web Animations, no three.js | Ligero, sin dependencias de WebGL; la estantería no depende de él |
+| 14 nov 2026 | Un libro borrado en un dispositivo ya no reaparece desde la copia local de otro | Con iPhone y web a la vez, los borrados volvían a subirse al abrir el otro |
 | 14 nov 2026 | Todos los libros de una colección (Folio, Blanche, Albin Michel) miden lo mismo; el autor se queda en el apellido si no cabe | Homogéneos, como en la estantería de verdad |
 | 14 nov 2026 | El alto de cada lomo se calcula midiendo su texto (tope 250 px, balda de 336); la letra encoge antes de cortar | Con alturas aleatorias se cortaban títulos y autores |
 | 14 nov 2026 | Baldas de 300 px y lomos de 172 a 220 px | Se cortaban los títulos y los libros finos parecían demasiado anchos para su altura |

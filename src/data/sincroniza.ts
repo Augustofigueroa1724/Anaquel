@@ -31,3 +31,20 @@ export async function subeCambios(antes: readonly Libro[], ahora: readonly Libro
     if (error) throw error;
   }
 }
+
+/**
+ * Libros que solo están en este móvil y hay que subir al entrar en la cuenta. Los que este móvil
+ * ya había sincronizado (`conocidos`) y ya no están en el servidor se borraron desde otro
+ * dispositivo: no se vuelven a subir (antes reaparecían). Sin registro de sincronizados, solo se
+ * suman los locales en un inicio de sesión nuevo (libros apuntados antes de tener cuenta); al
+ * reanudar una sesión, lo local es una copia de la cuenta y manda el servidor.
+ */
+export function soloDeEsteMovil(
+  locales: readonly Libro[], remotos: readonly Libro[], conocidos: ReadonlySet<number> | null, loginNuevo: boolean,
+): Libro[] {
+  const ids = new Set(remotos.map((l) => l.id));
+  const isbns = new Set(remotos.map((l) => l.isbn).filter(Boolean));
+  return locales
+    .filter((l) => !ids.has(l.id) && !(l.isbn && isbns.has(l.isbn)))
+    .filter((l) => (conocidos ? !conocidos.has(l.id) : loginNuevo));
+}

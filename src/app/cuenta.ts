@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { LIBROS_EJEMPLO, sinEjemplos } from '../data/ejemplos';
-import { descargaLibros, subeCambios } from '../data/sincroniza';
+import { descargaLibros, soloDeEsteMovil, subeCambios } from '../data/sincroniza';
 import { miPerfil, type Perfil } from '../data/social';
 import type { Libro } from '../domain/libro';
 import { alCambiarSesion, iniciaCuenta } from '../platform/cuenta';
@@ -27,16 +27,31 @@ export const useCuenta = create<EstadoCuenta>((set) => ({
 let base: Libro[] | null = null;
 let temporizador: ReturnType<typeof setTimeout> | undefined;
 
+// Ids que este móvil sabe que están (o estuvieron) en la cuenta de ese usuario. Sirve para distinguir
+// un libro nuevo de este móvil de uno que se borró desde otro dispositivo.
+const CLAVE_SINC = 'anaquel.sincronizados.v1';
+function leeSincronizados(usuario: string): Set<number> | null {
+  try {
+    const d = JSON.parse(localStorage.getItem(CLAVE_SINC) || 'null') as { u?: string; ids?: number[] } | null;
+    return d && d.u === usuario && Array.isArray(d.ids) ? new Set(d.ids) : null;
+  } catch { return null; }
+}
+function guardaSincronizados(libros: readonly Libro[]): void {
+  const u = useCuenta.getState().sesion?.user.id;
+  if (!u) return;
+  try { localStorage.setItem(CLAVE_SINC, JSON.stringify({ u, ids: libros.map((l) => l.id) })); } catch { /* sin almacenamiento */ }
+}
+
 /** Al entrar: descarga los libros de la cuenta y suma los que solo estaban en este móvil. */
-async function alEntrar() {
+async function alEntrar(loginNuevo: boolean) {
   useCuenta.setState({ sincronizando: true, avisoSync: null });
   try {
     const remotos = await descargaLibros();
     const locales = sinEjemplos(useBiblioteca.getState().libros);
-    const ids = new Set(remotos.map((l) => l.id));
-    const isbns = new Set(remotos.map((l) => l.isbn).filter(Boolean));
-    const soloAqui = locales.filter((l) => !ids.has(l.id) && !(l.isbn && isbns.has(l.isbn)));
+    const usuario = useCuenta.getState().sesion?.user.id ?? '';
+    const soloAqui = soloDeEsteMovil(locales, remotos, leeSincronizados(usuario), loginNuevo);
     base = remotos;
+    guardaSincronizados(remotos);
     // Sin libros, reemplazaLibros enseña los de ejemplo; esos no se suben nunca.
     useBiblioteca.getState().reemplazaLibros([...remotos, ...soloAqui]); // la suscripción sube soloAqui
     useCuenta.setState({ perfil: await miPerfil() });
@@ -62,6 +77,7 @@ function programaSubida() {
     try {
       await subeCambios(base, ahora);
       base = ahora;
+      guardaSincronizados(ahora);
       useCuenta.setState({ avisoSync: null });
     } catch {
       useCuenta.setState({ avisoSync: 'Sin conexión: tus cambios se subirán cuando vuelva la red.' });
@@ -78,15 +94,20 @@ export async function arrancaCuenta(): Promise<void> {
   });
   window.addEventListener('online', () => {
     if (!useCuenta.getState().sesion) return;
-    if (!base) void alEntrar(); else programaSubida();
+    if (!base) void alEntrar(false); else programaSubida();
   });
+  // Hasta leer la sesión guardada, un aviso de sesión es la reanudación (la carga el arranque de
+  // abajo); después, un usuario distinto es un inicio de sesión nuevo hecho a mano.
+  let arranqueHecho = false;
   alCambiarSesion((s) => {
     const antes = useCuenta.getState().sesion;
     useCuenta.setState({ sesion: s });
-    if (s && s.user.id !== antes?.user.id) void alEntrar();
+    if (!arranqueHecho) return;
+    if (s && s.user.id !== antes?.user.id) void alEntrar(true);
     if (!s && antes) alSalir();
   });
   const s = await iniciaCuenta();
   useCuenta.setState({ sesion: s });
-  if (s) await alEntrar();
+  arranqueHecho = true;
+  if (s) await alEntrar(false);
 }
