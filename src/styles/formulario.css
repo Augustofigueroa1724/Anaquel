@@ -193,3 +193,28 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .orden-baldas .flecha:not(:disabled):active{background:var(--line)}
 .orden-baldas + .enlace{border:0;background:none;padding:10px 0 0;min-height:44px;color:var(--muted);font:500 13px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .nota-suave{color:var(--muted);font-size:13px}
+
+/* ---------- Lomos por colección (Folio, Blanche NRF, Albin Michel) ----------
+   Recreaciones de los lomos reales; la colección la deduce coleccionDe() por ISBN y editorial. */
+.lomo .aut{flex:none;max-height:42%;overflow:hidden;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
+.lomo .aut span{display:block;overflow:hidden;text-overflow:ellipsis;max-height:100%}
+.lomo .logo{flex:none;white-space:nowrap;line-height:1}
+.lomo .logo.vertical{writing-mode:vertical-rl;transform:rotate(180deg)}
+.lomo.ed-folio,.lomo.ed-blanche,.lomo.ed-albin{gap:5px;padding:7px 0}
+.lomo.ed-folio{color:#151515}
+.lomo.ed-folio .aut{font:700 7.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:#c4161c}
+.lomo.ed-folio .tit{font:500 12px/1 var(--display)}
+.lomo.ed-folio .logo{font:italic 700 9px Georgia,'Times New Roman',serif;letter-spacing:-.02em}
+.lomo.ed-blanche{color:#1d1a14}
+.lomo.ed-blanche .filete{flex:none;width:72%;height:5px;border-top:1px solid #1d1a14;border-bottom:2px solid #b3262a}
+.lomo.ed-blanche .aut{font:500 8.5px/1 var(--display)}
+.lomo.ed-blanche .tit{font:500 12.5px/1 var(--display);color:#b3262a}
+.lomo.ed-blanche .logo{font:italic 500 10px var(--display)}
+.lomo.ed-albin{color:#222}
+.lomo.ed-albin .aut{font:italic 500 8.5px/1 var(--display)}
+.lomo.ed-albin .tit{font:italic 500 12.5px/1 var(--display)}
+.lomo.ed-albin .logo{font:500 6.5px/1 var(--display);letter-spacing:.04em}
+
+/* Portada real en la tapa del libro 3D: entera, sin recortar (las cubiertas son casi 2:3, como la tapa). */
+.portada.real{background:#d9d6cf}
+.portada.real img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block}

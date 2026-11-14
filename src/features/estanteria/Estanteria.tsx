@@ -1,14 +1,19 @@
 import { Fragment, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomo, anchoLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomo, anchoLomo, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 
-/** Interior del lomo según la edición (clásico, moderno o condensado). */
+/** Interior del lomo: el de su colección (Folio, Blanche, Albin Michel) o el de la edición genérica. */
 export function Interior({ libro }: { libro: Libro }) {
+  const col = coleccionDe(libro);
   const titulo = (
     <span className="zona"><span className="tit"><span>{libro.titulo}</span></span></span>
   );
+  const autor = <span className="aut"><span>{libro.autor}</span></span>;
+  if (col === 'folio') return <>{autor}{titulo}<span className="logo">folio</span></>;
+  if (col === 'blanche') return <><span className="filete" />{autor}{titulo}<span className="logo">nrf</span><span className="filete" /></>;
+  if (col === 'albin') return <>{autor}{titulo}<span className="logo vertical"><span>Albin Michel</span></span></>;
   if (libro.edicion === 'clasico') {
     return <><span className="banda" />{titulo}<span className="banda" /></>;
   }
@@ -18,12 +23,19 @@ export function Interior({ libro }: { libro: Libro }) {
   return <><span className="franja" />{titulo}</>;
 }
 
+/** Clase del lomo: la colección si la hay, si no la edición genérica. */
+export const claseLomo = (libro: Libro): string => {
+  const col = coleccionDe(libro);
+  return col ? `ed-${col}` : libro.edicion;
+};
+
 function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }) {
   const abrirEnStore = useBiblioteca((s) => s.abrir);
   const abrir = (id: number) => (onAbrir ? onAbrir(libro) : abrirEnStore(id));
-  const { tinta, oro } = tintaPara(libro.color);
+  const c = colorLomo(libro);
+  const { tinta, oro } = tintaPara(c);
   const estilo = {
-    '--c': libro.color,
+    '--c': c,
     '--t': tinta,
     '--g': oro,
     width: anchoLomo(libro.id),
@@ -31,7 +43,7 @@ function Lomo({ libro, onAbrir }: { libro: Libro; onAbrir?: (l: Libro) => void }
   } as CSSProperties;
   return (
     <button
-      className={`lomo ${libro.edicion}`}
+      className={`lomo ${claseLomo(libro)}`}
       data-id={libro.id}
       data-st={libro.estado}
       style={estilo}

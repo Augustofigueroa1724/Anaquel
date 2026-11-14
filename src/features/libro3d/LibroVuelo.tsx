@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
-import { tintaPara, type Libro } from '../../domain/libro';
-import { Interior } from '../estanteria/Estanteria';
+import { colorLomo, tintaPara, type Libro } from '../../domain/libro';
+import { claseLomo, Interior } from '../estanteria/Estanteria';
 import { Portada } from './Portada';
 import { H, lomoEn, marcoRect, poseDestino, poseLomo, tf, W } from './vuelo';
 
@@ -174,7 +174,8 @@ export function LibroVuelo() {
   }
 
   const u = ultimo.current;
-  const { tinta, oro } = u ? tintaPara(u.libro.color) : { tinta: '', oro: '' };
+  const cLomo = u ? colorLomo(u.libro) : '';
+  const { tinta, oro } = u ? tintaPara(cLomo) : { tinta: '', oro: '' };
   return (
     <div className="escenario" aria-hidden="true">
       {u && (
@@ -183,13 +184,13 @@ export function LibroVuelo() {
           className="libro3d"
           style={{
             '--W': `${W}px`, '--H': `${H}px`, '--T': '30px',
-            '--c': u.libro.color, '--t': tinta, '--g': oro,
+            '--c': cLomo, '--t': tinta, '--g': oro,
             pointerEvents: 'none',
           } as CSSProperties}
         >
           <div className="cara tapa"><Portada libro={u.libro} /></div>
           <div className="cara trasera" />
-          <div className={`cara canto lomo ${u.libro.edicion}`} style={{ '--c': u.libro.color, '--t': tinta, '--g': oro } as CSSProperties}>
+          <div className={`cara canto lomo ${claseLomo(u.libro)}`} style={{ '--c': cLomo, '--t': tinta, '--g': oro } as CSSProperties}>
             <Interior libro={u.libro} />
           </div>
           <div className="cara hojas" />

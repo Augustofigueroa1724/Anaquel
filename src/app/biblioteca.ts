@@ -2,9 +2,10 @@ import { create } from 'zustand';
 import { CANDIDATO_SIMULADO, GENERO_EJEMPLO, LIBROS_EJEMPLO, sinEjemplos } from '../data/ejemplos';
 import { buscarPorIsbn, type Busqueda } from '../data/buscar-isbn';
 import { repositorioLocal } from '../data/repositorio-local';
+import { colorDominante } from '../platform/imagen';
 import type { LibroImportado } from '../data/goodreads';
 import {
-  candidatoDesdeIsbn, COLORES_TELA, edicionDe, nuevoId, type Estado, type Filtro, type Libro,
+  candidatoDesdeIsbn, coleccionDe, COLORES_TELA, edicionDe, nuevoId, type Estado, type Filtro, type Libro,
 } from '../domain/libro';
 
 const conTela = (l: LibroImportado | Omit<Libro, 'color' | 'edicion'>, id: number): Libro =>
@@ -34,6 +35,8 @@ interface Biblioteca {
   descartarCandidato(): void;
   /** Género del libro escaneado antes de añadirlo (lo detectado se puede cambiar). */
   setGeneroCandidato(genero: string): void;
+  /** Busca portada (y editorial y color) de los libros propios que aún no la tienen, de uno en uno. */
+  completaPortadas(): Promise<void>;
   editarLibro(id: number, cambios: Partial<Omit<Libro, 'id' | 'color' | 'edicion'>>): void;
   borrarLibro(id: number): void;
   prestar(id: number, a: string, desde: string): void;
@@ -44,6 +47,8 @@ const CLAVE_ORDEN = 'anaquel.orden-generos.v1';
 function leeOrden(): string[] {
   try { const o: unknown = JSON.parse(localStorage.getItem(CLAVE_ORDEN) || '[]'); return Array.isArray(o) ? o.filter((g): g is string => typeof g === 'string') : []; } catch { return []; }
 }
+
+let completando = false;
 
 const guardados = repositorioLocal.cargar();
 // Los libros guardados antes de existir el género lo toman de los ejemplos si coinciden.
@@ -85,10 +90,42 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
       const actual = get().candidato;
       if (!actual || actual.isbn !== isbn) return; // el usuario ya cerró o leyó otro
       set({
-        candidato: meta ? { ...actual, ...meta } : actual,
+        candidato: meta ? { ...actual, ...meta, portadaBuscada: true } : actual,
         busqueda: estado,
       });
+      if (meta?.portada && !coleccionDe({ isbn, editorial: meta.editorial })) {
+        void colorDominante(meta.portada).then((colorPortada) => {
+          const c = get().candidato;
+          if (colorPortada && c && c.isbn === isbn) set({ candidato: { ...c, colorPortada } });
+        });
+      }
     });
+  },
+
+  completaPortadas: async () => {
+    if (completando) return;
+    completando = true;
+    try {
+      const pendientes = get().libros.filter((l) => !l.ejemplo && l.isbn && !l.portada && !l.portadaBuscada).slice(0, 60);
+      for (const p of pendientes) {
+        const { meta, estado } = await buscarPorIsbn(p.isbn);
+        if (estado === 'sin-red') break;
+        let colorPortada: string | null = null;
+        if (meta?.portada && !coleccionDe({ isbn: p.isbn, editorial: meta.editorial ?? p.editorial })) colorPortada = await colorDominante(meta.portada);
+        const libros = get().libros.map((l) => (l.id !== p.id ? l : {
+          ...l,
+          portadaBuscada: true as const,
+          ...(meta?.portada ? { portada: meta.portada } : {}),
+          ...(meta?.editorial && !l.editorial ? { editorial: meta.editorial } : {}),
+          ...(colorPortada ? { colorPortada } : {}),
+        }));
+        repositorioLocal.guardar(libros);
+        set({ libros });
+        await new Promise((r) => setTimeout(r, 300));
+      }
+    } finally {
+      completando = false;
+    }
   },
 
   setGeneroCandidato: (genero) => {

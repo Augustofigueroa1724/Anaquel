@@ -18,6 +18,7 @@ export function AnadirManual({ onCerrar, onAnadido }: {
   const [activo, setActivo] = useState<'titulo' | 'autor' | null>(null);
   const [sugs, setSugs] = useState<Candidato[]>([]);
   const elegido = useRef(false);
+  const [extra, setExtra] = useState<{ portada?: string; editorial?: string }>({});
 
   // Autocompletar: busca al dejar de teclear (350 ms) con lo que haya en título y autor.
   useEffect(() => {
@@ -31,12 +32,14 @@ export function AnadirManual({ onCerrar, onAnadido }: {
 
   function escribe(campo: 'titulo' | 'autor', valor: string) {
     elegido.current = false;
+    setExtra({});
     setDatos((d) => ({ ...d, [campo]: valor }));
     setError('');
   }
 
   function elige(c: Candidato) {
     elegido.current = true;
+    setExtra({ ...(c.portada ? { portada: c.portada } : {}), ...(c.editorial ? { editorial: c.editorial } : {}) });
     setDatos((d) => ({ ...d, titulo: c.titulo, autor: c.autor, anio: c.anio || d.anio, isbn: c.isbn || d.isbn, genero: d.genero || c.genero || '' }));
     setSugs([]);
     setActivo(null);
@@ -63,7 +66,7 @@ export function AnadirManual({ onCerrar, onAnadido }: {
     const fallo = validaDatos(limpio);
     if (fallo) { setError(fallo); return; }
     const { genero, ...resto } = limpio;
-    const nuevo = { ...resto, ...(genero ? { genero } : {}), ...(posesion === 'quiero' ? { posesion: 'quiero' as const } : {}) };
+    const nuevo = { ...resto, ...extra, ...(genero ? { genero } : {}), ...(posesion === 'quiero' ? { posesion: 'quiero' as const } : {}) };
     if (!sinRepetidos([nuevo], libros.filter((l) => !l.ejemplo)).length) { setError('Este libro ya está en tu anaquel o en tu lista.'); return; }
     importa([nuevo]);
     onAnadido(posesion);

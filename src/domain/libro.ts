@@ -23,6 +23,14 @@ export interface Libro {
   valoracion?: number;
   /** Libro de muestra: se ve hasta que el usuario añade el primero suyo y nunca se sube a la cuenta. */
   ejemplo?: true;
+  /** Portada real (URL de Google Books u Open Library). Sin ella se dibuja la generada. */
+  portada?: string;
+  /** Editorial, si la fuente la da: ayuda a reconocer la colección del lomo. */
+  editorial?: string;
+  /** Ya se buscó portada para este libro (para no repetir la búsqueda en cada arranque). */
+  portadaBuscada?: true;
+  /** Color dominante de la portada: tiñe el lomo cuando no hay colección reconocida. */
+  colorPortada?: string;
 }
 
 export const ESTADOS: readonly Estado[] = ['leido', 'leyendo', 'pendiente'];
@@ -264,4 +272,27 @@ export function seccionesPorAutor(libros: readonly Libro[]): Seccion[] {
     if (g.s.tipo === 'letra') g.s.libros.sort((a, b) => claveAutor(a.autor).localeCompare(claveAutor(b.autor), 'es'));
   }
   return [...grupos.values()].sort((a, b) => a.orden.localeCompare(b.orden, 'es')).map((g) => g.s);
+}
+
+/**
+ * Colecciones reconocibles por el ISBN o la editorial, con lomo propio en la estantería.
+ * Gallimard (978-2-07): los ISBN 2-07-03… y 2-07-04… son los de bolsillo Folio; el resto, la Blanche NRF.
+ */
+export type Coleccion = 'folio' | 'blanche' | 'albin';
+export const COLOR_COLECCION: Record<Coleccion, string> = { folio: '#f7f6f2', blanche: '#efe6cf', albin: '#ebe7de' };
+
+export function coleccionDe(l: Pick<Libro, 'isbn'> & { editorial?: string }): Coleccion | undefined {
+  const isbn = (l.isbn || '').replace(/[^0-9X]/gi, '');
+  const ed = (l.editorial || '').toLowerCase();
+  const trece = isbn.length === 10 ? `978${isbn}` : isbn;
+  if (/folio/.test(ed) || /^9782070[34]/.test(trece)) return 'folio';
+  if (/^978207/.test(trece) || /gallimard/.test(ed)) return 'blanche';
+  if (/^9782226/.test(trece) || /albin michel/.test(ed)) return 'albin';
+  return undefined;
+}
+
+/** Color del lomo: el de su colección, el de su portada o la tela asignada. */
+export function colorLomo(l: Pick<Libro, 'isbn' | 'color'> & { editorial?: string; colorPortada?: string }): string {
+  const col = coleccionDe(l);
+  return col ? COLOR_COLECCION[col] : l.colorPortada ?? l.color;
 }

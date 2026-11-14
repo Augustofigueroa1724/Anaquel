@@ -41,6 +41,12 @@ export default function App() {
   const [estilo, setEstilo] = useState<Estilo>(leeEstilo);
   useEffect(() => { aplicaEstilo(estilo); }, [estilo]);
   useEffect(() => { void arrancaCuenta(); }, []);
+  // Portadas de los libros que aún no la tienen: en segundo plano, tras la descarga de la cuenta.
+  const completaPortadas = useBiblioteca((s) => s.completaPortadas);
+  useEffect(() => {
+    const t = setTimeout(() => { void completaPortadas(); }, 5000);
+    return () => clearTimeout(t);
+  }, [sesion, completaPortadas]);
   useEffect(() => {
     const alPulsar = (e: KeyboardEvent) => { if (e.key === 'Escape') { cerrar(); setAjustes(false); setManual(false); } };
     window.addEventListener('keydown', alPulsar);

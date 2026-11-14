@@ -1,8 +1,24 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { tintaPara, type Libro } from '../../domain/libro';
 
-/** Portada generada en la misma tela y tinta que el lomo. Respaldo hasta tener portada real. */
+/**
+ * Portada real si la hay (Google Books u Open Library): ocupa la tapa entera sin recortar
+ * (las cubiertas son casi 2:3, como la tapa). Si no hay o no carga, la generada.
+ */
 export function Portada({ libro }: { libro: Libro }) {
+  const [rota, setRota] = useState(false);
+  if (libro.portada && !rota) {
+    return (
+      <div className="portada real">
+        <img src={libro.portada} alt="" referrerPolicy="no-referrer" onError={() => setRota(true)} />
+      </div>
+    );
+  }
+  return <PortadaGenerada libro={libro} />;
+}
+
+/** Portada generada en la misma tela y tinta que el lomo. Respaldo cuando no hay portada real. */
+function PortadaGenerada({ libro }: { libro: Libro }) {
   const { tinta, oro } = tintaPara(libro.color);
   const L = libro.titulo.length;
   const base = { '--c': libro.color, '--t': tinta, '--g': oro } as CSSProperties;

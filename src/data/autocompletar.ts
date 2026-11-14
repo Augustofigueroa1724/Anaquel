@@ -14,6 +14,7 @@ export interface Candidato {
   portada?: string;
   /** Idioma de la edición (código de Google Books), para poner primero lo que está en español. */
   idioma?: string;
+  editorial?: string;
 }
 
 const TIEMPO_MAX_MS = 6000;
@@ -57,10 +58,11 @@ export function parseGoogleCandidatos(json: unknown): Candidato[] {
     const cats = Array.isArray(info.categories) ? info.categories.filter((c): c is string => typeof c === 'string') : [];
     const genero = generoDesdeCategorias(cats);
     const img = (info.imageLinks as { smallThumbnail?: string; thumbnail?: string } | undefined);
-    const portada = (img?.smallThumbnail ?? img?.thumbnail)?.replace(/^http:/, 'https:');
+    const portada = (img?.thumbnail ?? img?.smallThumbnail)?.replace(/^http:/, 'https:').replace(/&edge=curl/, '');
     const titulo = typeof info.subtitle === 'string' && info.title.length < 4 ? `${info.title}: ${info.subtitle}` : info.title;
     const idioma = typeof info.language === 'string' ? info.language : undefined;
-    fuera.push({ titulo, autor: autores.join(', '), anio: Number.isFinite(anio) ? anio : 0, isbn, ...(genero ? { genero } : {}), ...(portada ? { portada } : {}), ...(idioma ? { idioma } : {}) });
+    const editorial = typeof info.publisher === 'string' ? info.publisher : undefined;
+    fuera.push({ titulo, autor: autores.join(', '), anio: Number.isFinite(anio) ? anio : 0, isbn, ...(genero ? { genero } : {}), ...(portada ? { portada } : {}), ...(idioma ? { idioma } : {}), ...(editorial ? { editorial } : {}) });
   }
   return unicos(fuera);
 }
@@ -75,7 +77,7 @@ export function parseOpenLibraryCandidatos(json: unknown): Candidato[] {
     const isbns = Array.isArray(d.isbn) ? (d.isbn as string[]) : [];
     const isbn = isbns.find((i) => i.length === 13) ?? isbns[0] ?? '';
     const anio = typeof d.first_publish_year === 'number' ? d.first_publish_year : 0;
-    const portada = typeof d.cover_i === 'number' ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : undefined;
+    const portada = typeof d.cover_i === 'number' ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : undefined;
     fuera.push({ titulo: d.title, autor: autores[0], anio, isbn, ...(portada ? { portada } : {}) });
   }
   return unicos(fuera);
@@ -111,7 +113,7 @@ export async function sugiereLibros(titulo: string, autor: string, senal?: Abort
   const q = consultaGoogle(titulo, autor);
   if (limpia(titulo).length < 3 && limpia(autor).length < 3) return [];
   if (cache.has(q)) return cache.get(q)!;
-  const campos = '&printType=books&maxResults=20&fields=items(volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,categories,imageLinks,language))';
+  const campos = '&printType=books&maxResults=20&fields=items(volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,categories,imageLinks,language,publisher))';
   const libre = [limpia(titulo), limpia(autor)].filter(Boolean).join(' ');
   const google = (consulta: string) => pide(conClaveBooks(`https://www.googleapis.com/books/v1/volumes?q=${consulta}${campos}`), fetchFn, senal)
     .then(parseGoogleCandidatos, () => [] as Candidato[]);

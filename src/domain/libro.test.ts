@@ -157,3 +157,16 @@ describe('orden de las baldas', () => {
     expect(ordenaPorPreferencia([g('A'), g('B')], []).map((x) => x.genero)).toEqual(['A', 'B']);
   });
 });
+
+describe('coleccionDe', () => {
+  it('reconoce Folio, Blanche y Albin Michel por el ISBN', async () => {
+    const { coleccionDe } = await import('./libro');
+    expect(coleccionDe({ isbn: '9782070360420' })).toBe('folio');   // La peste, Folio
+    expect(coleccionDe({ isbn: '9782070392537' })).toBe('folio');   // Crime et châtiment, Folio classique
+    expect(coleccionDe({ isbn: '9782070780938' })).toBe('blanche'); // L'élégance du hérisson
+    expect(coleccionDe({ isbn: '9782073140920' })).toBe('blanche'); // Le pays des étés
+    expect(coleccionDe({ isbn: '9782226141637' })).toBe('albin');
+    expect(coleccionDe({ isbn: '9782080490896' })).toBeUndefined(); // Flammarion: color de la portada
+    expect(coleccionDe({ isbn: '', editorial: 'Folio' })).toBe('folio');
+  });
+});
