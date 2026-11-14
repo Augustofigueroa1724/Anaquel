@@ -1,0 +1,21 @@
+name: Consultar ISBN
+# Diagnóstico a mano: qué devuelven Google Books, la BnF y Open Library para un ISBN,
+# desde la red de GitHub (la de las sesiones de Claude no llega a esas fuentes).
+on:
+  workflow_dispatch:
+    inputs:
+      isbn:
+        description: ISBN a consultar
+        required: true
+env:
+  VITE_GOOGLE_BOOKS_KEY: ${{ secrets.GOOGLE_BOOKS_KEY }}
+jobs:
+  consulta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/consulta-isbn.mjs "${{ inputs.isbn }}"
