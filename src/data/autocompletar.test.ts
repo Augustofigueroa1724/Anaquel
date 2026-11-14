@@ -19,7 +19,7 @@ describe('autocompletar', () => {
     expect(c[0]).toMatchObject({ titulo: 'Tokio blues', autor: 'Haruki Murakami', anio: 2005, isbn: '9788483835043', portada: 'https://x/y.jpg' });
   });
   it('lee Open Library', () => {
-    const c = parseOpenLibraryCandidatos({ docs: [{ title: 'Rayuela', author_name: ['Julio Cortázar'], first_publish_year: 1963, isbn: ['8437604575', '9788437604572'], cover_i: 7 }] });
+    const c = parseOpenLibraryCandidatos({ docs: [{ title: 'Rayuela', author_name: ['Julio Cortázar'], first_publish_year: 1963, cover_i: 7, editions: { docs: [{ title: 'Rayuela', isbn: ['8437604575', '9788437604572'], cover_i: 8 }] } }] });
     expect(c[0]).toMatchObject({ titulo: 'Rayuela', autor: 'Julio Cortázar', anio: 1963, isbn: '9788437604572' });
   });
   it('menos de 3 letras no consulta; sin red devuelve vacío', async () => {
@@ -40,11 +40,23 @@ describe('afinidad y mezcla', () => {
   it('junta Google y Open Library y pone primero lo que casa', async () => {
     const respuestas: Record<string, unknown> = {
       google: { items: [{ volumeInfo: { title: 'Pays perdu', authors: ['Pierre Jourde'], language: 'fr' } }] },
-      openlibrary: { docs: [{ title: 'Le pays des étés', author_name: ['Pierre Adrian'], first_publish_year: 2026, isbn: ['9782073140920'] }] },
+      openlibrary: { docs: [{ title: 'Le pays des étés', author_name: ['Pierre Adrian'], first_publish_year: 2026, editions: { docs: [{ title: 'Le pays des étés', isbn: ['9782073140920'] }] } }] },
     };
     const f = (async (url: string) => ({ ok: true, json: async () => respuestas[url.includes('openlibrary') ? 'openlibrary' : 'google'] })) as unknown as typeof fetch;
     const r = await sugiereLibros('le pays des etes', 'adrian', undefined, f);
     expect(r[0]).toMatchObject({ titulo: 'Le pays des étés', isbn: '9782073140920' });
     expect(r.find((x) => x.titulo === 'Pays perdu')).toBeUndefined();
+  });
+});
+
+describe('Open Library: edición correcta', () => {
+  it('el ISBN sale de la edición que casa, no de la lista de la obra', () => {
+    const c = parseOpenLibraryCandidatos({ docs: [{ title: 'Au revoir là-haut', author_name: ['Pierre Lemaitre'], isbn: ['9788467926217'], cover_i: 1,
+      editions: { docs: [{ title: 'Au revoir là-haut', isbn: ['9782253194613'], cover_i: 2 }] } }] });
+    expect(c[0]).toMatchObject({ isbn: '9782253194613', portada: 'https://covers.openlibrary.org/b/id/2-M.jpg' });
+  });
+  it('sin edición, sin ISBN', () => {
+    const c = parseOpenLibraryCandidatos({ docs: [{ title: 'X', author_name: ['A'], isbn: ['9788467926217'], cover_i: 1 }] });
+    expect(c[0].isbn).toBe('');
   });
 });

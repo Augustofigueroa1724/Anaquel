@@ -69,6 +69,12 @@ export function parseGoogleCandidatos(json: unknown): Candidato[] {
   return unicos(fuera);
 }
 
+/**
+ * Open Library agrupa todas las ediciones de una obra: su lista `isbn` mezcla idiomas y formatos
+ * (con *Au revoir là-haut* salía el ISBN del cómic español de Norma). Por eso se pide `editions`,
+ * que trae la edición que mejor casa con lo escrito, y el ISBN y la portada salen de ella. Sin
+ * edición, el candidato va sin ISBN antes que con uno equivocado.
+ */
 export function parseOpenLibraryCandidatos(json: unknown): Candidato[] {
   const docs = (json as { docs?: Record<string, unknown>[] })?.docs ?? [];
   const fuera: Candidato[] = [];
@@ -76,12 +82,15 @@ export function parseOpenLibraryCandidatos(json: unknown): Candidato[] {
     if (typeof d.title !== 'string') continue;
     const autores = Array.isArray(d.author_name) ? (d.author_name as unknown[]).filter((a): a is string => typeof a === 'string') : [];
     if (!autores.length) continue;
-    const isbns = Array.isArray(d.isbn) ? (d.isbn as string[]) : [];
+    const ed = (d.editions as { docs?: Record<string, unknown>[] } | undefined)?.docs?.[0];
+    const isbns = Array.isArray(ed?.isbn) ? (ed!.isbn as string[]) : [];
     const isbn = isbns.find((i) => i.length === 13) ?? isbns[0] ?? '';
     const anio = typeof d.first_publish_year === 'number' ? d.first_publish_year : 0;
-    const portada = typeof d.cover_i === 'number' ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : undefined;
+    const cover = typeof ed?.cover_i === 'number' ? ed.cover_i : (!ed && typeof d.cover_i === 'number' ? d.cover_i : undefined);
+    const portada = cover ? `https://covers.openlibrary.org/b/id/${cover}-M.jpg` : undefined;
+    const titulo = typeof ed?.title === 'string' ? ed.title : d.title;
     const paginas = typeof d.number_of_pages_median === 'number' ? d.number_of_pages_median : undefined;
-    fuera.push({ titulo: d.title, autor: autores[0], anio, isbn, ...(portada ? { portada } : {}), ...(paginas ? { paginas } : {}) });
+    fuera.push({ titulo, autor: autores[0], anio, isbn, ...(portada ? { portada } : {}), ...(paginas ? { paginas } : {}) });
   }
   return unicos(fuera);
 }
@@ -120,7 +129,7 @@ export async function sugiereLibros(titulo: string, autor: string, senal?: Abort
   const libre = [limpia(titulo), limpia(autor)].filter(Boolean).join(' ');
   const google = (consulta: string) => pide(conClaveBooks(`https://www.googleapis.com/books/v1/volumes?q=${consulta}${campos}`), fetchFn, senal)
     .then(parseGoogleCandidatos, () => [] as Candidato[]);
-  const ol = new URLSearchParams({ q: libre, limit: '12', fields: 'title,author_name,first_publish_year,isbn,cover_i,number_of_pages_median' });
+  const ol = new URLSearchParams({ q: libre, limit: '12', fields: 'title,author_name,first_publish_year,cover_i,number_of_pages_median,editions,editions.title,editions.isbn,editions.cover_i,editions.language' });
   const [porCampos, enLibre, openLibrary] = await Promise.all([
     google(encodeURIComponent(q).replace(/%2B/g, '+')),
     google(encodeURIComponent(libre)),

@@ -1,7 +1,15 @@
 // Diagnóstico: pregunta un ISBN a las tres fuentes reales (Google Books, BnF y Open Library)
 // y enseña qué responde cada una. Se lanza con el workflow «Consultar ISBN» (red de GitHub).
-const isbn = (process.argv[2] || '').replace(/[^0-9Xx]/g, '');
-if (!isbn) { console.error('Uso: node tools/consulta-isbn.mjs ISBN'); process.exit(1); }
+const entrada = process.argv[2] || '';
+// Con texto (no un ISBN) se prueba la búsqueda de Open Library del autocompletar, con sus ediciones.
+if (/[a-z]{3}/i.test(entrada)) {
+  const p = new URLSearchParams({ q: entrada, limit: '5', fields: 'title,author_name,first_publish_year,cover_i,editions,editions.title,editions.isbn,editions.cover_i,editions.language' });
+  const r = await fetch(`https://openlibrary.org/search.json?${p}`);
+  console.log(`=== Open Library (search con ediciones): HTTP ${r.status}\n${(await r.text()).slice(0, 3000)}`);
+  process.exit(0);
+}
+const isbn = entrada.replace(/[^0-9Xx]/g, '');
+if (!isbn) { console.error('Uso: node tools/consulta-isbn.mjs ISBN|texto'); process.exit(1); }
 const clave = process.env.VITE_GOOGLE_BOOKS_KEY ? `&key=${process.env.VITE_GOOGLE_BOOKS_KEY}` : '';
 const fuentes = {
   'Google Books (isbn:)': `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}${clave}`,
