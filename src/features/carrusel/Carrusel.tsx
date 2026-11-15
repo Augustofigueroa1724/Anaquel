@@ -33,7 +33,7 @@ function LibroCarrusel({ libro, d, onToca }: { libro: Libro; d: number; onToca: 
   const { texto, fijo } = medidaLomo(libro);
   const { x, z, giro } = poseCarrusel(d);
   const estilo = {
-    '--t': `${t}px`, '--c': c, '--t-tinta': tinta,
+    '--gr': `${t}px`, '--c': c, '--t-tinta': tinta,
     transform: `translateX(${x}px) translateZ(${z}px) rotateY(${giro}deg)`,
     zIndex: 100 - Math.round(Math.abs(d) * 10),
   } as CSSProperties;
