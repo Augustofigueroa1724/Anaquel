@@ -118,7 +118,7 @@ export const anchoPorPaginas = (paginas: number): number => Math.round(Math.min(
 export const anchoLomoDe = (l: Pick<Libro, 'id'> & { paginas?: number }): number =>
   (l.paginas && l.paginas > 0 ? anchoPorPaginas(l.paginas) : anchoLomo(l.id));
 /** Alto del lomo: entre 172 y 220 px, para que quepan los títulos y el grosor se lea en proporción; la balda mide 300 px para que las pestañas de los separadores quepan encima. */
-export const altoLomo = (id: number): number => 172 + (id % 5) * 12;
+export const altoLomo = (id: number): number => 196 + (id % 5) * 9;
 
 /** Tope del alto de un lomo: lo que cabe en la balda (336 px) bajo las pestañas de los separadores. */
 export const ALTO_MAX_LOMO = 250;
@@ -340,4 +340,30 @@ export function coleccionDe(l: Pick<Libro, 'isbn'> & { editorial?: string }): Co
 export function colorLomo(l: Pick<Libro, 'isbn' | 'color'> & { editorial?: string; colorPortada?: string }): string {
   const col = coleccionDe(l);
   return col ? COLOR_COLECCION[col] : l.colorPortada ?? l.color;
+}
+
+/**
+ * Título tal como va en el lomo: sin la coletilla de género de los catálogos («: roman», «: récit»),
+ * sin el paréntesis de colección («(Collection Folio)») y con apóstrofo recto (el tipográfico no
+ * está en la fuente del lomo y deja un hueco).
+ */
+export function tituloLomo(titulo: string): string {
+  return titulo
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/\s*\((collection|colecci[oó]n|folio|poche)[^)]*\)\s*/gi, ' ')
+    .replace(/\s*:\s*(roman|r[ée]cit|r[ée]cits|nouvelles|po[èe]mes|th[ée][âa]tre|novela|relatos|cuentos)\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Edición (tipo de lomo genérico) de un libro: la misma para todos los de una editorial, para que
+ * dos tomos de la misma casa se parezcan; sin editorial, la asignada al libro.
+ */
+export function edicionLomo(l: Pick<Libro, 'edicion'> & { editorial?: string }): Edicion {
+  const ed = (l.editorial ?? '').toLowerCase().replace(/[^a-z]/g, '');
+  if (!ed) return l.edicion;
+  let h = 0;
+  for (const ch of ed) h = (h * 31 + ch.charCodeAt(0)) % 9973;
+  return EDICIONES[h % 3];
 }

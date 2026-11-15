@@ -236,3 +236,5 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .buscador input::placeholder{color:var(--muted)}
 .buscador input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .buscador svg{position:absolute;z-index:1;left:14px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--muted);pointer-events:none}
+/* Apellidos largos en la pestaña del separador (Dostoïevski): letra más prieta para que quepan */
+.balda .riel .separador .pestana.larga span{font-size:7px;letter-spacing:0}

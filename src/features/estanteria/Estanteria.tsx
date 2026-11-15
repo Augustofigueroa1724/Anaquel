@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomoDe, buscar, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, type Coleccion, generoDe, generosDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomoDe, buscar, edicionLomo, tituloLomo, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, type Coleccion, generoDe, generosDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 import { altosPorColeccion, autorLomo, escalaPara, medidaLomo, olvidaMedidas } from './medida';
 
@@ -9,16 +9,17 @@ import { altosPorColeccion, autorLomo, escalaPara, medidaLomo, olvidaMedidas } f
 export function Interior({ libro }: { libro: Libro }) {
   const col = coleccionDe(libro);
   const titulo = (
-    <span className="zona"><span className="tit"><span>{libro.titulo}</span></span></span>
+    <span className="zona"><span className="tit"><span>{tituloLomo(libro.titulo)}</span></span></span>
   );
   const autor = <span className="aut"><span>{autorLomo(libro)}</span></span>;
   if (col === 'folio') return <>{autor}{titulo}<span className="logo">folio</span></>;
   if (col === 'blanche') return <><span className="filete" />{autor}{titulo}<span className="logo">nrf</span><span className="filete" /></>;
   if (col === 'albin') return <>{autor}{titulo}<span className="logo vertical"><span>Albin Michel</span></span></>;
-  if (libro.edicion === 'clasico') {
+  const edicion = edicionLomo(libro);
+  if (edicion === 'clasico') {
     return <><span className="banda" />{titulo}<span className="banda" /></>;
   }
-  if (libro.edicion === 'moderno') {
+  if (edicion === 'moderno') {
     return <>{titulo}<span className="sello" /></>;
   }
   return <><span className="franja" />{titulo}</>;
@@ -27,7 +28,7 @@ export function Interior({ libro }: { libro: Libro }) {
 /** Clase del lomo: la colección si la hay, si no la edición genérica. */
 export const claseLomo = (libro: Libro): string => {
   const col = coleccionDe(libro);
-  return col ? `ed-${col}` : libro.edicion;
+  return col ? `ed-${col}` : edicionLomo(libro);
 };
 
 type Altos = Partial<Record<Coleccion, number>>;
@@ -99,7 +100,7 @@ function Balda({ libros, etiqueta, onAbrir, soloLectura, altos }: {
           <Fragment key={`${sec.tipo}:${sec.etiqueta}`}>
             {conPestana(sec) && (
               <span className={`separador ${sec.tipo}`} aria-hidden="true">
-                <span className="pestana"><span>{sec.etiqueta}</span></span>
+                <span className={`pestana${sec.etiqueta.length > 8 ? ' larga' : ''}`}><span>{sec.etiqueta}</span></span>
               </span>
             )}
             {sec.libros.map((l) => <Lomo key={l.id} libro={l} onAbrir={onAbrir} altos={altos} />)}

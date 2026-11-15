@@ -4,7 +4,7 @@ import {
   agrupaPorGenero, anchoLomoDe, buscar, colorLomo, delAnaquel, ETIQUETA, filtrar, generoDe, generosDe, tintaPara, type Libro,
 } from '../../domain/libro';
 import { claseLomo, Interior } from '../estanteria/Estanteria';
-import { escalaPara, medidaLomo } from '../estanteria/medida';
+import { altosPorColeccion, escalaPara, medidaLomo } from '../estanteria/medida';
 import { Portada } from '../libro3d/Portada';
 
 /** Tapa de 150 × 228 px (2:3, como las cubiertas). */
@@ -73,6 +73,8 @@ export function Carrusel() {
   const abrir = useBiblioteca((s) => s.abrir);
 
   const libros = useMemo(() => delAnaquel(propios), [propios]);
+  // Decide qué autores van solo con el apellido en los lomos, igual que en la estantería.
+  useMemo(() => altosPorColeccion(libros), [libros]);
   const base = useMemo(() => buscar(filtrar(libros, filtro), consulta), [libros, filtro, consulta]);
   const generos = useMemo(() => agrupaPorGenero(base, ordenGeneros).map((g) => g.genero), [base, ordenGeneros]);
   // Mismo orden que la estantería: por género y, dentro, tal como están; sin repetir libros.

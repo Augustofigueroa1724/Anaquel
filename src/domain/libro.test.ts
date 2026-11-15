@@ -49,8 +49,8 @@ describe('dimensiones del lomo', () => {
     for (let id = 0; id < 50; id++) {
       expect(anchoLomo(id)).toBeGreaterThanOrEqual(26);
       expect(anchoLomo(id)).toBeLessThanOrEqual(35);
-      expect(altoLomo(id)).toBeGreaterThanOrEqual(172);
-      expect(altoLomo(id)).toBeLessThanOrEqual(220);
+      expect(altoLomo(id)).toBeGreaterThanOrEqual(196);
+      expect(altoLomo(id)).toBeLessThanOrEqual(232);
     }
   });
 });
@@ -214,5 +214,21 @@ describe('varios géneros', () => {
     expect(generosDe({ genero: 'Novela' })).toEqual(['Novela']);
     expect(camposGenero(['Novela', 'Goncourt'])).toEqual({ genero: 'Novela', generos: ['Novela', 'Goncourt'] });
     expect(camposGenero(['Novela'])).toEqual({ genero: 'Novela', generos: undefined });
+  });
+});
+
+describe('lomo: título y edición', () => {
+  it('limpia coletillas de catálogo y el apóstrofo tipográfico', async () => {
+    const { tituloLomo } = await import('./libro');
+    expect(tituloLomo('Le pays des étés: roman')).toBe('Le pays des étés');
+    expect(tituloLomo('La Vie Devant Soi (Collection Folio)')).toBe('La Vie Devant Soi');
+    expect(tituloLomo('L\u2019étranger')).toBe("L'étranger");
+    expect(tituloLomo('Olivier: récit')).toBe('Olivier');
+    expect(tituloLomo('Huis Clos, suivi de Les Mouches')).toBe('Huis Clos, suivi de Les Mouches');
+  });
+  it('dos tomos de la misma editorial llevan el mismo tipo de lomo', async () => {
+    const { edicionLomo } = await import('./libro');
+    expect(edicionLomo({ edicion: 'moderno', editorial: 'Flammarion' })).toBe(edicionLomo({ edicion: 'clasico', editorial: 'Flammarion' }));
+    expect(edicionLomo({ edicion: 'moderno' })).toBe('moderno');
   });
 });

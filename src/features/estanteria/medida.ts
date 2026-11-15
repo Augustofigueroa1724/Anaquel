@@ -3,7 +3,7 @@
  * Se mide con un lienzo y las mismas fuentes que el CSS de cada tipo de lomo. Si cambian las
  * fuentes o tamaños de `.lomo` en anaquel.css o formulario.css, hay que cambiarlos aquí.
  */
-import { ALTO_MAX_LOMO, apellido, coleccionDe, type Coleccion, type Libro } from '../../domain/libro';
+import { ALTO_MAX_LOMO, apellido, coleccionDe, edicionLomo, tituloLomo, type Coleccion, type Libro } from '../../domain/libro';
 
 type Tipo = 'folio' | 'blanche' | 'albin' | 'clasico' | 'moderno' | 'condensado';
 interface Letra { fuente: string; px: number; espaciado: number; mayus?: boolean }
@@ -42,23 +42,29 @@ function largo(texto: string, l: Letra): number {
   return total;
 }
 
-const receta = (libro: Libro): Receta => RECETAS[(coleccionDe(libro) ?? libro.edicion) as Tipo];
+const receta = (libro: Libro): Receta => RECETAS[(coleccionDe(libro) ?? edicionLomo(libro)) as Tipo];
+
+// Autores que en una colección van solo con el apellido: basta que un libro suyo no quepa con el
+// nombre completo para que todos los suyos de esa colección vayan igual (homogéneos en la balda).
+let autoresCortos = new Set<string>();
+const claveAutorCol = (libro: Libro) => `${coleccionDe(libro) ?? ''}|${libro.autor.trim().toLowerCase()}`;
+const noCabeCompleto = (libro: Libro, r: Receta) =>
+  !!r.autor && largo(tituloLomo(libro.titulo), r.titulo) + largo(libro.autor, r.autor) + r.fijo > ALTO_MAX_LOMO;
 
 /**
  * Autor que se escribe en el lomo: el nombre completo, o solo el apellido cuando con el nombre
- * completo el lomo pasaría del tope de alto.
+ * completo este libro (u otro del mismo autor y colección) pasaría del tope de alto.
  */
 export function autorLomo(libro: Libro): string {
   const r = receta(libro);
   if (!r.autor) return libro.autor;
-  const completo = largo(libro.titulo, r.titulo) + largo(libro.autor, r.autor) + r.fijo;
-  return completo > ALTO_MAX_LOMO ? apellido(libro.autor) : libro.autor;
+  return autoresCortos.has(claveAutorCol(libro)) || noCabeCompleto(libro, r) ? apellido(libro.autor) : libro.autor;
 }
 
 /** { texto: px que ocupan autor y título; fijo: px del resto del lomo }. */
 export function medidaLomo(libro: Libro): { texto: number; fijo: number } {
   const r = receta(libro);
-  return { texto: largo(libro.titulo, r.titulo) + (r.autor ? largo(autorLomo(libro), r.autor) : 0), fijo: r.fijo };
+  return { texto: largo(tituloLomo(libro.titulo), r.titulo) + (r.autor ? largo(autorLomo(libro), r.autor) : 0), fijo: r.fijo };
 }
 
 /** Alto mínimo de cada colección (la Blanche es más alta que el bolsillo Folio). */
@@ -71,6 +77,7 @@ const ALTO_BASE: Record<Coleccion, number> = { folio: 200, blanche: 220, albin: 
  */
 export function altosPorColeccion(libros: readonly Libro[]): Partial<Record<Coleccion, number>> {
   const altos: Partial<Record<Coleccion, number>> = {};
+  autoresCortos = new Set(libros.filter((l) => coleccionDe(l) && noCabeCompleto(l, receta(l))).map(claveAutorCol));
   for (const l of libros) {
     const col = coleccionDe(l);
     if (!col) continue;
