@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomoDe, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, type Coleccion, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomoDe, buscar, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, type Coleccion, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 import { altosPorColeccion, autorLomo, escalaPara, medidaLomo, olvidaMedidas } from './medida';
 
@@ -123,11 +123,12 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
   const filtro = useBiblioteca((s) => s.filtro);
   const filtroGenero = useBiblioteca((s) => s.filtroGenero);
   const ordenGeneros = useBiblioteca((s) => s.ordenGeneros);
+  const consulta = useBiblioteca((s) => s.consulta);
   const soloLectura = ajenos !== undefined;
   const libros = useMemo(() => delAnaquel(ajenos ?? propios), [ajenos, propios]);
   const lista = useMemo(
-    () => (soloLectura ? libros : filtrar(libros, filtro).filter((l) => !filtroGenero || generoDe(l) === filtroGenero)),
-    [libros, filtro, filtroGenero, soloLectura],
+    () => (soloLectura ? libros : buscar(filtrar(libros, filtro), consulta).filter((l) => !filtroGenero || generoDe(l) === filtroGenero)),
+    [libros, filtro, filtroGenero, soloLectura, consulta],
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -154,7 +155,7 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
         <p className="vacio">
           {libros.length === 0
             ? (soloLectura ? 'Su anaquel aún está vacío.' : 'Tu anaquel está vacío. Escanea el código de barras de tu primer libro.')
-            : 'Ningún libro en este filtro.'}
+            : (consulta.trim() && !soloLectura ? `Ningún libro con «${consulta.trim()}».` : 'Ningún libro en este filtro.')}
         </p>
       ) : (
         <div className="mueble">

@@ -10,7 +10,7 @@ import { GeneroActivo } from '../features/estanteria/GeneroActivo';
 import { Hoja } from '../features/ficha/Hoja';
 import { LibroVuelo } from '../features/libro3d/LibroVuelo';
 import { AnadirManual } from '../features/manual/AnadirManual';
-import { delAnaquel, esDeseo, filtrar } from '../domain/libro';
+import { delAnaquel, esDeseo, filtrar, buscar } from '../domain/libro';
 import { useBiblioteca } from './biblioteca';
 import { arrancaCuenta, useCuenta } from './cuenta';
 
@@ -31,7 +31,9 @@ export default function App() {
   const libros = useBiblioteca((s) => s.libros);
   const filtro = useBiblioteca((s) => s.filtro);
   const cerrar = useBiblioteca((s) => s.cerrar);
-  const visibles = filtrar(delAnaquel(libros), filtro).length;
+  const consulta = useBiblioteca((s) => s.consulta);
+  const setConsulta = useBiblioteca((s) => s.setConsulta);
+  const visibles = buscar(filtrar(delAnaquel(libros), filtro), consulta).length;
   const deseos = libros.filter(esDeseo).length;
   const sesion = useCuenta((s) => s.sesion);
   const datosUsuario = sesion?.user.user_metadata as { avatar_url?: string; picture?: string; full_name?: string; name?: string } | undefined;
@@ -89,6 +91,12 @@ export default function App() {
           </div>
         </header>
 
+        {pestana === 'estanteria' && (
+          <label className="buscador">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+            <input id="buscar" type="search" value={consulta} onChange={(e) => setConsulta(e.target.value)} placeholder="Buscar título o autor" aria-label="Buscar título o autor" autoComplete="off" enterKeyHint="search" />
+          </label>
+        )}
         {pestana === 'estanteria' && <Filtros />}
         {pestana === 'estanteria' && <GeneroActivo />}
 

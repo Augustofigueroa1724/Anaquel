@@ -93,6 +93,14 @@ export function filtrar(libros: readonly Libro[], filtro: Filtro): Libro[] {
   return filtro === 'todos' ? [...libros] : libros.filter((l) => l.estado === filtro);
 }
 
+/** Buscador: libros cuyo título o autor contienen todas las palabras escritas, sin tildes ni mayúsculas. */
+export function buscar<T extends Pick<Libro, 'titulo' | 'autor'>>(libros: readonly T[], consulta: string): T[] {
+  const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const palabras = plano(consulta).split(/\s+/).filter(Boolean);
+  if (!palabras.length) return [...libros];
+  return libros.filter((l) => { const texto = plano(`${l.titulo} ${l.autor}`); return palabras.every((p) => texto.includes(p)); });
+}
+
 export function contar(libros: readonly Libro[]): Record<Filtro, number> {
   const c: Record<Filtro, number> = { todos: libros.length, leido: 0, leyendo: 0, pendiente: 0 };
   for (const l of libros) c[l.estado] += 1;

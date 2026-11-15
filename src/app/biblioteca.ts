@@ -15,6 +15,9 @@ interface Biblioteca {
   libros: Libro[];
   filtro: Filtro;
   filtroGenero: string | null;
+  /** Texto del buscador del anaquel (título o autor). */
+  consulta: string;
+  setConsulta(c: string): void;
   /** Orden de las baldas elegido en ajustes (preferencia del dispositivo). */
   ordenGeneros: string[];
   setOrdenGeneros(orden: string[]): void;
@@ -60,6 +63,8 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
   libros: inicial,
   filtro: 'todos',
   filtroGenero: null,
+  consulta: '',
+  setConsulta: (consulta) => set({ consulta }),
   ordenGeneros: leeOrden(),
   abierto: null,
   candidato: null,

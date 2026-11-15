@@ -59,6 +59,15 @@ async function run() {
     if (pendientes === 0) errores.push('el filtro Pendientes no muestra libros');
     await page.locator('.chip[data-f="todos"]').click();
 
+    // Buscador: filtra por título o autor y, vacío, vuelve a enseñarlo todo.
+    const todos = await page.locator('.balda .lomo').count();
+    await page.locator('#buscar').fill('zzzzqq');
+    await page.waitForTimeout(200);
+    if (await page.locator('.balda .lomo').count() !== 0) errores.push('el buscador no filtra');
+    await page.locator('#buscar').fill('');
+    await page.waitForTimeout(200);
+    if (await page.locator('.balda .lomo').count() !== todos) errores.push('el buscador vacío no enseña todos los libros');
+
     // Mueble nórdico: el botón cambia el estilo y vuelve al clásico.
     await page.locator('#cambia-mueble').click();
     if (await page.evaluate(() => document.documentElement.dataset.estilo) !== 'nordico') errores.push('el botón no cambia al mueble nórdico');

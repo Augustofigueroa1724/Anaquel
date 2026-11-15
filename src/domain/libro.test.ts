@@ -193,3 +193,14 @@ describe('alto del lomo según el texto', () => {
     expect(altoLomoDe(0, 600, 40).escala).toBe(0.78);                              // suelo de la letra
   });
 });
+
+describe('buscar', () => {
+  it('por título o autor, sin tildes ni mayúsculas, con todas las palabras', async () => {
+    const { buscar } = await import('./libro');
+    const ls = [{ titulo: "L'étranger", autor: 'Albert Camus' }, { titulo: 'Rayuela', autor: 'Julio Cortázar' }];
+    expect(buscar(ls, 'CORTAZAR')).toHaveLength(1);
+    expect(buscar(ls, 'etranger camus')[0].titulo).toBe("L'étranger");
+    expect(buscar(ls, 'camus rayuela')).toHaveLength(0);
+    expect(buscar(ls, '  ')).toHaveLength(2);
+  });
+});
