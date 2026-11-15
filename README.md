@@ -51,6 +51,7 @@ npm run build
 | 15 nov 2026 | Carrusel: el lomo queda pegado a la portada y a la contraportada | Dos variables CSS con el mismo nombre dejaban el lomo estrecho y con un hueco |
 | 15 nov 2026 | Balda «Lo quiero» al final de la estantería y aviso emergente al importar de Goodreads | Ver los deseos junto a la biblioteca; confirmar claro cuántos libros entraron |
 | 15 nov 2026 | En la web, cabecera compacta: buscador tras una lupa, título menor y sin «Mi biblioteca» | La librería tenía poco sitio; lo de arriba no pasa del 20 % del alto |
+| 15 nov 2026 | La balda «Lo quiero» se ordena por año, con un separador por año | Se cargaron todos los premios Goncourt como «lo quiero» y se quieren ver por año |
 | 15 nov 2026 | Un libro puede tener varios géneros y sale en la balda de cada uno | Novela y Goncourt a la vez, por ejemplo |
 | 15 nov 2026 | Buscador por título o autor en el anaquel; mock de carrusel 3D como alternativa al mueble | Encontrar un libro entre muchos; explorar una vista tipo rolodex |
 | 14 nov 2026 | Un libro borrado en un dispositivo ya no reaparece desde la copia local de otro | Con iPhone y web a la vez, los borrados volvían a subirse al abrir el otro |

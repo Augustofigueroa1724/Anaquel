@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomoDe, buscar, edicionLomo, tituloLomo, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, esDeseo, ETIQUETA, filtrar, type Coleccion, generoDe, generosDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomoDe, buscar, edicionLomo, tituloLomo, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, esDeseo, ETIQUETA, filtrar, type Coleccion, generoDe, generosDe, conPestana, seccionesPorAnio, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 import { altosPorColeccion, autorLomo, escalaPara, medidaLomo, olvidaMedidas } from './medida';
 
@@ -76,7 +76,7 @@ function Balda({ libros, etiqueta, onAbrir, soloLectura, altos, deseos }: {
   const setFiltroGenero = useBiblioteca((s) => s.setFiltroGenero);
   const riel = useRef<HTMLDivElement>(null);
   const [hayMas, setHayMas] = useState(false);
-  const secciones = useMemo(() => seccionesPorAutor(libros), [libros]);
+  const secciones = useMemo(() => (deseos ? seccionesPorAnio(libros) : seccionesPorAutor(libros)), [libros, deseos]);
   useLayoutEffect(() => {
     const el = riel.current;
     if (!el) return;

@@ -282,10 +282,25 @@ export const claveAutor = (autor: string): string => sinTildes(apellido(autor));
 /** Nombre para la pestaña: solo el primer apellido («García», «Murakami»), que siempre cabe. */
 const nombrePestana = (autor: string): string => apellido(autor);
 
-export type Seccion = { tipo: 'autor' | 'letra'; etiqueta: string; libros: Libro[] };
+export type Seccion = { tipo: 'autor' | 'letra' | 'anio'; etiqueta: string; libros: Libro[] };
 
 /** La pestaña del autor sale siempre; la de la letra, solo si agrupa más de 2 libros. */
-export const conPestana = (s: Seccion): boolean => s.tipo === 'autor' || s.libros.length > 2;
+export const conPestana = (s: Seccion): boolean => s.tipo === 'anio' ? s.etiqueta !== '' : s.tipo === 'autor' || s.libros.length > 2;
+
+/**
+ * Separadores de la balda «Lo quiero»: por año, del más reciente al más antiguo, con una pestaña
+ * por año. Los libros sin año van al final, sin pestaña.
+ */
+export function seccionesPorAnio(libros: readonly Libro[]): Seccion[] {
+  const porAnio = new Map<number, Libro[]>();
+  for (const l of libros) {
+    const a = l.anio || 0;
+    porAnio.set(a, [...(porAnio.get(a) ?? []), l]);
+  }
+  return [...porAnio.entries()]
+    .sort(([a], [b]) => (a === 0 ? 1 : b === 0 ? -1 : b - a))
+    .map(([a, ls]) => ({ tipo: 'anio' as const, etiqueta: a ? String(a) : '', libros: ls.sort((x, y) => x.titulo.localeCompare(y.titulo, 'es')) }));
+}
 
 /**
  * Separadores dentro de una balda: un autor con más de un libro tiene su pestaña con el nombre;

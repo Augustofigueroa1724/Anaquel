@@ -263,3 +263,7 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .app.web .filtros .chip{min-height:40px}
 .app.web header:has(.busca-cab) .cuenta{display:none}
 .busca-cab input::-webkit-search-cancel-button{display:none}
+.balda .riel .separador.anio .pestana span{font:600 9px/1 var(--mono,ui-monospace,monospace);letter-spacing:.04em;text-transform:none}
+/* La pestaña del año se abre a la derecha, sobre su propio libro (hay una por libro) */
+.balda .riel .separador.anio .pestana{left:0;border-radius:0 6px 6px 0}
+.balda .riel .separador.anio:first-child{margin-left:0}

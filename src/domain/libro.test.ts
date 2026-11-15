@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   altoLomo, anchoLomo, contar, COLORES_TELA, edicionDe, filtrar, luminancia, repartePorBaldas,
-  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO, seccionesPorAutor, apellido, conPestana, ordenaPorPreferencia,
+  tintaPara, type Libro, validaDatos, validaPrestamo, hoyIso, formateaFecha, agrupaPorGenero, generoDesdeCategorias, SIN_GENERO, seccionesPorAutor, seccionesPorAnio, apellido, conPestana, ordenaPorPreferencia,
 } from './libro';
 
 const libro = (id: number, estado: Libro['estado'] = 'leido'): Libro => ({
@@ -230,5 +230,15 @@ describe('lomo: título y edición', () => {
     const { edicionLomo } = await import('./libro');
     expect(edicionLomo({ edicion: 'moderno', editorial: 'Flammarion' })).toBe(edicionLomo({ edicion: 'clasico', editorial: 'Flammarion' }));
     expect(edicionLomo({ edicion: 'moderno' })).toBe('moderno');
+  });
+});
+
+describe('seccionesPorAnio', () => {
+  it('ordena del año más reciente al más antiguo, con una pestaña por año y los sin año al final', () => {
+    const l = (id: number, titulo: string, anio: number) => ({ id, titulo, autor: 'X', anio, isbn: '', estado: 'pendiente', color: '#000000', edicion: 'clasico' }) as Libro;
+    const s = seccionesPorAnio([l(1, 'B', 1990), l(2, 'Sin', 0), l(3, 'A', 2020), l(4, 'A', 1990)]);
+    expect(s.map((x) => x.etiqueta)).toEqual(['2020', '1990', '']);
+    expect(s[1].libros.map((x) => x.id)).toEqual([4, 1]);
+    expect(s.map(conPestana)).toEqual([true, true, false]);
   });
 });
