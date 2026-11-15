@@ -1,0 +1,32 @@
+name: Datos de libros
+# Busca ISBN, portada, editorial y páginas de una lista (tools/*.json) y deja el resultado en la rama «datos».
+on:
+  workflow_dispatch:
+    inputs:
+      lista:
+        description: Fichero de la lista, dentro de tools/
+        required: true
+        default: goncourt.json
+env:
+  VITE_GOOGLE_BOOKS_KEY: ${{ secrets.GOOGLE_BOOKS_KEY }}
+  LISTA: ${{ inputs.lista }}
+permissions:
+  contents: write
+jobs:
+  datos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: mkdir salida && node tools/busca-titulos.mjs "tools/$LISTA" "salida/$LISTA"
+      - name: Publicar en la rama datos
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout --orphan datos
+          git rm -rfq . && git clean -fdq -e salida
+          mv salida/* . && rmdir salida
+          git add -A && git commit -qm "Datos de libros" && git push -f origin datos
