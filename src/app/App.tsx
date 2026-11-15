@@ -4,6 +4,7 @@ import { Amigos } from '../features/amigos/Amigos';
 import { Ajustes } from '../features/ajustes/Ajustes';
 import { Deseos } from '../features/deseos/Deseos';
 import { Escanear } from '../features/escaner/Escanear';
+import { Carrusel } from '../features/carrusel/Carrusel';
 import { Estanteria } from '../features/estanteria/Estanteria';
 import { Filtros } from '../features/estanteria/Filtros';
 import { GeneroActivo } from '../features/estanteria/GeneroActivo';
@@ -66,12 +67,12 @@ export default function App() {
           <div className="cab-derecha">
             <div className="cab-botones">
               {pestana === 'estanteria' && (
-                <button className="cambia-mueble" id="cambia-mueble" onClick={() => setEstilo(estilo === 'nordico' ? 'clasico' : 'nordico')}
-                  aria-label={estilo === 'nordico' ? 'Cambiar al mueble clásico de nogal' : 'Cambiar al mueble nórdico de roble'}>
-                  {estilo === 'nordico' ? (
+                <button className="cambia-mueble" id="cambia-mueble" onClick={() => setEstilo(estilo === 'carrusel' ? 'clasico' : 'carrusel')}
+                  aria-label={estilo === 'carrusel' ? 'Ver en estantería' : 'Ver en carrusel'}>
+                  {estilo === 'carrusel' ? (
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 3h16M5 3v18M19 3v18M5 9h14M5 15h14M5 21h14" /></svg>
                   ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 3v18M19 3v18M3 8h18M3 14h18M3 20h18" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5h6v14H9zM4 7.5l3-1v11l-3-1zM20 7.5l-3-1v11l3-1z" /></svg>
                   )}
                 </button>
               )}
@@ -98,13 +99,13 @@ export default function App() {
           </label>
         )}
         {pestana === 'estanteria' && <Filtros />}
-        {pestana === 'estanteria' && <GeneroActivo />}
+        {pestana === 'estanteria' && estilo !== 'carrusel' && <GeneroActivo />}
 
         <main>
           {pestana === 'estanteria' && (
             <section id="estanteria">
-              <Estanteria />
-              <div className="pista" id="pista">Toca un libro para sacarlo del anaquel</div>
+              {estilo === 'carrusel' ? <Carrusel /> : <Estanteria />}
+              <div className="pista" id="pista">{estilo === 'carrusel' ? 'Desliza para pasar los libros · toca el del centro' : 'Toca un libro para sacarlo del anaquel'}</div>
             </section>
           )}
           {pestana === 'deseos' && <section className="desplaza"><Deseos /></section>}

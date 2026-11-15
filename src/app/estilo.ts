@@ -1,15 +1,16 @@
-/** Estilo del mueble: «clásico» (nogal y latón) o «nórdico» (roble claro y blanco). Preferencia del dispositivo. */
 import { barraDeEstado } from '../platform/barra-estado';
-export type Estilo = 'clasico' | 'nordico';
+
+/** Vista del anaquel: la estantería de nogal o el carrusel 3D. Preferencia del dispositivo. */
+export type Estilo = 'clasico' | 'carrusel';
 const CLAVE = 'anaquel.estilo.v1';
 
 export function leeEstilo(): Estilo {
-  try { return localStorage.getItem(CLAVE) === 'nordico' ? 'nordico' : 'clasico'; } catch { return 'clasico'; }
+  // «nordico» fue un mueble alternativo que se retiró el 15 nov 2026: quien lo tenía vuelve al clásico.
+  try { return localStorage.getItem(CLAVE) === 'carrusel' ? 'carrusel' : 'clasico'; } catch { return 'clasico'; }
 }
 
 export function aplicaEstilo(e: Estilo): void {
-  if (e === 'nordico') document.documentElement.dataset.estilo = 'nordico';
-  else delete document.documentElement.dataset.estilo;
+  delete document.documentElement.dataset.estilo;
   try { localStorage.setItem(CLAVE, e); } catch { /* sin almacenamiento: dura la sesión */ }
 }
 

@@ -8,7 +8,7 @@ import '@fontsource/oswald/index.css';
 import '@fontsource/ibm-plex-mono/index.css';
 import './styles/anaquel.css';
 import './styles/formulario.css';
-import './styles/nordico.css';
+import './styles/carrusel.css';
 import { aplicaEstilo, aplicaTema, leeEstilo, leeTema } from './app/estilo';
 aplicaEstilo(leeEstilo());
 aplicaTema(leeTema());

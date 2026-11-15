@@ -68,12 +68,19 @@ async function run() {
     await page.waitForTimeout(200);
     if (await page.locator('.balda .lomo').count() !== todos) errores.push('el buscador vacío no enseña todos los libros');
 
-    // Mueble nórdico: el botón cambia el estilo y vuelve al clásico.
+    // Carrusel: el botón cambia de vista, se pasa de libro, el del centro abre su ficha y se vuelve a la estantería.
     await page.locator('#cambia-mueble').click();
-    if (await page.evaluate(() => document.documentElement.dataset.estilo) !== 'nordico') errores.push('el botón no cambia al mueble nórdico');
-    if (await page.locator('.lomo').count() === 0) errores.push('el mueble nórdico no muestra libros');
+    await page.waitForSelector('.vista-carrusel .libro-c');
+    const titulo1 = await page.locator('.ficha-c b').innerText();
+    await page.locator('.flecha-c.de').click();
+    await page.waitForTimeout(700);
+    if (await page.locator('.ficha-c b').innerText() === titulo1) errores.push('el carrusel no pasa al libro siguiente');
+    await page.locator('.ficha-c').click();
+    await page.waitForSelector('.hoja.abierta');
+    await page.keyboard.press('Escape');
+    await page.waitForSelector('.hoja:not(.abierta)');
     await page.locator('#cambia-mueble').click();
-    if (await page.evaluate(() => document.documentElement.dataset.estilo)) errores.push('el botón no vuelve al mueble clásico');
+    await page.waitForSelector('.mueble');
 
     const antes = await page.locator('#cuenta').innerText();
     await page.locator('#tab-escanear').click();
