@@ -3,7 +3,7 @@ import { SelectorGenero } from './SelectorGenero';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
   ESTADOS, esDeseo, ETIQUETA, formateaFecha, hoyIso, validaDatos, validaPrestamo,
-  type DatosLibro, type Estado, type Libro,
+  type DatosLibro, type Estado, type Libro, camposGenero, generosDe,
 } from '../../domain/libro';
 
 /** Valoración de 1 a 5 en latón. Tocar la misma estrella la quita. */
@@ -65,7 +65,7 @@ function Ficha({ libro, enEstante }: { libro: Libro; enEstante: boolean }) {
 function Cabecera({ libro }: { libro: Libro }) {
   return (
     <>
-      <p className="eti">{esDeseo(libro) ? 'Lo quiero' : ETIQUETA[libro.estado]}{libro.genero ? ` · ${libro.genero}` : ''}</p>
+      <p className="eti">{esDeseo(libro) ? 'Lo quiero' : ETIQUETA[libro.estado]}{generosDe(libro).map((g) => ` · ${g}`).join('')}</p>
       <h2>{libro.titulo}</h2>
       <p className="autor">{[libro.autor, libro.anio || null].filter(Boolean).join(' · ')}</p>
     </>
@@ -129,7 +129,7 @@ function Vista({
 
       {!enEstante && busqueda !== 'buscando' && (
         <div className="genero-candidato">
-          <SelectorGenero valor={libro.genero ?? ''} onCambio={setGeneroCandidato} />
+          <SelectorGenero valores={generosDe(libro)} onCambio={setGeneroCandidato} />
         </div>
       )}
 
@@ -244,16 +244,17 @@ function Formulario({ libro, onListo }: { libro: Libro; onListo: () => void }) {
     estado: libro.estado,
     genero: libro.genero ?? '',
   });
+  const [generos, setGeneros] = useState<string[]>(() => generosDe(libro));
   const [error, setError] = useState<string | null>(null);
 
   function guardar(e: React.FormEvent) {
     e.preventDefault();
     const limpio: DatosLibro = {
-      ...datos, titulo: datos.titulo.trim(), autor: datos.autor.trim(), isbn: datos.isbn.trim(), genero: datos.genero.trim(),
+      ...datos, titulo: datos.titulo.trim(), autor: datos.autor.trim(), isbn: datos.isbn.trim(), genero: generos[0] ?? '',
     };
     const fallo = validaDatos(limpio);
     if (fallo) { setError(fallo); return; }
-    editar(libro.id, limpio);
+    editar(libro.id, { ...limpio, ...camposGenero(generos) });
     onListo();
   }
 
@@ -268,7 +269,7 @@ function Formulario({ libro, onListo }: { libro: Libro; onListo: () => void }) {
         <span>Autor</span>
         <input value={datos.autor} onChange={(e) => setDatos({ ...datos, autor: e.target.value })} autoComplete="off" />
       </label>
-      <SelectorGenero valor={datos.genero} onCambio={(genero) => setDatos({ ...datos, genero })} />
+      <SelectorGenero valores={generos} onCambio={setGeneros} />
       <label className="campo">
         <span>Año</span>
         <input

@@ -204,3 +204,15 @@ describe('buscar', () => {
     expect(buscar(ls, '  ')).toHaveLength(2);
   });
 });
+
+describe('varios géneros', () => {
+  it('un libro con dos géneros sale en las dos baldas', async () => {
+    const { agrupaPorGenero, generosDe, camposGenero } = await import('./libro');
+    const l = (id: number, extra: Partial<Libro>): Libro => ({ id, titulo: `T${id}`, autor: 'A', anio: 0, isbn: '', estado: 'leido', color: '#000', edicion: 'clasico', ...extra });
+    const g = agrupaPorGenero([l(1, { genero: 'Novela', generos: ['Novela', 'Goncourt'] }), l(2, { genero: 'Novela' }), l(3, {})]);
+    expect(g.map((x) => `${x.genero}:${x.libros.map((b) => b.id).join(',')}`)).toEqual(['Novela:1,2', 'Goncourt:1', 'Sin género:3']);
+    expect(generosDe({ genero: 'Novela' })).toEqual(['Novela']);
+    expect(camposGenero(['Novela', 'Goncourt'])).toEqual({ genero: 'Novela', generos: ['Novela', 'Goncourt'] });
+    expect(camposGenero(['Novela'])).toEqual({ genero: 'Novela', generos: undefined });
+  });
+});

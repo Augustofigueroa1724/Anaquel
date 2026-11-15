@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomoDe, buscar, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, type Coleccion, generoDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomoDe, buscar, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, ETIQUETA, filtrar, type Coleccion, generoDe, generosDe, conPestana, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 import { altosPorColeccion, autorLomo, escalaPara, medidaLomo, olvidaMedidas } from './medida';
 
@@ -127,7 +127,7 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
   const soloLectura = ajenos !== undefined;
   const libros = useMemo(() => delAnaquel(ajenos ?? propios), [ajenos, propios]);
   const lista = useMemo(
-    () => (soloLectura ? libros : buscar(filtrar(libros, filtro), consulta).filter((l) => !filtroGenero || generoDe(l) === filtroGenero)),
+    () => (soloLectura ? libros : buscar(filtrar(libros, filtro), consulta).filter((l) => !filtroGenero || generoDe(l) === filtroGenero || generosDe(l).includes(filtroGenero))),
     [libros, filtro, filtroGenero, soloLectura, consulta],
   );
 

@@ -5,7 +5,7 @@ import {
   aceptaAmistad, anaquelDe, guardaPerfil, pideAmistad, quitaAmistad, relaciones,
   type Perfil, type Relaciones,
 } from '../../data/social';
-import { ETIQUETA, type Libro } from '../../domain/libro';
+import { ETIQUETA, type Libro, generosDe } from '../../domain/libro';
 import { BotonesLogin } from '../cuenta/BotonesLogin';
 import { Estanteria } from '../estanteria/Estanteria';
 
@@ -136,7 +136,7 @@ function AnaquelAmigo({ amigo, onVolver }: { amigo: Perfil; onVolver: () => void
       {libros && <div className="contenedor-amigo"><Estanteria ajenos={libros} onAbrir={setElegido} /></div>}
       {elegido && (
         <div className="tarjeta-amigo" role="dialog" aria-label={elegido.titulo}>
-          <p className="eti">{ETIQUETA[elegido.estado]}{elegido.genero ? ` · ${elegido.genero}` : ''}</p>
+          <p className="eti">{ETIQUETA[elegido.estado]}{generosDe(elegido).map((g) => ` · ${g}`).join('')}</p>
           <h3>{elegido.titulo}</h3>
           <p className="autor">{[elegido.autor, elegido.anio || null].filter(Boolean).join(' · ')}{elegido.valoracion ? ` · ${'★'.repeat(elegido.valoracion)}` : ''}</p>
           <div className="botones">

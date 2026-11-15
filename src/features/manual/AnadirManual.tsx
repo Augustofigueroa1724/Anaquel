@@ -18,6 +18,7 @@ export function AnadirManual({ onCerrar, onAnadido }: {
   const [activo, setActivo] = useState<'titulo' | 'autor' | null>(null);
   const [sugs, setSugs] = useState<Candidato[]>([]);
   const elegido = useRef(false);
+  const [generos, setGeneros] = useState<string[]>([]);
   const [extra, setExtra] = useState<{ portada?: string; editorial?: string; paginas?: number }>({});
 
   // Autocompletar: busca al dejar de teclear (350 ms) con lo que haya en título y autor.
@@ -40,7 +41,8 @@ export function AnadirManual({ onCerrar, onAnadido }: {
   function elige(c: Candidato) {
     elegido.current = true;
     setExtra({ ...(c.portada ? { portada: c.portada } : {}), ...(c.editorial ? { editorial: c.editorial } : {}), ...(c.paginas ? { paginas: c.paginas } : {}) });
-    setDatos((d) => ({ ...d, titulo: c.titulo, autor: c.autor, anio: c.anio || d.anio, isbn: c.isbn || d.isbn, genero: d.genero || c.genero || '' }));
+    setDatos((d) => ({ ...d, titulo: c.titulo, autor: c.autor, anio: c.anio || d.anio, isbn: c.isbn || d.isbn }));
+    if (c.genero) setGeneros((gs) => (gs.length ? gs : [c.genero!]));
     setSugs([]);
     setActivo(null);
   }
@@ -61,12 +63,12 @@ export function AnadirManual({ onCerrar, onAnadido }: {
   function guarda(e: React.FormEvent) {
     e.preventDefault();
     const limpio: DatosLibro = {
-      ...datos, titulo: datos.titulo.trim(), autor: datos.autor.trim(), isbn: datos.isbn.replace(/[^0-9Xx]/g, ''), genero: datos.genero.trim(),
+      ...datos, titulo: datos.titulo.trim(), autor: datos.autor.trim(), isbn: datos.isbn.replace(/[^0-9Xx]/g, ''), genero: generos[0] ?? '',
     };
     const fallo = validaDatos(limpio);
     if (fallo) { setError(fallo); return; }
     const { genero, ...resto } = limpio;
-    const nuevo = { ...resto, ...extra, ...(genero ? { genero } : {}), ...(posesion === 'quiero' ? { posesion: 'quiero' as const } : {}) };
+    const nuevo = { ...resto, ...extra, ...(genero ? { genero } : {}), ...(generos.length > 1 ? { generos } : {}), ...(posesion === 'quiero' ? { posesion: 'quiero' as const } : {}) };
     if (!sinRepetidos([nuevo], libros.filter((l) => !l.ejemplo)).length) { setError('Este libro ya está en tu anaquel o en tu lista.'); return; }
     importa([nuevo]);
     onAnadido(posesion);
@@ -91,7 +93,7 @@ export function AnadirManual({ onCerrar, onAnadido }: {
           <input id="manual-autor" value={datos.autor} onChange={(e) => escribe('autor', e.target.value)} onFocus={() => setActivo('autor')} onBlur={() => setActivo(null)} autoComplete="off" />
         </label>
         {lista('autor')}
-        <SelectorGenero valor={datos.genero} onCambio={(genero) => setDatos({ ...datos, genero })} />
+        <SelectorGenero valores={generos} onCambio={setGeneros} />
         <label className="campo"><span>Año (opcional)</span>
           <input type="number" inputMode="numeric" value={datos.anio || ''} onChange={(e) => setDatos({ ...datos, anio: e.target.value === '' ? 0 : Number(e.target.value) })} />
         </label>

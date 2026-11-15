@@ -37,7 +37,7 @@ interface Biblioteca {
   valorar(id: number, valoracion: number | undefined): void;
   descartarCandidato(): void;
   /** Género del libro escaneado antes de añadirlo (lo detectado se puede cambiar). */
-  setGeneroCandidato(genero: string): void;
+  setGeneroCandidato(generos: string[]): void;
   /** Busca portada (y editorial y color) de los libros propios que aún no la tienen, de uno en uno. */
   completaPortadas(): Promise<void>;
   editarLibro(id: number, cambios: Partial<Omit<Libro, 'id' | 'color' | 'edicion'>>): void;
@@ -135,9 +135,9 @@ export const useBiblioteca = create<Biblioteca>((set, get) => ({
     }
   },
 
-  setGeneroCandidato: (genero) => {
+  setGeneroCandidato: (generos) => {
     const c = get().candidato;
-    if (c) set({ candidato: { ...c, genero: genero || undefined } });
+    if (c) set({ candidato: { ...c, genero: generos[0] || undefined, generos: generos.length > 1 ? generos : undefined } });
   },
 
   anadirCandidato: (posesion = 'tengo') => {

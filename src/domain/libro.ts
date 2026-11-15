@@ -15,6 +15,8 @@ export interface Libro {
   prestamo?: { a: string; desde: string };
   /** Género o categoría: cada uno ocupa sus propias baldas. */
   genero?: string;
+  /** Todos los géneros cuando tiene más de uno (el primero es `genero`): sale en la balda de cada uno. */
+  generos?: string[];
   /** Notas o comentarios del lector. */
   notas?: string;
   /** «quiero» = lista de deseos (aún no lo tiene). Sin valor = lo tiene. */
@@ -203,12 +205,22 @@ export const GENEROS_BASE: readonly string[] = [
 
 export const generoDe = (l: Libro): string => l.genero?.trim() || SIN_GENERO;
 
+/** Géneros de un libro (puede tener varios, p. ej. Novela y Goncourt); vacío si no tiene. */
+export function generosDe(l: Pick<Libro, 'genero' | 'generos'>): string[] {
+  const todos = (l.generos?.length ? l.generos : [l.genero ?? '']).map((g) => g.trim()).filter(Boolean);
+  return todos.filter((g, i) => todos.findIndex((x) => x.toLowerCase() === g.toLowerCase()) === i);
+}
+
+/** Campos que se guardan para una lista de géneros: `genero` es el primero; `generos`, solo si hay varios. */
+export const camposGenero = (gs: readonly string[]): { genero: string; generos: string[] | undefined } =>
+  ({ genero: gs[0] ?? '', generos: gs.length > 1 ? [...gs] : undefined });
+
 /** Agrupa por género: los más numerosos primero, «Sin género» al final. */
 export function agrupaPorGenero(libros: readonly Libro[], orden: readonly string[] = []): { genero: string; libros: Libro[] }[] {
   const grupos = new Map<string, Libro[]>();
   for (const l of libros) {
-    const g = generoDe(l);
-    grupos.set(g, [...(grupos.get(g) ?? []), l]);
+    const gs = generosDe(l);
+    for (const g of gs.length ? gs : [SIN_GENERO]) grupos.set(g, [...(grupos.get(g) ?? []), l]);
   }
   const base = [...grupos.entries()]
     .map(([genero, ls]) => ({ genero, libros: ls }))

@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import { anadeGenero, borraGenero, cargaGeneros, esBase, juntaGeneros } from '../../data/generos';
-import { GENEROS_BASE } from '../../domain/libro';
+import { GENEROS_BASE, generosDe } from '../../domain/libro';
 
-/** Chips de género (lista común) y «+ Nuevo». Un género añadido y sin usar se puede quitar. */
-export function SelectorGenero({ valor, onCambio }: { valor: string; onCambio: (g: string) => void }) {
+/**
+ * Chips de género (lista común) y «+ Nuevo». Se pueden marcar varios: el libro sale en la balda de
+ * cada uno. Un género añadido y sin usar se puede quitar.
+ */
+export function SelectorGenero({ valores, onCambio }: { valores: string[]; onCambio: (gs: string[]) => void }) {
   const libros = useBiblioteca((s) => s.libros);
   // Los base salen al momento; los de la lista común se suman cuando llegan del servidor.
   const [catalogo, setCatalogo] = useState<string[]>(() => juntaGeneros(GENEROS_BASE));
@@ -12,15 +15,17 @@ export function SelectorGenero({ valor, onCambio }: { valor: string; onCambio: (
   const [error, setError] = useState('');
   useEffect(() => { void cargaGeneros().then((g) => setCatalogo((c) => juntaGeneros(c, g))); }, []);
 
-  const usados = useMemo(() => libros.map((l) => l.genero ?? '').filter(Boolean), [libros]);
-  const lista = useMemo(() => juntaGeneros(catalogo, usados, valor ? [valor] : []), [catalogo, usados, valor]);
+  const usados = useMemo(() => libros.flatMap((l) => generosDe(l)), [libros]);
+  const lista = useMemo(() => juntaGeneros(catalogo, usados, valores), [catalogo, usados, valores]);
+  const tiene = (g: string) => valores.some((v) => v.toLowerCase() === g.toLowerCase());
+  const alterna = (g: string) => onCambio(tiene(g) ? valores.filter((v) => v.toLowerCase() !== g.toLowerCase()) : [...valores, g]);
 
   async function anade() {
     if (nuevo === null) return;
     const r = await anadeGenero(nuevo);
     if (!r.ok) { setError(r.error); return; }
     setCatalogo((c) => juntaGeneros(c, [r.genero]));
-    onCambio(r.genero);
+    if (!tiene(r.genero)) onCambio([...valores, r.genero]);
     setNuevo(null); setError('');
   }
 
@@ -31,14 +36,14 @@ export function SelectorGenero({ valor, onCambio }: { valor: string; onCambio: (
 
   return (
     <div className="selector-genero">
-      <span className="rotulo">Género</span>
+      <span className="rotulo">Géneros (puedes marcar varios)</span>
       <div className="chips-genero">
         {lista.map((g) => {
-          const activo = g.toLowerCase() === valor.toLowerCase();
+          const activo = tiene(g);
           const quitable = !esBase(g) && !activo && !usados.some((u) => u.toLowerCase() === g.toLowerCase());
           return (
             <span key={g} className={`chip-genero${activo ? ' activo' : ''}`}>
-              <button type="button" aria-pressed={activo} onClick={() => onCambio(activo ? '' : g)}>{g}</button>
+              <button type="button" aria-pressed={activo} onClick={() => alterna(g)}>{g}</button>
               {quitable && <button type="button" className="quita-genero" aria-label={`Quitar ${g} de la lista`} onClick={() => void quita(g)}>×</button>}
             </span>
           );
