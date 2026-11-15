@@ -20,9 +20,17 @@ async function json(url) {
 }
 const apellido = (a) => plano(a).split(' ').pop();
 
+// Guías de lectura, resúmenes y análisis: no son el libro.
+const GUIA = /fiche|analyse|r[ée]sum[ée]|comprendre|primento|petit ?litt[ée]raire|[ée]tude|commentaire|profil|study|guide|lecture/i;
+
 async function google(l) {
-  const q = encodeURIComponent(`intitle:"${l.titulo.replace(/\.+$/, '')}" inauthor:"${l.autor.split(' et ')[0]}"`);
-  const r = await json(`https://www.googleapis.com/books/v1/volumes?q=${q}&printType=books&maxResults=20${clave}`);
+  const a = await googleCon(l, `intitle:"${l.titulo.replace(/\.+$/, '')}" inauthor:"${l.autor.split(' et ')[0]}"`);
+  return a || googleCon(l, `intitle:${l.titulo.replace(/\.+$/, '')} inauthor:${l.autor.split(' ').pop()}`);
+}
+
+async function googleCon(l, consulta) {
+  const q = encodeURIComponent(consulta);
+  const r = await json(`https://www.googleapis.com/books/v1/volumes?q=${q}&printType=books&maxResults=40${clave}`);
   const t = plano(l.titulo);
   let mejor = null;
   for (const it of r?.items || []) {
@@ -31,6 +39,7 @@ async function google(l) {
     if (!isbn) continue;
     const tv = plano(v.title);
     if (!(tv === t || tv.startsWith(t) || t.startsWith(tv))) continue;
+    if (GUIA.test(`${v.title} ${v.subtitle || ''} ${v.publisher || ''}`) || (v.language && v.language !== 'fr')) continue;
     if (!(v.authors || []).some((a) => plano(a).includes(apellido(l.autor)))) continue;
     const img = v.imageLinks?.thumbnail;
     const p = (isbn.startsWith('9782') || isbn.startsWith('97910') ? 4 : 0) + (v.language === 'fr' ? 2 : 0) + (img ? 3 : 0) + (tv === t ? 1 : 0) + (v.pageCount ? 0.5 : 0);
@@ -50,11 +59,32 @@ async function openLibrary(l) {
   return null;
 }
 
+// Catálogo de la BnF (SRU, Dublin Core): todo lo publicado en Francia.
+async function bnf(l) {
+  const q = encodeURIComponent(`bib.title all "${l.titulo}" and bib.author all "${l.autor.split(' ').pop()}"`);
+  let x = '';
+  try {
+    const r = await fetch(`https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=${q}&recordSchema=dublincore&maximumRecords=30`, { signal: AbortSignal.timeout(20000) });
+    if (r.ok) x = await r.text();
+  } catch { return null; }
+  let mejor = null;
+  for (const reg of x.split('<srw:record>').slice(1)) {
+    const isbn = (reg.match(/ISBN\s*([0-9Xx-]{10,17})/) || [])[1]?.replace(/-/g, '');
+    if (!isbn || isbn.length !== 13) continue;
+    if (GUIA.test((reg.match(/<dc:title>([^<]*)/) || [])[1] || '')) continue;
+    const ed = ((reg.match(/<dc:publisher>([^<]*)/) || [])[1] || '').replace(/\s*\(.*?\)\s*$/, '');
+    const pag = Number((reg.match(/(\d+)\s*p\./) || [])[1] || 0);
+    const fecha = Number((reg.match(/<dc:date>(\d{4})/) || [])[1] || 0);
+    if (!mejor || fecha > mejor.fecha) mejor = { p: 0, isbn, portada: '', editorial: ed, paginas: pag, fuente: 'bnf', fecha };
+  }
+  return mejor;
+}
+
 const fuera = [];
 for (const l of lista) {
   const g = await google(l);
   const o = g && g.portada ? null : await openLibrary(l);
-  const m = g ? { ...g, portada: g.portada || (o?.isbn === g.isbn ? o.portada : '') } : o;
+  const m = g ? { ...g, portada: g.portada || (o?.isbn === g.isbn ? o.portada : '') } : (o || await bnf(l));
   // Sin portada de Google, se prueba la de Open Library por ISBN.
   if (m && !m.portada) {
     try {
