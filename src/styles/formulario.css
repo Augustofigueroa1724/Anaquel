@@ -248,3 +248,18 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .aviso-ok{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--bg);font-size:26px;line-height:1}
 /* Balda de «Lo quiero»: los lomos algo apagados, porque aún no están en casa */
 .balda-deseos .lomo{opacity:.82}
+
+/* Cabecera compacta de la web: lo de antes de la librería no pasa del 20 % del alto */
+.app.web header{align-items:center;padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:6px}
+.app.web .marca{font-size:30px}
+.app.web .cab-derecha{flex-direction:row-reverse;align-items:center;gap:10px}
+.app.web .filtros button{padding-top:5px;padding-bottom:5px}
+.lupa{border:0;background:none;color:var(--fg);width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
+.lupa svg{width:26px;height:26px}
+.lupa:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+.busca-cab{flex:1;min-width:0;display:flex;align-items:center;gap:4px}
+.busca-cab .buscador{flex:1;min-width:0;margin:0}
+.cierra-busca{flex:none;border:0;background:none;color:var(--muted);width:44px;height:44px;font-size:26px;line-height:1;cursor:pointer}
+.app.web .filtros .chip{min-height:40px}
+.app.web header:has(.busca-cab) .cuenta{display:none}
+.busca-cab input::-webkit-search-cancel-button{display:none}

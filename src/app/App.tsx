@@ -1,5 +1,6 @@
 import { aplicaEstilo, leeEstilo, type Estilo } from './estilo';
 import { useEffect, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { Amigos } from '../features/amigos/Amigos';
 import { Ajustes } from '../features/ajustes/Ajustes';
 import { Deseos } from '../features/deseos/Deseos';
@@ -23,11 +24,15 @@ const ICONOS: Record<Pestana, string> = {
   escanear: 'M12 5v14M5 12h14',
   amigos: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.6-3.3 3.3-5.5 6.5-5.5s5.9 2.2 6.5 5.5M16 4.3a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .7 3.3 2.6 3.6 5.2',
 };
+/** En la web la cabecera va compacta: sin «Mi biblioteca», título menor y el buscador tras una lupa. */
+const WEB = !Capacitor.isNativePlatform();
+
 const NOMBRES: Record<Pestana, string> = { estanteria: 'Anaquel', deseos: 'Lo quiero', escanear: 'Añadir', amigos: 'Amigos' };
 
 export default function App() {
   const [pestana, setPestana] = useState<Pestana>('estanteria');
   const [ajustes, setAjustes] = useState(false);
+  const [buscando, setBuscando] = useState(false);
   const [manual, setManual] = useState(false);
   const libros = useBiblioteca((s) => s.libros);
   const filtro = useBiblioteca((s) => s.filtro);
@@ -63,16 +68,37 @@ export default function App() {
     return () => window.removeEventListener('keydown', alPulsar);
   }, [cerrar]);
 
+  const campoBuscar = (
+          <label className="buscador">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+            <input id="buscar" type="search" value={consulta} onChange={(e) => setConsulta(e.target.value)} placeholder="Buscar título o autor" aria-label="Buscar título o autor" autoComplete="off" enterKeyHint="search" autoFocus={WEB} />
+          </label>
+  );
+  const buscaAbierta = WEB && pestana === 'estanteria' && buscando;
+  const cierraBusca = () => { setBuscando(false); setConsulta(''); };
+
   return (
     <>
-      <div className="app">
+      <div className={`app${WEB ? ' web' : ''}`}>
         <header>
-          <div className="titulo">
-            <span className="sobre">Mi biblioteca</span>
-            <span className="marca">Anaquel</span>
-          </div>
+          {buscaAbierta ? (
+            <div className="busca-cab">
+              {campoBuscar}
+              <button type="button" className="cierra-busca" onClick={cierraBusca} aria-label="Cerrar el buscador">×</button>
+            </div>
+          ) : (
+            <div className="titulo">
+              {!WEB && <span className="sobre">Mi biblioteca</span>}
+              <span className="marca">Anaquel</span>
+            </div>
+          )}
           <div className="cab-derecha">
             <div className="cab-botones">
+              {WEB && pestana === 'estanteria' && !buscando && (
+                <button className="lupa" id="abre-buscar" onClick={() => setBuscando(true)} aria-label="Buscar título o autor">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+                </button>
+              )}
               {pestana === 'estanteria' && (
                 <button className="cambia-mueble" id="cambia-mueble" onClick={() => setEstilo(estilo === 'carrusel' ? 'clasico' : 'carrusel')}
                   aria-label={estilo === 'carrusel' ? 'Ver en estantería' : 'Ver en carrusel'}>
@@ -99,12 +125,7 @@ export default function App() {
           </div>
         </header>
 
-        {pestana === 'estanteria' && (
-          <label className="buscador">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-            <input id="buscar" type="search" value={consulta} onChange={(e) => setConsulta(e.target.value)} placeholder="Buscar título o autor" aria-label="Buscar título o autor" autoComplete="off" enterKeyHint="search" />
-          </label>
-        )}
+        {pestana === 'estanteria' && !WEB && campoBuscar}
         {pestana === 'estanteria' && <Filtros />}
         {pestana === 'estanteria' && estilo !== 'carrusel' && <GeneroActivo />}
 

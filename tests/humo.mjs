@@ -61,6 +61,7 @@ async function run() {
 
     // Buscador: filtra por título o autor y, vacío, vuelve a enseñarlo todo.
     const todos = await page.locator('.balda .lomo').count();
+    if (await page.locator('#abre-buscar').count()) await page.locator('#abre-buscar').click();
     await page.locator('#buscar').fill('zzzzqq');
     await page.waitForTimeout(200);
     if (await page.locator('.balda .lomo').count() !== 0) errores.push('el buscador no filtra');
