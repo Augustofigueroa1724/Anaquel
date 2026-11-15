@@ -247,7 +247,7 @@ section.desplaza{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .aviso .btn{width:100%;margin-top:6px}
 .aviso-ok{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--bg);font-size:26px;line-height:1}
 /* Balda de «Lo quiero»: los lomos algo apagados, porque aún no están en casa */
-.balda-deseos .lomo{opacity:.82}
+.balda-deseos .lomo,.balda .lomo.deseo{opacity:.82}
 
 /* Cabecera compacta de la web: lo de antes de la librería no pasa del 20 % del alto */
 .app.web header{align-items:center;padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:6px}

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useBiblioteca } from '../../app/biblioteca';
 import {
-  agrupaPorGenero, altoLomoDe, buscar, edicionLomo, tituloLomo, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, esDeseo, ETIQUETA, filtrar, type Coleccion, generoDe, generosDe, conPestana, seccionesPorAnio, seccionesPorAutor, tintaPara, type Libro,
+  agrupaPorGenero, altoLomoDe, buscar, edicionLomo, tituloLomo, anchoLomoDe, coleccionDe, colorLomo, delAnaquel, esDeseo, ETIQUETA, filtrar, type Coleccion, generoDe, generosDe, conPestana, esPremio, seccionesPorAnio, seccionesPorAutor, tintaPara, type Libro,
 } from '../../domain/libro';
 import { altosPorColeccion, autorLomo, escalaPara, medidaLomo, olvidaMedidas } from './medida';
 
@@ -53,7 +53,7 @@ function Lomo({ libro, onAbrir, altos }: { libro: Libro; onAbrir?: (l: Libro) =>
   } as CSSProperties;
   return (
     <button
-      className={`lomo ${claseLomo(libro)}`}
+      className={`lomo ${claseLomo(libro)}${esDeseo(libro) ? ' deseo' : ''}`}
       data-id={libro.id}
       data-st={libro.estado}
       style={estilo}
@@ -70,13 +70,13 @@ function Lomo({ libro, onAbrir, altos }: { libro: Libro; onAbrir?: (l: Libro) =>
  * Una balda por género, en carrusel: los lomos van alineados a la izquierda y la balda
  * se desliza en horizontal, sin límite de libros (100 novelas caben en la misma balda).
  */
-function Balda({ libros, etiqueta, onAbrir, soloLectura, altos, deseos }: {
-  libros: Libro[]; etiqueta?: string; onAbrir?: (l: Libro) => void; soloLectura?: boolean; altos: Altos; deseos?: boolean;
+function Balda({ libros, etiqueta, onAbrir, soloLectura, altos, deseos, porAnio }: {
+  libros: Libro[]; etiqueta?: string; onAbrir?: (l: Libro) => void; soloLectura?: boolean; altos: Altos; deseos?: boolean; porAnio?: boolean;
 }) {
   const setFiltroGenero = useBiblioteca((s) => s.setFiltroGenero);
   const riel = useRef<HTMLDivElement>(null);
   const [hayMas, setHayMas] = useState(false);
-  const secciones = useMemo(() => (deseos ? seccionesPorAnio(libros) : seccionesPorAutor(libros)), [libros, deseos]);
+  const secciones = useMemo(() => (deseos || porAnio ? seccionesPorAnio(libros) : seccionesPorAutor(libros)), [libros, deseos, porAnio]);
   useLayoutEffect(() => {
     const el = riel.current;
     if (!el) return;
@@ -127,14 +127,23 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
   const consulta = useBiblioteca((s) => s.consulta);
   const soloLectura = ajenos !== undefined;
   const libros = useMemo(() => delAnaquel(ajenos ?? propios), [ajenos, propios]);
-  // Lo que quieres y aún no tienes: una balda propia al final, sin filtro de estado ni de género.
-  const deseos = useMemo(
-    () => (soloLectura || filtro !== 'todos' || filtroGenero ? [] : buscar(propios.filter(esDeseo), consulta)),
-    [propios, soloLectura, filtro, filtroGenero, consulta],
-  );
   const lista = useMemo(
     () => (soloLectura ? libros : buscar(filtrar(libros, filtro), consulta).filter((l) => !filtroGenero || generoDe(l) === filtroGenero || generosDe(l).includes(filtroGenero))),
     [libros, filtro, filtroGenero, soloLectura, consulta],
+  );
+  // Lo que quieres y aún no tienes. Los de un premio (Goncourt…) van en la balda de ese premio, junto
+  // a los que ya tienes; el resto, en una balda propia al final. Sin filtro de estado.
+  const quiero = useMemo(
+    () => (soloLectura || filtro !== 'todos' ? [] : buscar(propios.filter(esDeseo), consulta)),
+    [propios, soloLectura, filtro, consulta],
+  );
+  const dePremio = useMemo(
+    () => quiero.filter((l) => generosDe(l).some((g) => esPremio(g) && (!filtroGenero || g === filtroGenero))),
+    [quiero, filtroGenero],
+  );
+  const deseos = useMemo(
+    () => (filtroGenero ? [] : quiero.filter((l) => !generosDe(l).some(esPremio))),
+    [quiero, filtroGenero],
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -151,13 +160,20 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
 
   // Una balda por género, en carrusel horizontal; la placa lleva el nombre y cuántos hay.
   const baldas = useMemo(
-    () => agrupaPorGenero(lista, soloLectura ? [] : ordenGeneros).map(({ genero, libros: delGenero }) => ({ libros: delGenero, etiqueta: genero, clave: genero })),
-    [lista, ordenGeneros, soloLectura],
+    () => agrupaPorGenero([...lista, ...dePremio], soloLectura ? [] : ordenGeneros)
+      .map(({ genero, libros: delGenero }) => {
+        const premio = !soloLectura && esPremio(genero);
+        // Un deseo solo sale en la balda de su premio, no en sus otros géneros.
+        const suyos = premio ? delGenero : delGenero.filter((l) => !esDeseo(l));
+        return { libros: suyos, etiqueta: genero, clave: genero, porAnio: premio };
+      })
+      .filter((b) => b.libros.length > 0),
+    [lista, dePremio, ordenGeneros, soloLectura, filtroGenero],
   );
 
   return (
     <div id="plano" className="plano" ref={ref}>
-      {lista.length === 0 && deseos.length === 0 ? (
+      {baldas.length === 0 && deseos.length === 0 ? (
         <p className="vacio">
           {libros.length === 0
             ? (soloLectura ? 'Su anaquel aún está vacío.' : 'Tu anaquel está vacío. Escanea el código de barras de tu primer libro.')
@@ -165,7 +181,7 @@ export function Estanteria({ ajenos, onAbrir }: { ajenos?: Libro[]; onAbrir?: (l
         </p>
       ) : (
         <div className="mueble">
-          {baldas.map((b) => <Balda key={b.clave} libros={b.libros} etiqueta={b.etiqueta} onAbrir={onAbrir} soloLectura={soloLectura} altos={altos} />)}
+          {baldas.map((b) => <Balda key={b.clave} libros={b.libros} etiqueta={b.etiqueta} onAbrir={onAbrir} soloLectura={soloLectura} altos={altos} porAnio={b.porAnio} />)}
           {deseos.length > 0 && <Balda libros={deseos} etiqueta="Lo quiero" onAbrir={onAbrir} altos={altos} deseos />}
         </div>
       )}

@@ -25,6 +25,8 @@ export interface Libro {
   valoracion?: number;
   /** Libro de muestra: se ve hasta que el usuario añade el primero suyo y nunca se sube a la cuenta. */
   ejemplo?: true;
+  /** Año en que ganó el premio de su balda (Goncourt…); ordena esa balda. Sin valor, vale `anio`. */
+  premio?: number;
   /** Portada real (URL de Google Books u Open Library). Sin ella se dibuja la generada. */
   portada?: string;
   /** Editorial, si la fuente la da: ayuda a reconocer la colección del lomo. */
@@ -287,14 +289,18 @@ export type Seccion = { tipo: 'autor' | 'letra' | 'anio'; etiqueta: string; libr
 /** La pestaña del autor sale siempre; la de la letra, solo si agrupa más de 2 libros. */
 export const conPestana = (s: Seccion): boolean => s.tipo === 'anio' ? s.etiqueta !== '' : s.tipo === 'autor' || s.libros.length > 2;
 
+/** Baldas de un premio literario («Goncourt», «Premio Planeta»…): van por año e incluyen los que aún no tienes. */
+export const esPremio = (genero: string): boolean =>
+  /goncourt|renaudot|femina|m[ée]dicis|nobel|booker|pulitzer|planeta|cervantes|nadal|\bpremios?\b|\bprix\b/i.test(genero);
+
 /**
- * Separadores de la balda «Lo quiero»: por año, del más reciente al más antiguo, con una pestaña
+ * Separadores de la balda «Lo quiero» y de las de premios: por año, del más reciente al más antiguo, con una pestaña
  * por año. Los libros sin año van al final, sin pestaña.
  */
 export function seccionesPorAnio(libros: readonly Libro[]): Seccion[] {
   const porAnio = new Map<number, Libro[]>();
   for (const l of libros) {
-    const a = l.anio || 0;
+    const a = l.premio || l.anio || 0;
     porAnio.set(a, [...(porAnio.get(a) ?? []), l]);
   }
   return [...porAnio.entries()]
