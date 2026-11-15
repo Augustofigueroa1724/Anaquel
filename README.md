@@ -49,6 +49,7 @@ npm run build
 | 15 nov 2026 | Vista en carrusel 3D como alternativa a la estantería (mismo botón de la cabecera); se retira el mueble nórdico | El carrusel gustó; el nórdico no convenció |
 | 15 nov 2026 | Carrusel: se vuelve a la pose original tras probar dos ajustes (menos giro; derecha de canto) | Los dos ajustes se veían peor |
 | 15 nov 2026 | Carrusel: el lomo queda pegado a la portada y a la contraportada | Dos variables CSS con el mismo nombre dejaban el lomo estrecho y con un hueco |
+| 15 nov 2026 | Balda «Lo quiero» al final de la estantería y aviso emergente al importar de Goodreads | Ver los deseos junto a la biblioteca; confirmar claro cuántos libros entraron |
 | 15 nov 2026 | Un libro puede tener varios géneros y sale en la balda de cada uno | Novela y Goncourt a la vez, por ejemplo |
 | 15 nov 2026 | Buscador por título o autor en el anaquel; mock de carrusel 3D como alternativa al mueble | Encontrar un libro entre muchos; explorar una vista tipo rolodex |
 | 14 nov 2026 | Un libro borrado en un dispositivo ya no reaparece desde la copia local de otro | Con iPhone y web a la vez, los borrados volvían a subirse al abrir el otro |

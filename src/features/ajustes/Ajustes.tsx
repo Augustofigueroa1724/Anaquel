@@ -28,6 +28,7 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
   }
   const [confirmaBorrar, setConfirmaBorrar] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [importados, setImportados] = useState<{ n: number; repetidos: number } | null>(null);
   const [tema, setTema] = useState<Tema>(leeTema);
   const eligeTema = (t: Tema) => { setTema(t); aplicaTema(t); };
 
@@ -40,6 +41,7 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
     const nuevos = sinRepetidos(leidos, libros);
     const n = importa(nuevos);
     const repetidos = leidos.length - nuevos.length;
+    setImportados({ n, repetidos });
     setMensaje(`${n === 1 ? "Importado 1 libro" : `Importados ${n} libros`}${repetidos ? ` (${repetidos} ya estaban)` : ''}. Los de «Quiero leer» van a tu lista de deseos.`);
   }
 
@@ -128,6 +130,17 @@ export function Ajustes({ onCerrar }: { onCerrar: () => void }) {
       </div>
 
       {mensaje && <p className="nota" role="status">{mensaje}</p>}
+
+      {importados && (
+        <div className="aviso-velo" onClick={() => setImportados(null)}>
+          <div className="aviso" role="alertdialog" aria-modal="true" aria-labelledby="aviso-titulo" onClick={(e) => e.stopPropagation()}>
+            <span className="aviso-ok" aria-hidden="true">✓</span>
+            <h3 id="aviso-titulo">{importados.n === 1 ? 'Importado 1 libro con éxito' : `Importados ${importados.n} libros con éxito`}</h3>
+            {importados.repetidos > 0 && <p>{importados.repetidos === 1 ? '1 ya estaba' : `${importados.repetidos} ya estaban`} en tu anaquel y no se ha repetido.</p>}
+            <button type="button" className="btn" autoFocus onClick={() => setImportados(null)}>Aceptar</button>
+          </div>
+        </div>
+      )}
       <p className="isbn-pie">Anaquel 0.1</p>
     </div>
   );
