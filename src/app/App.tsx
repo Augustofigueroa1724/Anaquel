@@ -1,5 +1,5 @@
 import { aplicaEstilo, leeEstilo, type Estilo } from './estilo';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Amigos } from '../features/amigos/Amigos';
 import { Ajustes } from '../features/ajustes/Ajustes';
 import { Deseos } from '../features/deseos/Deseos';
@@ -44,6 +44,13 @@ export default function App() {
   const [estilo, setEstilo] = useState<Estilo>(leeEstilo);
   useEffect(() => { aplicaEstilo(estilo); }, [estilo]);
   useEffect(() => { void arrancaCuenta(); }, []);
+  // Al iniciar sesión se va a la portada (el anaquel) y se cierra el panel de ajustes desde el que se entró.
+  const usuario = sesion?.user.id ?? null;
+  const usuarioAntes = useRef<string | null>(usuario);
+  useEffect(() => {
+    if (usuario && usuario !== usuarioAntes.current) { setAjustes(false); setManual(false); setPestana('estanteria'); }
+    usuarioAntes.current = usuario;
+  }, [usuario]);
   // Portadas de los libros que aún no la tienen: en segundo plano, tras la descarga de la cuenta.
   const completaPortadas = useBiblioteca((s) => s.completaPortadas);
   useEffect(() => {
