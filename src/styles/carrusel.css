@@ -7,7 +7,7 @@
 .generos-c button::before{content:"";position:absolute;inset:-4px 0}
 .generos-c button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .marco-c{position:relative;margin-top:6px}
-.escena-c{position:relative;height:316px;perspective:1900px;perspective-origin:50% 46%;overflow:hidden;touch-action:pan-y;cursor:grab;
+.escena-c{position:relative;height:316px;perspective:1100px;perspective-origin:50% 42%;overflow:hidden;touch-action:pan-y;cursor:grab;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .escena-c:active{cursor:grabbing}
 .libro-c{position:absolute;left:50%;top:30px;width:150px;height:228px;margin-left:-75px;padding:0;border:0;background:none;color:inherit;
@@ -25,9 +25,7 @@
 .libro-c .tras::after{content:"";position:absolute;right:14px;bottom:14px;width:46px;height:28px;box-sizing:border-box;border:3px solid #fff;background-color:#fff;
   background-image:repeating-linear-gradient(90deg,#111 0 1.5px,#fff 1.5px 3px,#111 3px 4px,#fff 4px 7px)}
 /* El lomo reutiliza los estilos de .lomo de la estantería, girado sobre el canto izquierdo */
-.libro-c .canto-c.lomo{left:calc(var(--t)/-2);width:var(--t);height:100%;transform:rotateY(-90deg)!important;border-radius:0;
-  /* sombra en la arista que une el lomo con la tapa y con la contraportada: se lee como un solo libro */
-  box-shadow:inset -7px 0 8px -5px rgba(0,0,0,.4),inset 7px 0 8px -5px rgba(0,0,0,.3);cursor:inherit;transition:none;box-sizing:border-box}
+.libro-c .canto-c.lomo{left:calc(var(--t)/-2);width:var(--t);height:100%;transform:rotateY(-90deg)!important;border-radius:0;box-shadow:none;cursor:inherit;transition:none;box-sizing:border-box}
 .sombra-c{position:absolute;left:8px;right:8px;bottom:-16px;height:14px;border-radius:50%;background:rgba(0,0,0,.34);filter:blur(7px);transform:rotateX(90deg) translateZ(-6px)}
 .flecha-c{position:absolute;top:122px;width:44px;height:44px;border-radius:50%;border:0;background:var(--card);color:var(--fg);box-shadow:0 4px 12px rgba(0,0,0,.22);display:grid;place-items:center;cursor:pointer}
 .flecha-c.iz{left:max(8px,env(safe-area-inset-left,0px))}

@@ -10,7 +10,7 @@ import { Portada } from '../libro3d/Portada';
 /** Tapa de 150 × 228 px (2:3, como las cubiertas). */
 const ALTO = 228;
 /** Cuántos libros a cada lado del centro se dibujan (el resto no se ve). */
-const VENTANA = 5;
+const VENTANA = 7;
 const sinMovimiento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /** Pose de un libro a `d` posiciones del centro (negativo = izquierda). */
@@ -18,15 +18,11 @@ export function poseCarrusel(d: number): { x: number; z: number; giro: number } 
   const a = Math.abs(d);
   const k = Math.min(a, 1);
   const lejos = Math.max(0, a - 1);
-  const dcha = d > 0;
   return {
-    // Juntos, sin dejar ver la pared entre libros. Los de la derecha van de canto, así que
-    // ocupan menos y se aprietan más.
-    x: dcha ? k * 104 + lejos * 40 : -(k * 100 + lejos * 48),
-    z: -k * 110 - lejos * 18,
-    // A la izquierda, portada y lomo. A la derecha, de canto: el lomo de frente y un filo de
-    // portada; nunca más de 90 grados, para que no se vea la contraportada.
-    giro: dcha ? k * 74 : k * 54,
+    x: Math.sign(d) * (k * 96 + lejos * 46),
+    z: -k * 150 - lejos * 26,
+    // A la izquierda enseña portada y lomo; a la derecha se da la vuelta: contraportada y lomo hacia fuera.
+    giro: d < 0 ? k * 64 : k * 116,
   };
 }
 
