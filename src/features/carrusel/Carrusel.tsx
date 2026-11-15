@@ -18,13 +18,15 @@ export function poseCarrusel(d: number): { x: number; z: number; giro: number } 
   const a = Math.abs(d);
   const k = Math.min(a, 1);
   const lejos = Math.max(0, a - 1);
+  const dcha = d > 0;
   return {
-    // El primero de cada lado se aparta lo justo para no pisar al del centro; los demás se
-    // escalonan dejando ver un buen trozo de portada, no solo el lomo.
-    x: Math.sign(d) * (k * 112 + lejos * 60),
-    z: -k * 90 - lejos * 14,
-    // A la izquierda enseña portada y lomo; a la derecha se da la vuelta: contraportada y lomo hacia fuera.
-    giro: d < 0 ? k * 50 : k * 130,
+    // Juntos, sin dejar ver la pared entre libros. Los de la derecha van de canto, así que
+    // ocupan menos y se aprietan más.
+    x: dcha ? k * 104 + lejos * 40 : -(k * 100 + lejos * 48),
+    z: -k * 110 - lejos * 18,
+    // A la izquierda, portada y lomo. A la derecha, de canto: el lomo de frente y un filo de
+    // portada; nunca más de 90 grados, para que no se vea la contraportada.
+    giro: dcha ? k * 74 : k * 54,
   };
 }
 
